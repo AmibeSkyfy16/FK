@@ -1,0 +1,126 @@
+Documentation du MOD
+
+LES FICHIERS DE CONFIG
+
+    Lorsque le mod sera installé et le serveur lancé pour la première fois,
+    Un dossier portant le nom du mode (fk) sera créé dans le dossier "config" du serveur
+
+    Voici une descriptions pour chaque fichier .json
+
+        teams.json -> Contient les informations sur les teams.
+            1. la couleur d'une team,
+            2. le nom d'une team
+            3. la liste des joueur composant cette team
+            4. Des informations sur la base
+                4.1 Le nom de la base
+                4.2 Les coordonnées du centre de la base ainsi que sa taille (en partant du centre)
+
+        fkconfig.json -> Contient des informations général sur le jeu
+            1. Le jour ou les assauts seront autorisé
+            2. Le jour ou les joueurs auront le droit d'entrer dans le nether
+            3. Le jour ou les joueurs auront le droit d'entrer dans l'end
+            4. Le jour ou les joueurs auront le droit de se taper dessus
+            5. Des informations sur la salle d'attente
+                5.1 Les coordonnées du centre de la salle d'attente (waitingRoom) ainsi que sa taille (en partant du centre)
+                5.2 Des informations sur là ou les joueurs seront téléporté la toutes premières fois qu'il se connecte
+            6. Contient des information sur le spawn du monde (là ou les joueurs arrive lorsqu'il meurt et qu'il ont pas de lit)
+
+        worldconfig.json
+            1. Contient des informations sur la bordure du monde
+                1.1 Le nom de la dimension
+                1.2 Sa taille (calculer depuis son centre)
+                1.3 Le nombre de blocs vers le bas
+                1.4 Le nombre de blocs vers le haut
+                1.5 La coordonnée X du point central
+                1.6 La coordonnée Y du point central
+                1.7 La coordonnée Z du point central
+
+
+
+LES ETATS DU JEU
+
+    NOT_STARTED -> Le jeu n'a encore jamais été démarré sur ce serveur.
+                   C'est l'état par défaut, lorsque le mod est installé sur le serveur.
+
+    RUNNING -> Le jeu est en cours (les joueurs minent, construisent leur muraille, etc.).
+               Le jeu se met dans l'état RUNNING lorsque la commande /FKStart est exécuté
+               ou que le serveur à redémarrer et qu'il se trouvait déjà dans l'état RUNNING.
+
+    PAUSED -> Le jeu est en pause.
+              Le jeu se met dans l'état PAUSED lorsque la commande /FKPause est exécuté
+              ou que le serveur à redémarrer et qu'il se trouvait déjà dans l'état PAUSED.
+
+        Les choses suivantes se produisent lorsque le jeu est en pause:
+            1. Les joueurs ne peuvent pas bouger, excepté les joueurs OP.
+            2. Les entités ne peuvent pas bouger.
+            3. Le temps est arrêté.
+
+
+COMMANDES
+    /FKStart -> permet de démarrer le FK, si et seulement si le jeu est dans l'état NOT_STARTED.
+                Seul un joueur OP peut utilisé cette commande.
+
+                Une vérification des joueurs participants au FK est effectué, si et seulement si tous les joueurs
+                inscrit dans les fichiers de configuration sont connecté au serveur, alors le jeu pourra démarré !
+
+    /FKPause -> permet de mettre le jeu en pause (voir état: PAUSED).
+                Seul un joueur OP peut utilisé cette commande.
+
+    /FKResume -> permet de continuer le jeu après que le serveur ait été mis en pause.
+                 Seul un joueur OP peut utilisé cette commande.
+
+
+LES ETATS DU JEU EN DETAILS
+
+    NOT_STARTED
+
+        Les choses qui se produise lorsque le jeu est dans cette état:
+
+            1. Lorsqu'un joueur se connecte, il est téléporté dans se que l'on appelle, la waitingRoom.
+               Temps que le jeu n'a pas démarré, les joueurs ne peuvent pas sortir de la waitingRoom.
+            2. Les joueurs ne peuvent pas subir de dégâts.
+            3. Les joueurs ne perde pas de nourritures
+            4. Le PvP est désactivé
+
+    RUNNING
+
+        Les choses qui se produise lorsque le jeu est dans cette état:
+
+            1. Les joueurs recevront un message leur disant ou se trouve leur base respective.
+            2. Le comptage du temps démarre. On commence au jour 1 à la minute 0 et à la seconde 0.
+               Chaque prochaine 20 minutes est un nouveau jour qui commence.
+
+
+    Règles:
+
+        CASSAGE DE BLOCS
+            À l'intérieur de sa propre base : Tous les blocs peuvent être cassés
+            Dans la zone de proximité de sa propre base : Tous les blocs peuvent être cassés
+
+            À l'intérieur d'une base enemies : Aucuns blocs ne peut être cassé, excepté la TNT, les torches en redstone et les torches
+            Dans la zone de proximité d'une base enemies : Aucuns blocs ne peut être cassé, excepté la TNT, les torches en redstone et les torches
+
+        POSE DE BLOCS
+            À l'intérieur de sa propre base : Tous les blocs peuvent être placés
+            Dans la zone de proximité de sa propre base : Aucun bloc ne peut être placé
+
+            À l'intérieur d'une base enemies : Aucuns blocs ne peut être placé, excepté la TNT, les torches en redstone et les torches
+            Dans la zone de proximité d'une base enemies : Aucuns blocs ne peut être placé, excepté la TNT, les torches en redstone et les torches
+
+        REMPLISSAGE DE SCEAU
+            À l'intérieur de sa propre base : Sceau d'eau et lava peuvent être remplie
+            Dans la zone de proximité de sa propre base : Sceau d'eau et lava peuvent être remplie
+
+            À l'intérieur d'une base enemies : Aucun sceau ne peut être rempli
+            Dans la zone de proximité d'une base enemies : Aucun sceau ne peut être rempli
+
+        VIDAGE DE SCEAU
+            À l'intérieur de sa propre base : Sceau d'eau et lava peuvent être vidé
+            Dans la zone de proximité de sa propre base : Aucun sceau ne peut être vidé
+
+            À l'intérieur d'une base enemies : Aucun sceau ne peut être vidé
+            Dans la zone de proximité d'une base enemies : Aucun sceau ne peut être vidé
+
+
+NOTES IMPORTANTES
+    1. Les joueurs OP ne sont affecté par rien.

@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "fk",
+  "version": "${version}",
+  "name": "Fallen Kingdom",
+  "description": "A Fallen Kingdom mod",
+  "authors": [
+    "Skyfy16"
+  ],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/fk/icon.png",
+  "environment": "server",
+  "entrypoints": {
+    "server": [
+      "ch.skyfy.fk.FKMod"
+    ],
+    "main": [
+      "ch.skyfy.fk.sidebar.SidebarAPIMod"
+    ]
+  },
+  "mixins": [
+    "fk.mixins.json",
+    "sidebarapi.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.13.3",
+    "fabric": "*",
+    "minecraft": "1.18.2",
+    "player_events_api": ">=2.2.4"
+  }
+}

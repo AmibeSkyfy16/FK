@@ -52,8 +52,6 @@ public class FKGame {
 
     private final FKGameEvents fkGameEvents;
 
-    private final AtomicLong lastTimeWhen_PAUSED = new AtomicLong(0L);
-
     public FKGame(MinecraftServer server) {
         this.server = server;
         this.timeline = new Timeline(server);
@@ -78,9 +76,7 @@ public class FKGame {
         }
     }
 
-    public void pause() {
-        lastTimeWhen_PAUSED.set(System.currentTimeMillis());
-    }
+    public void pause() {}
 
     public void resume() {
         // If the timeline wasn't started (in the case of a server restart with gamestate at PAUSE OR RUNNING)
@@ -137,24 +133,7 @@ public class FKGame {
         PlayerJoinCallback.EVENT.register(fkGameEvents::onPlayerJoin);
         EntitySpawnCallback.EVENT.register(fkGameEvents::onEntitySpawn);
         ItemDespawnCallback.EVENT.register(itemEntity -> {
-
             if(!GameUtils.isGameState_PAUSED())return ActionResult.PASS;
-
-            var elapsedTime = System.currentTimeMillis() - lastTimeWhen_PAUSED.get();
-            System.out.println("Time elapsed in second from pause: " + TimeUnit.MILLISECONDS.toSeconds(elapsedTime));
-
-            Class<ItemEntity> itemEntityClass = ItemEntity.class;
-            Field itemAgeField = null;
-            try {
-                itemAgeField = itemEntityClass.getDeclaredField("field_7204");
-                itemAgeField.setAccessible(true);
-                System.out.println("Item age is : " + itemAgeField.getInt(itemEntity));
-                itemAgeField.setInt(itemEntity, 5000);
-                System.out.println("item age set: its now: " + itemAgeField.getInt(itemEntity));
-            } catch (NoSuchFieldException |NullPointerException| IllegalAccessException e) {
-                e.printStackTrace();
-            }
-
             return ActionResult.FAIL;
         });
 

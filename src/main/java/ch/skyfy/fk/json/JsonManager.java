@@ -4,6 +4,7 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -13,7 +14,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 @SuppressWarnings({"UnstableApiUsage", "unused"})
-public class JsonManager<T> {
+public class JsonManager<T extends Validable> {
 
     private final Class<T> tClass;
 
@@ -34,19 +35,13 @@ public class JsonManager<T> {
         this(tClass, new GsonBuilder().setPrettyPrinting().create(), file);
     }
 
-    public @Nullable T getOrCreateConfig() {
+    public @NotNull T getOrCreateConfig() throws Exception {
         T config;
-        try {
-            if (file.exists())
-                config = get();
-            else {
-                config = tClass.getDeclaredConstructor().newInstance();
-                save(config);
-            }
-        } catch (IOException | JsonIOException | InstantiationException | IllegalAccessException |
-                 InvocationTargetException | NoSuchMethodException | SecurityException e) {
-            e.printStackTrace();
-            return null;
+        if (file.exists())
+            config = get();
+        else {
+            config = tClass.getDeclaredConstructor().newInstance();
+            save(config);
         }
         return config;
     }

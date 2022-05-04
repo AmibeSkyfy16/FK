@@ -8,7 +8,7 @@ import net.minecraft.text.Style;
 import net.minecraft.util.Formatting;
 
 public class ScoreboardManager {
-//sdsd
+
     private static class LazyHolder {
         static final ScoreboardManager INSTANCE = new ScoreboardManager();
     }

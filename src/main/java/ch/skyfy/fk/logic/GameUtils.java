@@ -162,7 +162,7 @@ public class GameUtils {
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    public static boolean isGameStatePAUSE() {
+    public static boolean isGameState_PAUSED() {
         return FKGameAllData.FK_GAME_DATA.config.getGameState() == FKMod.GameState.PAUSED;
     }
 

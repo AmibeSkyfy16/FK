@@ -12,6 +12,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.TntBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.MovementType;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
@@ -34,7 +35,10 @@ import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Field;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.StreamSupport;
 
 @SuppressWarnings("FieldCanBeLocal")
@@ -47,6 +51,8 @@ public class FKGame {
     private final PauseEvents pauseEvents;
 
     private final FKGameEvents fkGameEvents;
+
+    private final AtomicLong lastTimeWhen_PAUSED = new AtomicLong(0L);
 
     public FKGame(MinecraftServer server) {
         this.server = server;
@@ -73,7 +79,7 @@ public class FKGame {
     }
 
     public void pause() {
-
+        lastTimeWhen_PAUSED.set(System.currentTimeMillis());
     }
 
     public void resume() {
@@ -106,7 +112,7 @@ public class FKGame {
 
     }
 
-    public void updateSidebar(ServerPlayerEntity player){
+    public void updateSidebar(ServerPlayerEntity player) {
         var timelineData = timeline.timelineData;
         ScoreboardManager.getInstance().updateSidebar(player, timelineData.getDay(), timelineData.getMinutes(), timelineData.getSeconds());
     }
@@ -129,6 +135,30 @@ public class FKGame {
         PlayerDamageCallback.EVENT.register(fkGameEvents::onPlayerDamage);
         PlayerHungerCallback.EVENT.register(fkGameEvents::onPlayerHungerUpdate);
         PlayerJoinCallback.EVENT.register(fkGameEvents::onPlayerJoin);
+        EntitySpawnCallback.EVENT.register(fkGameEvents::onEntitySpawn);
+        ItemDespawnCallback.EVENT.register(itemEntity -> {
+
+            if(!GameUtils.isGameState_PAUSED())return ActionResult.PASS;
+
+            var elapsedTime = System.currentTimeMillis() - lastTimeWhen_PAUSED.get();
+            System.out.println("Time elapsed in second from pause: " + TimeUnit.MILLISECONDS.toSeconds(elapsedTime));
+
+            Class<ItemEntity> itemEntityClass = ItemEntity.class;
+            Field itemAgeField = null;
+            try {
+                itemAgeField = itemEntityClass.getDeclaredField("field_7204");
+                itemAgeField.setAccessible(true);
+                System.out.println("Item age is : " + itemAgeField.getInt(itemEntity));
+                itemAgeField.setInt(itemEntity, 5000);
+                System.out.println("item age set: its now: " + itemAgeField.getInt(itemEntity));
+            } catch (NoSuchFieldException |NullPointerException| IllegalAccessException e) {
+                e.printStackTrace();
+            }
+
+            return ActionResult.FAIL;
+        });
+
+//        server.getOverworld().getEntitiesByType(TypeFilter.instanceOf(ItemEntity.class), itemEntity -> true);
 
         // Event use when the game state is "pause"
         EntityMoveCallback.EVENT.register(pauseEvents::stopEntitiesFromMoving);
@@ -399,7 +429,7 @@ public class FKGame {
             }
 
             // Cancel player from moving.
-            if (GameUtils.isGameStatePAUSE())
+            if (GameUtils.isGameState_PAUSED())
                 return ActionResult.FAIL;
 
             // Cancel the player from going too far into the map
@@ -414,7 +444,7 @@ public class FKGame {
         private ActionResult onPlayerDamage(ServerPlayerEntity player, DamageSource source, float amount) {
             if (player.hasPermissionLevel(4)) return ActionResult.PASS;
 
-            if (GameUtils.isGameStatePAUSE() || GameUtils.isGameStateNOT_STARTED())
+            if (GameUtils.isGameState_PAUSED() || GameUtils.isGameStateNOT_STARTED())
                 return ActionResult.FAIL;
             return ActionResult.PASS;
         }
@@ -422,9 +452,15 @@ public class FKGame {
         private ActionResult onPlayerHungerUpdate(PlayerEntity player) {
             if (player.hasPermissionLevel(4)) return ActionResult.PASS;
 
-            if (GameUtils.isGameStateNOT_STARTED() || GameUtils.isGameStatePAUSE()) {
+            if (GameUtils.isGameStateNOT_STARTED() || GameUtils.isGameState_PAUSED()) {
                 return ActionResult.FAIL;
             }
+            return ActionResult.PASS;
+        }
+
+        private ActionResult onEntitySpawn(Entity entity) {
+            if (!(entity instanceof PlayerEntity) && GameUtils.isGameState_PAUSED())
+                return ActionResult.FAIL;
             return ActionResult.PASS;
         }
 
@@ -447,12 +483,12 @@ public class FKGame {
     static class PauseEvents {
 
         private ActionResult stopEntitiesFromMoving(Entity entity, MovementType movementType, Vec3d movement) {
-            if (!GameUtils.isGameStatePAUSE()) return ActionResult.PASS;
+            if (!GameUtils.isGameState_PAUSED()) return ActionResult.PASS;
             return ActionResult.FAIL;
         }
 
         private ActionResult cancelTimeOfDayToBeingUpdated(long time) {
-            if (!GameUtils.isGameStatePAUSE()) return ActionResult.PASS;
+            if (!GameUtils.isGameState_PAUSED()) return ActionResult.PASS;
             return ActionResult.FAIL;
         }
 

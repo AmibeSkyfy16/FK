@@ -106,7 +106,7 @@ public class FKGame {
 
     }
 
-    private void setWorldSpawn(){
+    private void setWorldSpawn() {
         var spawnLocation = Configs.FK_CONFIG.config.getWorldSpawn();
         server.getOverworld().setSpawnPos(new BlockPos(spawnLocation.getX(), spawnLocation.getY(), spawnLocation.getZ()), 1.0f);
     }
@@ -123,7 +123,7 @@ public class FKGame {
         PlayerMoveCallback.EVENT.register(fkGameEvents::cancelPlayersFromMoving);
         PlayerDamageCallback.EVENT.register(fkGameEvents::onPlayerDamage);
         PlayerHungerCallback.EVENT.register(fkGameEvents::onPlayerHungerUpdate);
-        PlayerJoinCallback.EVENT.register(fkGameEvents::teleportPlayerToWaitingRoom);
+        PlayerJoinCallback.EVENT.register(fkGameEvents::onPlayerJoin);
 
         // Event use when the game state is "pause"
         EntityMoveCallback.EVENT.register(pauseEvents::stopEntitiesFromMoving);
@@ -398,7 +398,7 @@ public class FKGame {
                 return ActionResult.FAIL;
 
             // Cancel the player from going too far into the map
-            if(Utils.cancelPlayerFromLeavingACube(Configs.WORLD_CONFIG.config.getWorldInfo().getWorldDimension(), player, Optional.empty())){
+            if (Utils.cancelPlayerFromLeavingACube(Configs.WORLD_CONFIG.config.getWorldInfo().getWorldDimension(), player, Optional.empty())) {
                 player.sendMessage(new LiteralText("You reach the border limit !").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
                 return ActionResult.FAIL;
             }
@@ -414,31 +414,36 @@ public class FKGame {
             return ActionResult.PASS;
         }
 
-        private ActionResult onPlayerHungerUpdate(PlayerEntity player){
+        private ActionResult onPlayerHungerUpdate(PlayerEntity player) {
             if (player.hasPermissionLevel(4)) return ActionResult.PASS;
 
-            if( GameUtils.isGameStateNOT_STARTED() || GameUtils.isGameStatePAUSE()){
+            if (GameUtils.isGameStateNOT_STARTED() || GameUtils.isGameStatePAUSE()) {
                 return ActionResult.FAIL;
             }
             return ActionResult.PASS;
         }
 
-        private void teleportPlayerToWaitingRoom(ServerPlayerEntity player, MinecraftServer server) {
+        private void onPlayerJoin(ServerPlayerEntity player, MinecraftServer server) {
             if (player.hasPermissionLevel(4)) return;
 
-            if (!GameUtils.isGameStateNOT_STARTED()) return;
+            if (GameUtils.isGameStateNOT_STARTED()) {
+                var spawnLoc = Configs.FK_CONFIG.config.getWaitingRoom().getSpawnLocation();
+                StreamSupport.stream(server.getWorlds().spliterator(), false)
+                        .filter(serverWorld -> serverWorld.getDimension().getEffects().toString().equals(spawnLoc.getDimensionName()))
+                        .findFirst()
+                        .ifPresent(serverWorld -> {
+                            updateTeam(server, player);
+                            ScoreboardManager.getInstance().updateSidebar(player, 0, 0, 0);
+                            player.teleport(serverWorld, spawnLoc.getX(), spawnLoc.getY(), spawnLoc.getZ(), spawnLoc.getYaw(), spawnLoc.getPitch());
+                        });
+                return;
+            }
 
-            var spawnLoc = Configs.FK_CONFIG.config.getWaitingRoom().getSpawnLocation();
+            if (GameUtils.isGameStatePAUSE()) {
+                var timelineData = timeline.timelineData;
+                ScoreboardManager.getInstance().updateSidebar(player, timelineData.getDay(), timelineData.getMinutes(), timelineData.getSeconds());
+            }
 
-            StreamSupport.stream(server.getWorlds().spliterator(), false)
-                    .filter(serverWorld -> serverWorld.getDimension().getEffects().toString().equals(spawnLoc.getDimensionName()))
-                    .findFirst()
-                    .ifPresent(serverWorld -> {
-                        updateTeam(server, player);
-                        ScoreboardManager.getInstance().updateSidebar(player, 0, 0, 0);
-
-                        player.teleport(serverWorld, spawnLoc.getX(), spawnLoc.getY(), spawnLoc.getZ(), spawnLoc.getYaw(), spawnLoc.getPitch());
-                    });
         }
 
     }

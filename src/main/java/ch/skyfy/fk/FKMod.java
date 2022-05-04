@@ -86,6 +86,8 @@ public class FKMod implements DedicatedServerModInitializer {
             if(GameUtils.isGameStateRUNNING())
                 FKGameAllData.FK_GAME_DATA.config.setGameState(GameState.PAUSED);
 
+            fkGame.updateSidebar(player);
+
         }
     }
 

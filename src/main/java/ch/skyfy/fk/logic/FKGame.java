@@ -106,6 +106,11 @@ public class FKGame {
 
     }
 
+    public void updateSidebar(ServerPlayerEntity player){
+        var timelineData = timeline.timelineData;
+        ScoreboardManager.getInstance().updateSidebar(player, timelineData.getDay(), timelineData.getMinutes(), timelineData.getSeconds());
+    }
+
     private void setWorldSpawn() {
         var spawnLocation = Configs.FK_CONFIG.config.getWorldSpawn();
         server.getOverworld().setSpawnPos(new BlockPos(spawnLocation.getX(), spawnLocation.getY(), spawnLocation.getZ()), 1.0f);
@@ -171,7 +176,7 @@ public class FKGame {
                     return true;
                 }
 
-                System.out.println("Player is in the wild");
+                // Player is in the wild
 
                 return true;
             };
@@ -424,26 +429,17 @@ public class FKGame {
         }
 
         private void onPlayerJoin(ServerPlayerEntity player, MinecraftServer server) {
-            if (player.hasPermissionLevel(4)) return;
 
             if (GameUtils.isGameStateNOT_STARTED()) {
                 var spawnLoc = Configs.FK_CONFIG.config.getWaitingRoom().getSpawnLocation();
                 StreamSupport.stream(server.getWorlds().spliterator(), false)
                         .filter(serverWorld -> serverWorld.getDimension().getEffects().toString().equals(spawnLoc.getDimensionName()))
                         .findFirst()
-                        .ifPresent(serverWorld -> {
-                            updateTeam(server, player);
-                            ScoreboardManager.getInstance().updateSidebar(player, 0, 0, 0);
-                            player.teleport(serverWorld, spawnLoc.getX(), spawnLoc.getY(), spawnLoc.getZ(), spawnLoc.getYaw(), spawnLoc.getPitch());
-                        });
-                return;
+                        .ifPresent(serverWorld -> player.teleport(serverWorld, spawnLoc.getX(), spawnLoc.getY(), spawnLoc.getZ(), spawnLoc.getYaw(), spawnLoc.getPitch()));
             }
 
-            if (GameUtils.isGameStatePAUSE()) {
-                var timelineData = timeline.timelineData;
-                ScoreboardManager.getInstance().updateSidebar(player, timelineData.getDay(), timelineData.getMinutes(), timelineData.getSeconds());
-            }
-
+            updateTeam(server, player);
+            updateSidebar(player);
         }
 
     }

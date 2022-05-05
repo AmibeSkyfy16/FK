@@ -4,7 +4,7 @@
     Les joueurs ne pourront pas sortir du "Cube" dans lequel le jeu se déroule
   */
 
-  "worldInfo": {
+  "worldBorderData": {
 
     // Le nom de la dimension, en général, c'est toujours << minecraft:overworld >>
     // À moins que vous décidiez de faire un FK dans le nether ou dans l'end

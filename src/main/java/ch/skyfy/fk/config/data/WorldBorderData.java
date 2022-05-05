@@ -3,7 +3,7 @@ package ch.skyfy.fk.config.data;
 import lombok.Getter;
 
 @SuppressWarnings("ClassCanBeRecord")
-public class WorldInfo {
+public class WorldBorderData {
 
     @Getter
     private final String dimensionName;
@@ -11,7 +11,7 @@ public class WorldInfo {
     @Getter
     private final Cube cube;
 
-    public WorldInfo(String dimensionName, Cube cube) {
+    public WorldBorderData(String dimensionName, Cube cube) {
         this.dimensionName = dimensionName;
         this.cube = cube;
     }

@@ -16,7 +16,6 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.MovementType;
-import net.minecraft.entity.TntEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -69,6 +68,7 @@ public class FKGame {
             FKGameAllData.FK_GAME_DATA.config.setGameState(FKMod.GameState.PAUSED);
         update(firstPlayerToJoin);
         teleportPlayerToWaitingRoom(firstPlayerToJoin);
+        setupWorldBorder();
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -138,6 +138,13 @@ public class FKGame {
                     .findFirst()
                     .ifPresent(serverWorld -> player.teleport(serverWorld, spawnLoc.getX(), spawnLoc.getY(), spawnLoc.getZ(), spawnLoc.getYaw(), spawnLoc.getPitch()));
         }
+    }
+
+    private void setupWorldBorder(){
+        var worldBorderCube = Configs.WORLD_CONFIG.config.getWorldBorderData().getCube();
+        server.getOverworld().getWorldBorder().setSize(worldBorderCube.getSize() * 2);
+        server.getOverworld().getWorldBorder().setCenter(worldBorderCube.getX(), worldBorderCube.getZ());
+        server.getOverworld().getWorldBorder().tick();
     }
 
     private void setWorldSpawn() {
@@ -439,7 +446,7 @@ public class FKGame {
                 return ActionResult.FAIL;
 
             // Cancel the player from going too far into the map
-            if (Utils.cancelPlayerFromLeavingAnArea(Configs.WORLD_CONFIG.config.getWorldInfo().getCube(), player, null)) {
+            if (Utils.cancelPlayerFromLeavingAnArea(Configs.WORLD_CONFIG.config.getWorldBorderData().getCube(), player, null)) {
                 player.sendMessage(new LiteralText("You reach the border limit !").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
                 return ActionResult.FAIL;
             }

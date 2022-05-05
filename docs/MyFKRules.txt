@@ -8,7 +8,7 @@ LES FICHIERS DE CONFIG
     Dans ce dossier "fk" se trouve trois fichiers de configuration importants
         1. teams.json5
         2. fkconfig.json5
-        3. worldconfig.json5
+        3. worldBorderConfig.json5
 
 
 LES ETATS DU JEU

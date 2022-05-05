@@ -2,7 +2,7 @@ package ch.skyfy.fk.config.constant;
 
 import ch.skyfy.fk.config.FKConfig;
 import ch.skyfy.fk.config.TeamsConfig;
-import ch.skyfy.fk.config.WorldConfig;
+import ch.skyfy.fk.config.WorldBorderConfig;
 import ch.skyfy.fk.config.data.*;
 import net.minecraft.util.Formatting;
 
@@ -40,7 +40,7 @@ public class DefaultConfigs {
             )
     ));
 
-    public static final WorldConfig DEFAULT_WORLD_INFO_CONFIG = new WorldConfig(new WorldInfo("minecraft:overworld",
+    public static final WorldBorderConfig DEFAULT_WORLD_INFO_CONFIG = new WorldBorderConfig(new WorldBorderData("minecraft:overworld",
             new Cube((short) 500, 64, 319, 0, 0, 0))
     );
 

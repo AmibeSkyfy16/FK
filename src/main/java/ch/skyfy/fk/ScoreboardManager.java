@@ -62,32 +62,8 @@ public class ScoreboardManager {
         list.add(new LiteralText("Nether: " + getSentence(GameUtils.isNetherEnabled(day))).setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)));
         list.add(new LiteralText("End: " + getSentence(GameUtils.isEndEnabled(day))).setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)));
 
-        for (int i = list.size() - 1; i >= 0; i--) {
-            var text = list.get(list.size() - 1 -i);
-            generalSidebar.setLine(i, text);
-        }
-
-//        generalSidebar.setLine(11, new LiteralText("").setStyle(Style.EMPTY));
-
-//        generalSidebar.setLine(10, new LiteralText("Game Status: " + FKGameAllData.FK_GAME_DATA.config.getGameState().name()).setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
-
-//        generalSidebar.setLine(9, new LiteralText("").setStyle(Style.EMPTY));
-
-
-//        generalSidebar.setLine(8, new LiteralText("Team name: " + GameUtils.getFKTeamOfPlayerByName(player.getName().asString()).getName()).setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
-
-//        generalSidebar.setLine(7, new LiteralText("").setStyle(Style.EMPTY));
-
-
-//        generalSidebar.setLine(6, new LiteralText("Day: %d".formatted(day)).setStyle(Style.EMPTY.withColor(Formatting.BLUE)));
-//        generalSidebar.setLine(5, new LiteralText("Time: %d:%s".formatted(minutes, seconds)).setStyle(Style.EMPTY.withColor(Formatting.BLUE)));
-
-//        generalSidebar.setLine(4, new LiteralText("").setStyle(Style.EMPTY));
-
-//        generalSidebar.setLine(3, new LiteralText("PvP: " + getSentence(GameUtils.isPvPEnabled(day))).setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)));
-//        generalSidebar.setLine(2, new LiteralText("Assault: " + getSentence(GameUtils.areAssaultEnabled(day))).setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)));
-//        generalSidebar.setLine(1, new LiteralText("Nether: " + getSentence(GameUtils.isNetherEnabled(day))).setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)));
-//        generalSidebar.setLine(0, new LiteralText("End: " + getSentence(GameUtils.isEndEnabled(day))).setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)));
+        for (int i = list.size() - 1; i >= 0; i--)
+            generalSidebar.setLine(i, list.get(list.size() - 1 -i));
     }
 
     private String getSentence(boolean bool){

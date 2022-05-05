@@ -1,6 +1,5 @@
 package ch.skyfy.fk.config;
 
-import ch.skyfy.fk.config.data.Cube;
 import ch.skyfy.fk.config.data.SpawnLocation;
 import ch.skyfy.fk.config.data.WaitingRoom;
 import ch.skyfy.fk.json.Validatable;
@@ -8,6 +7,7 @@ import lombok.Getter;
 
 import java.util.ArrayList;
 
+@SuppressWarnings("ClassCanBeRecord")
 public class FKConfig implements Validatable {
     @Getter
     private final int dayOfAuthorizationOfTheAssaults;

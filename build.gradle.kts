@@ -2,13 +2,12 @@
 
 plugins {
     id("fabric-loom") version "0.11-SNAPSHOT"
+    id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
 val archivesBaseName = property("archives_base_name")
 group = property("maven_group")!!
 version = property("mod_version")!!
-
-
 
 repositories {
     mavenCentral()
@@ -27,7 +26,7 @@ dependencies {
 
     implementation("com.google.code.gson:gson:2.9.0")
 
-//    implementation("com.github.SparklingComet:java-mojang-api:-SNAPSHOT")
+    implementation("com.github.SparklingComet:java-mojang-api:-SNAPSHOT")?.let { shadow(it) }
 
     compileOnly("org.projectlombok:lombok:1.18.24")
     annotationProcessor("org.projectlombok:lombok:1.18.24")
@@ -57,6 +56,19 @@ tasks {
                 "${it}_${archivesBaseName}"
             }
         }
+        from(compileJava)
+        from(processResources)
+    }
+
+
+    shadowJar {
+        configurations = listOf(project.configurations.shadow.get())
+    }
+    remapJar{
+        inputFile.set(shadowJar.get().archiveFile)
+    }
+    prepareRemapJar{
+        dependsOn(shadowJar)
     }
 
     named<JavaCompile>("compileJava") {
@@ -67,7 +79,6 @@ tasks {
     named<Test>("test") {
         useJUnitPlatform()
     }
-
 
     create("copyJarToServer") {
         mustRunAfter("build")

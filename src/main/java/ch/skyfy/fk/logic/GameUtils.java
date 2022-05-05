@@ -100,6 +100,7 @@ public class GameUtils {
         }
     }
 
+    @SuppressWarnings("RedundantIfStatement")
     public static <T> T whereIsThePlayer(PlayerEntity player, Vec3d blockPos, WhereIsThePlayer<T> whereIsThePlayer) {
 
         var isPlayerInHisOwnBase = false;
@@ -120,8 +121,8 @@ public class GameUtils {
 
             var isPlayerCloseToABase = false;
 
-            var proximitySquare = new Cube((short) (baseSquare.getSize() + 20), baseSquare.getNumberOfBlocksDown() + 10, baseSquare.getNumberOfBlocksUp() + 10, baseSquare.getX(), baseSquare.getY(), baseSquare.getZ());
-            if (Utils.isPlayerInsideCube(proximitySquare, blockPos)) {
+//            var proximitySquare = new Cube((short) (baseSquare.getSize() + 20), baseSquare.getNumberOfBlocksDown() + 10, baseSquare.getNumberOfBlocksUp() + 10, baseSquare.getX(), baseSquare.getY(), baseSquare.getZ());
+            if (Utils.isPlayerInsideCube(team.getBase().getProximityCube(), blockPos)) {
                 isPlayerCloseToABase = true;
             }
 

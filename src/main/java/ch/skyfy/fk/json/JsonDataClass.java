@@ -9,11 +9,11 @@ public class JsonDataClass<C extends Validatable> {
 
     public final JsonManager<C> jsonManager;
 
-    public JsonDataClass(String relativeFilePath, Class<C> cClass) {
+    public JsonDataClass(String relativeFilePath, Class<C> cClass, C defaultConfig) {
         this.relativeFilePath = relativeFilePath;
         this.cClass = cClass;
 
-        this.jsonManager = new JsonManager<>(cClass, ModUtils.getRelativeFile(relativeFilePath));
+        this.jsonManager = new JsonManager<>(cClass, ModUtils.getRelativeFile(relativeFilePath), defaultConfig);
 
         config = jsonManager.getOrCreateConfig();
         config.validate();

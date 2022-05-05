@@ -15,6 +15,10 @@ public class WorldConfig implements Validatable {
     @Getter
     private final WorldInfo worldInfo;
 
+    public WorldConfig(WorldInfo worldInfo) {
+        this.worldInfo = worldInfo;
+    }
+
     public WorldConfig() {
         worldInfo = new WorldInfo("minecraft:overworld", new Cube((short)500,64, 319, 0, 0, 0));
     }

@@ -16,7 +16,9 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.MovementType;
+import net.minecraft.entity.TntEntity;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.LavaFluid;
@@ -66,6 +68,7 @@ public class FKGame {
         if(GameUtils.isGameStateRUNNING())
             FKGameAllData.FK_GAME_DATA.config.setGameState(FKMod.GameState.PAUSED);
         update(firstPlayerToJoin);
+        teleportPlayerToWaitingRoom(firstPlayerToJoin);
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -127,6 +130,16 @@ public class FKGame {
         ScoreboardManager.getInstance().updateSidebar(player, timelineData.getDay(), timelineData.getMinutes(), timelineData.getSeconds());
     }
 
+    private void teleportPlayerToWaitingRoom(ServerPlayerEntity player){
+        if (GameUtils.isGameStateNOT_STARTED()) {
+            var spawnLoc = Configs.FK_CONFIG.config.getWaitingRoom().getSpawnLocation();
+            StreamSupport.stream(server.getWorlds().spliterator(), false)
+                    .filter(serverWorld -> serverWorld.getDimension().getEffects().toString().equals(spawnLoc.getDimensionName()))
+                    .findFirst()
+                    .ifPresent(serverWorld -> player.teleport(serverWorld, spawnLoc.getX(), spawnLoc.getY(), spawnLoc.getZ(), spawnLoc.getYaw(), spawnLoc.getPitch()));
+        }
+    }
+
     private void setWorldSpawn() {
         var spawnLocation = Configs.FK_CONFIG.config.getWorldSpawn();
         server.getOverworld().setSpawnPos(new BlockPos(spawnLocation.getX(), spawnLocation.getY(), spawnLocation.getZ()), 1.0f);
@@ -161,6 +174,8 @@ public class FKGame {
         @SuppressWarnings({"RedundantIfStatement"})
         private boolean cancelPlayerFromBreakingBlocks(World world, PlayerEntity player, BlockPos pos, BlockState state, /* Nullable */ BlockEntity blockEntity) {
             if (player.hasPermissionLevel(4)) return true;
+
+            if(!GameUtils.isGameStateRUNNING())return false;
 
             var breakPlace = (GameUtils.WhereIsThePlayer<Boolean>) (isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase) -> {
                 var block = world.getBlockState(pos).getBlock();
@@ -200,6 +215,8 @@ public class FKGame {
 
         private ActionResult cancelPlayerFromPlacingBlocks(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
             if (player.hasPermissionLevel(4)) return ActionResult.PASS;
+
+            if(!GameUtils.isGameStateRUNNING())return ActionResult.FAIL;
 
             var placeBlock = (GameUtils.WhereIsThePlayer<ActionResult>) (isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase) -> {
 
@@ -243,6 +260,8 @@ public class FKGame {
         private TypedActionResult<ItemStack> cancelPlayerFromFillingABucket(World world, PlayerEntity player, Hand hand, Fluid fillFluid, BucketItem bucketItem, BlockHitResult blockHitResult) {
             if (player.hasPermissionLevel(4)) return TypedActionResult.pass(player.getStackInHand(hand));
 
+            if(!GameUtils.isGameStateRUNNING())return TypedActionResult.fail(player.getStackInHand(hand));
+
             var fillBucketImpl = (GameUtils.WhereIsThePlayer<TypedActionResult<ItemStack>>) (isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase) -> {
 
                 var placedItemStack = player.getStackInHand(player.getActiveHand());
@@ -284,6 +303,8 @@ public class FKGame {
         private TypedActionResult<ItemStack> cancelPlayerFromEmptyingABucket(World world, PlayerEntity player, Hand hand, Fluid emptyFluid, BucketItem bucketItem, BlockHitResult blockHitResult) {
             if (player.hasPermissionLevel(4)) return TypedActionResult.pass(player.getStackInHand(hand));
 
+            if(!GameUtils.isGameStateRUNNING())return TypedActionResult.fail(player.getStackInHand(hand));
+
             var emptyBucketImpl = (GameUtils.WhereIsThePlayer<TypedActionResult<ItemStack>>) (isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase) -> {
 
                 var placedItemStack = player.getStackInHand(player.getActiveHand());
@@ -324,6 +345,8 @@ public class FKGame {
 
         private ActionResult cancelPlayerFromFiringATNT(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
             if (player.hasPermissionLevel(4)) return ActionResult.PASS;
+
+            if (!GameUtils.isGameStateRUNNING()) return ActionResult.FAIL;
 
             var emptyBucketImpl = (GameUtils.WhereIsThePlayer<ActionResult>) (isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase) -> {
 
@@ -377,7 +400,7 @@ public class FKGame {
         private ActionResult cancelPlayerPvP(PlayerEntity player, World world, Hand hand, Entity entity, @Nullable EntityHitResult hitResult) {
             if (player.hasPermissionLevel(4)) return ActionResult.PASS;
 
-            if (!GameUtils.isGameStateRUNNING()) return ActionResult.PASS;
+            if (!GameUtils.isGameStateRUNNING()) return ActionResult.FAIL;
 
             if (entity instanceof PlayerEntity)
                 if (!GameUtils.isPvPEnabled(timeline.timelineData.getDay()))
@@ -387,6 +410,8 @@ public class FKGame {
 
         private ActionResult cancelPlayerFromEnteringInPortal(ServerPlayerEntity player, Identifier dimensionId) {
             if (player.hasPermissionLevel(4)) return ActionResult.PASS;
+
+            if (!GameUtils.isGameStateRUNNING()) return ActionResult.FAIL;
 
             if (dimensionId == DimensionType.THE_NETHER_ID) {
                 if (!GameUtils.isNetherEnabled(timeline.timelineData.getDay()))
@@ -440,7 +465,7 @@ public class FKGame {
         }
 
         private ActionResult onEntitySpawn(Entity entity) {
-            if (!(entity instanceof PlayerEntity) && GameUtils.isGameState_PAUSED())
+            if (entity instanceof MobEntity && GameUtils.isGameState_PAUSED())
                 return ActionResult.FAIL;
             return ActionResult.PASS;
         }
@@ -451,13 +476,7 @@ public class FKGame {
         }
 
         private void onPlayerJoin(ServerPlayerEntity player, MinecraftServer server) {
-            if (GameUtils.isGameStateNOT_STARTED()) {
-                var spawnLoc = Configs.FK_CONFIG.config.getWaitingRoom().getSpawnLocation();
-                StreamSupport.stream(server.getWorlds().spliterator(), false)
-                        .filter(serverWorld -> serverWorld.getDimension().getEffects().toString().equals(spawnLoc.getDimensionName()))
-                        .findFirst()
-                        .ifPresent(serverWorld -> player.teleport(serverWorld, spawnLoc.getX(), spawnLoc.getY(), spawnLoc.getZ(), spawnLoc.getYaw(), spawnLoc.getPitch()));
-            }
+            teleportPlayerToWaitingRoom(player);
             update(player);
         }
 

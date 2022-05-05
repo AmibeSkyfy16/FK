@@ -16,10 +16,8 @@ public class TeamsConfig implements Validatable {
     @Getter
     private final List<FKTeam> teams;
 
-    public TeamsConfig() {
-        teams = new ArrayList<>();
-        teams.add(new FKTeam("The_Green_Team", Formatting.GREEN.name(), List.of("Skyfy16"), new Base("The_HADDA_BASE", new Cube((short) 15, 40, 500, 20, -34, 20))));
-        teams.add(new FKTeam("The_Red_Team", Formatting.RED.name(), List.of("AmibeSkyfy16"), new Base("The_DRIDROU_BASE", new Cube((short) 15, 40, 500, -20, -34, -20))));
+    public TeamsConfig(List<FKTeam> teams) {
+        this.teams = teams;
     }
 
     @Override

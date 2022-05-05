@@ -46,6 +46,16 @@
           "x": 20.0,
           "y": -34.0,
           "z": 20.0
+        },
+
+        // Le cube de proximité permet de définir une zone autour de votre base ou les joueurs ne pourront pas poser, ni casser de bloc
+        "proximityCube": {
+          "size": 14,
+          "numberOfBlocksDown": 5,
+          "numberOfBlocksUp": 5,
+          "x": 20.0,
+          "y": -34.0,
+          "z": 20.0
         }
       }
     },

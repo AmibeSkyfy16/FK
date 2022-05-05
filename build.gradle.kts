@@ -92,7 +92,7 @@ tasks{
 fun copyFile(path: String) {
     println("path: $path")
     copy {
-        from(".\\build\\libs\\FK-1.0-SNAPSHOT.jar")
+        from(".\\build\\libs\\FK-TEST-1.0-SNAPSHOT.jar")
         into(path)
     }
 }

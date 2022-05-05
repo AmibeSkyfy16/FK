@@ -18,9 +18,9 @@ public class FKGameData implements Validatable {
     @Getter
     private final ch.skyfy.fk.logic.data.TimelineData timelineData;
 
-    public FKGameData() {
-        gameState = FKMod.GameState.NOT_STARTED;
-        timelineData = new ch.skyfy.fk.logic.data.TimelineData(1, 0, 0);
+    public FKGameData(FKMod.GameState gameState, TimelineData timelineData) {
+        this.gameState = gameState;
+        this.timelineData = timelineData;
     }
 
     @Override

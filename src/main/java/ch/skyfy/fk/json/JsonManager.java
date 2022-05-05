@@ -21,15 +21,18 @@ public class JsonManager<T extends Validatable> {
 
     private final File file;
 
-    public JsonManager(Class<T> tClass, Gson gson, File file) {
+    private final T defaultConfig;
+
+    public JsonManager(Class<T> tClass, Gson gson, File file, T defaultConfig) {
         this.tClass = tClass;
         this.typeToken = TypeToken.of(tClass);
         this.gson = gson;
         this.file = file;
+        this.defaultConfig = defaultConfig;
     }
 
-    public JsonManager(Class<T> tClass, File file) {
-        this(tClass, new GsonBuilder().setPrettyPrinting().create(), file);
+    public JsonManager(Class<T> tClass, File file, T defaultConfig) {
+        this(tClass, new GsonBuilder().setPrettyPrinting().create(), file, defaultConfig);
     }
 
     public @NotNull T getOrCreateConfig() {
@@ -38,8 +41,8 @@ public class JsonManager<T extends Validatable> {
             if (file.exists())
                 config = get();
             else {
-                config = tClass.getDeclaredConstructor().newInstance();
-                save(config);
+                config = defaultConfig;
+                save(defaultConfig);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

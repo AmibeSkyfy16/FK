@@ -22,31 +22,24 @@ public class FKConfig implements Validatable {
     @Getter
     private final SpawnLocation worldSpawn;
 
-    public FKConfig() {
-        dayOfAuthorizationOfTheAssaults = 6;
-        dayOfAuthorizationOfTheEntryInTheNether = 3;
-        dayOfAuthorizationOfTheEntryInTheEnd = 3;
-        dayOfAuthorizationOfThePvP = 2;
-
-                this.waitingRoom = new WaitingRoom(
-                        new Cube((short) 5, 5, 5, 0, -33, 0),
-                        new SpawnLocation("minecraft:overworld", 0, -33, 0, 69, 69)
-                );
-
-        this.worldSpawn = new SpawnLocation("minecraft:overworld", 110, -33, 110, 69, 69);
+    public FKConfig(int dayOfAuthorizationOfTheAssaults, int dayOfAuthorizationOfTheEntryInTheNether, int dayOfAuthorizationOfTheEntryInTheEnd, int dayOfAuthorizationOfThePvP, WaitingRoom waitingRoom, SpawnLocation worldSpawn) {
+        this.dayOfAuthorizationOfTheAssaults = dayOfAuthorizationOfTheAssaults;
+        this.dayOfAuthorizationOfTheEntryInTheNether = dayOfAuthorizationOfTheEntryInTheNether;
+        this.dayOfAuthorizationOfTheEntryInTheEnd = dayOfAuthorizationOfTheEntryInTheEnd;
+        this.dayOfAuthorizationOfThePvP = dayOfAuthorizationOfThePvP;
+        this.waitingRoom = waitingRoom;
+        this.worldSpawn = worldSpawn;
     }
 
     @Override
     public void validate() {
         var errors = new ArrayList<String>();
 
-
         // TODO Implement validation
         // verify dayOfAuthorizationOfTheAssaults
         if (dayOfAuthorizationOfThePvP < 0) {
             errors.add("La propriété dayOfAuthorizationOfThePvP contient une valeur trop petite !");
         }
-
 
         confirmValidate(errors);
     }

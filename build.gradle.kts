@@ -8,9 +8,12 @@ val archivesBaseName = property("archives_base_name")
 group = property("maven_group")!!
 version = property("mod_version")!!
 
+
+
 repositories {
     mavenCentral()
     maven("https://maven.bymartrixx.me") {}
+    maven("https://jitpack.io") {}
 }
 
 dependencies {
@@ -24,6 +27,8 @@ dependencies {
 
     implementation("com.google.code.gson:gson:2.9.0")
 
+//    implementation("com.github.SparklingComet:java-mojang-api:-SNAPSHOT")
+
     compileOnly("org.projectlombok:lombok:1.18.24")
     annotationProcessor("org.projectlombok:lombok:1.18.24")
 
@@ -32,7 +37,7 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
 }
 
-tasks{
+tasks {
 
     processResources {
         inputs.property("version", project.version)
@@ -42,8 +47,8 @@ tasks{
         }
     }
 
-    java{
-            withSourcesJar()
+    java {
+        withSourcesJar()
     }
 
     named<Jar>("jar") {
@@ -62,6 +67,7 @@ tasks{
     named<Test>("test") {
         useJUnitPlatform()
     }
+
 
     create("copyJarToServer") {
         mustRunAfter("build")
@@ -87,7 +93,6 @@ tasks{
     }
 
 }
-
 
 fun copyFile(path: String) {
     println("path: $path")

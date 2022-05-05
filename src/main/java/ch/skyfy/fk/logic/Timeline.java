@@ -19,7 +19,6 @@ public class Timeline {
 
     private final MinecraftServer server;
 
-
     {
         timelineData = FKGameAllData.FK_GAME_DATA.config.getTimelineData();
     }
@@ -46,7 +45,6 @@ public class Timeline {
         if (remainingTime == 0)
             timelineData.setDay(timelineData.getDay() + 1);
 
-        // TODO UNCOMMENT
         if (previousMinutes != timelineData.getMinutes())
             saveData();
 

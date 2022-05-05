@@ -1,8 +1,10 @@
 package ch.skyfy.fk.logic;
 
+import ch.skyfy.fk.FKMod;
 import ch.skyfy.fk.ScoreboardManager;
 import ch.skyfy.fk.config.Configs;
 import ch.skyfy.fk.events.*;
+import ch.skyfy.fk.logic.data.FKGameAllData;
 import me.bymartrixx.playerevents.api.event.PlayerJoinCallback;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
@@ -48,14 +50,22 @@ public class FKGame {
 
     private final FKGameEvents fkGameEvents;
 
-    public FKGame(MinecraftServer server) {
+    public FKGame(MinecraftServer server, ServerPlayerEntity firstPlayerToJoin) {
         this.server = server;
         this.timeline = new Timeline(server);
         pauseEvents = new PauseEvents();
         fkGameEvents = new FKGameEvents();
 
+        initialize(firstPlayerToJoin);
+
         setWorldSpawn();
         registerEvents();
+    }
+
+    private void initialize(ServerPlayerEntity firstPlayerToJoin){
+        if(GameUtils.isGameStateRUNNING())
+            FKGameAllData.FK_GAME_DATA.config.setGameState(FKMod.GameState.PAUSED);
+        update(firstPlayerToJoin);
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -81,7 +91,14 @@ public class FKGame {
             timeline.startTimer();
     }
 
-    private void updateTeam(MinecraftServer server, ServerPlayerEntity player) {
+    private void update(ServerPlayerEntity player){
+        if(GameUtils.isFKPlayer(player.getName().asString())) {
+            updateTeam(player);
+        }
+        updateSidebar(player);
+    }
+
+    private void updateTeam(ServerPlayerEntity player) {
         var playerName = player.getName().asString();
 
         var serverScoreboard = server.getScoreboard();
@@ -105,7 +122,7 @@ public class FKGame {
 
     }
 
-    public void updateSidebar(ServerPlayerEntity player) {
+    private void updateSidebar(ServerPlayerEntity player) {
         var timelineData = timeline.timelineData;
         ScoreboardManager.getInstance().updateSidebar(player, timelineData.getDay(), timelineData.getMinutes(), timelineData.getSeconds());
     }
@@ -157,12 +174,10 @@ public class FKGame {
                 }
 
                 if (isPlayerInHisOwnBase) {
-                    // TODO Nothing to do for now
                     return true;
                 }
 
                 if (isPlayerCloseToHisOwnBase) {
-                    // TODO Nothing to do for now
                     return true;
                 }
 
@@ -389,7 +404,7 @@ public class FKGame {
 
             if (GameUtils.isGameStateNOT_STARTED()) {
                 var waitingRoom = Configs.FK_CONFIG.config.getWaitingRoom();
-                if (Utils.cancelPlayerFromLeavingAnArea(waitingRoom.getCube(), player, null))
+                if (Utils.cancelPlayerFromLeavingAnArea(waitingRoom.getCube(), player, waitingRoom.getSpawnLocation()))
                     return ActionResult.FAIL;
                 return ActionResult.PASS;
             }
@@ -436,7 +451,6 @@ public class FKGame {
         }
 
         private void onPlayerJoin(ServerPlayerEntity player, MinecraftServer server) {
-
             if (GameUtils.isGameStateNOT_STARTED()) {
                 var spawnLoc = Configs.FK_CONFIG.config.getWaitingRoom().getSpawnLocation();
                 StreamSupport.stream(server.getWorlds().spliterator(), false)
@@ -444,11 +458,7 @@ public class FKGame {
                         .findFirst()
                         .ifPresent(serverWorld -> player.teleport(serverWorld, spawnLoc.getX(), spawnLoc.getY(), spawnLoc.getZ(), spawnLoc.getYaw(), spawnLoc.getPitch()));
             }
-
-            if(GameUtils.isFKPlayer(player.getName().asString())) {
-                updateTeam(server, player);
-                updateSidebar(player);
-            }
+            update(player);
         }
 
     }

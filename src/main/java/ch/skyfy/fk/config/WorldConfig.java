@@ -16,7 +16,7 @@ public class WorldConfig implements Validatable {
     private final WorldInfo worldInfo;
 
     public WorldConfig() {
-        worldInfo = new WorldInfo("minecraft:overworld", new Cube((short)500,10, 20, 0, 0, 0));
+        worldInfo = new WorldInfo("minecraft:overworld", new Cube((short)500,64, 319, 0, 0, 0));
     }
 
     @Override

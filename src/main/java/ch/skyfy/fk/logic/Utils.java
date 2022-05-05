@@ -25,11 +25,11 @@ public class Utils {
             vec = new Vec3d(player.getX(), player.getY(), player.getZ() + 1);
         }
 
-        if(spawnLocation != null)
-            vec = new Vec3d(spawnLocation.getX(), spawnLocation.getY(), spawnLocation.getZ());
-
-        if (vec != null)
+        if (vec != null){
+            if(spawnLocation != null)
+                vec = new Vec3d(spawnLocation.getX(), spawnLocation.getY(), spawnLocation.getZ());
             player.teleport(vec.x, vec.y, vec.z);
+        }
 
         return vec != null;
     }

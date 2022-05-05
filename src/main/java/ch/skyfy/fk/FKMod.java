@@ -7,8 +7,6 @@ import ch.skyfy.fk.commands.StartCmd;
 import ch.skyfy.fk.commands.WhereIAmCmd;
 import ch.skyfy.fk.config.Configs;
 import ch.skyfy.fk.logic.FKGame;
-import ch.skyfy.fk.logic.GameUtils;
-import ch.skyfy.fk.logic.data.FKGameAllData;
 import ch.skyfy.fk.utils.ReflectionUtils;
 import me.bymartrixx.playerevents.api.event.PlayerJoinCallback;
 import net.fabricmc.api.DedicatedServerModInitializer;
@@ -46,7 +44,6 @@ public class FKMod implements DedicatedServerModInitializer {
     private final ResumeCmd resumeCmd;
 
     public FKMod() throws Exception {
-
         // Create a config directory named with the MOD_ID under config folder of the server
         createConfigDirectory();
 
@@ -66,22 +63,16 @@ public class FKMod implements DedicatedServerModInitializer {
         registerCommands();
     }
 
-    private void onFirstPlayerJoin(ServerPlayerEntity player, MinecraftServer server){
-        if(firstJoin)return;
-        if(server.getPlayerManager().getPlayerList().size() == 1){
+    private void onFirstPlayerJoin(ServerPlayerEntity player, MinecraftServer server) {
+        if (firstJoin) return;
+        if (server.getPlayerManager().getPlayerList().size() == 1) {
             firstJoin = true;
-
-            final var fkGame = new FKGame(server);
+            final var fkGame = new FKGame(server, player);
             optFKGameRef.set(Optional.of(fkGame));
-
-            if(GameUtils.isGameStateRUNNING())
-                FKGameAllData.FK_GAME_DATA.config.setGameState(GameState.PAUSED);
-
-            fkGame.updateSidebar(player);
         }
     }
 
-    public void registerCommands(){
+    public void registerCommands() {
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             dispatcher.register(net.minecraft.server.command.CommandManager.literal("FKStart").executes(startCmd));
             dispatcher.register(net.minecraft.server.command.CommandManager.literal("FKPause").executes(pauseCmd));

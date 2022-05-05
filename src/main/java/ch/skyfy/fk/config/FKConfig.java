@@ -23,7 +23,6 @@ public class FKConfig implements Validatable {
     private final SpawnLocation worldSpawn;
 
     public FKConfig() {
-
         dayOfAuthorizationOfTheAssaults = 6;
         dayOfAuthorizationOfTheEntryInTheNether = 3;
         dayOfAuthorizationOfTheEntryInTheEnd = 3;

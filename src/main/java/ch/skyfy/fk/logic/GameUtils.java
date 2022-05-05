@@ -120,7 +120,7 @@ public class GameUtils {
 
             var isPlayerCloseToABase = false;
 
-            var proximitySquare = new Cube((short) (baseSquare.getSize() + 5), baseSquare.getNumberOfBlocksDown() + 5, baseSquare.getNumberOfBlocksUp() + 5, baseSquare.getX(), baseSquare.getY(), baseSquare.getZ());
+            var proximitySquare = new Cube((short) (baseSquare.getSize() + 20), baseSquare.getNumberOfBlocksDown() + 10, baseSquare.getNumberOfBlocksUp() + 10, baseSquare.getX(), baseSquare.getY(), baseSquare.getZ());
             if (Utils.isPlayerInsideCube(proximitySquare, blockPos)) {
                 isPlayerCloseToABase = true;
             }

@@ -5,36 +5,10 @@ LES FICHIERS DE CONFIG
     Lorsque le mod sera installé et le serveur lancé pour la première fois,
     Un dossier portant le nom du mode (fk) sera créé dans le dossier "config" du serveur
 
-    Voici une description pour chaque fichier .json
-
-        teams.json -> Contient les informations sur les teams.
-            1. La couleur d'une team
-            2. Le nom d'une team
-            3. La liste du joueur composant cette team
-            4. Des informations sur la base
-                4.1 Le nom de la base
-                4.2 Les coordonnées du centre de la base ainsi que sa taille (en partant du centre)
-
-        fkconfig.json -> Contient des informations générales sur le jeu
-            1. Le jour ou les assauts seront autorisé
-            2. Le jour ou les joueurs auront le droit d'entrer dans le nether
-            3. Le jour ou les joueurs auront le droit d'entrer dans l'end
-            4. Le jour ou les joueurs auront le droit de se taper dessus
-            5. Des informations sur la salle d'attente
-                5.1 Les coordonnées du centre de la salle d'attente (waitingRoom) ainsi que sa taille (en partant du centre)
-                5.2 Des informations sur là où les joueurs seront téléporté la toutes premières fois qu'il se connecte
-            6. Contient de l'information sur le spawn du monde (là où les joueurs arrive lorsqu'il meurt et qu'ils n'ont pas de lit)
-
-        worldconfig.json
-            1. Contient des informations sur la bordure du monde
-                1.1 Le nom de la dimension
-                1.2 Sa taille (calculer depuis son centre)
-                1.3 Le nombre de blocs vers le bas
-                1.4 Le nombre de blocs vers le haut
-                1.5 La coordonnée X du point central
-                1.6 La coordonnée Y du point central
-                1.7 La coordonnée Z du point central
-
+    Dans ce dossier "fk" se trouve trois fichiers de configuration importants
+        1. teams.json5
+        2. fkconfig.json5
+        3. worldconfig.json5
 
 
 LES ETATS DU JEU
@@ -43,84 +17,133 @@ LES ETATS DU JEU
                    C'est l'état par défaut, lorsque le mod est installé sur le serveur.
 
     RUNNING -> Le jeu est en cours (les joueurs minent, construisent leur muraille, etc.).
-               Le jeu se met dans l'état RUNNING lorsque la commande /FKStart est exécuté
-               ou que le serveur à redémarrer et qu'il se trouvait déjà dans l'état RUNNING.
+               Le jeu se met dans l'état RUNNING lorsque la commande /FKStart ou /FKResume est exécuté
 
     PAUSED -> Le jeu est en pause.
               Le jeu se met dans l'état PAUSED lorsque la commande /FKPause est exécuté
-              ou que le serveur à redémarrer et qu'il se trouvait déjà dans l'état PAUSED.
-
-        Les choses suivantes se produisent lorsque le jeu est en pause:
-            1. Les joueurs ne peuvent pas bouger, excepté les joueurs OP.
-            2. Les entités ne peuvent pas bouger.
-            3. Le temps est arrêté.
+              ou que le serveur à redémarrer et qu'il se trouvait déjà dans l'état PAUSED ou RUNNING.
 
 
 COMMANDES
     /FKStart -> permet de démarrer le FK, si et seulement si le jeu est dans l'état NOT_STARTED.
-                Seul un joueur OP peut utilisé cette commande.
+                Seul un joueur OP peut utiliser cette commande.
 
                 Une vérification des joueurs participants au FK est effectué, si et seulement si tous les joueurs
-                inscrit dans les fichiers de configuration sont connecté au serveur, alors le jeu pourra démarré !
+                inscrit dans les fichiers de configuration sont connecté au serveur, alors le jeu pourra démarrer !
 
     /FKPause -> permet de mettre le jeu en pause (voir état: PAUSED).
-                Seul un joueur OP peut utilisé cette commande.
+                Seul un joueur OP peut utiliser cette commande.
 
     /FKResume -> permet de continuer le jeu après que le serveur ait été mis en pause.
-                 Seul un joueur OP peut utilisé cette commande.
+                 Seul un joueur OP peut utiliser cette commande.
 
 
 LES ETATS DU JEU EN DETAILS
 
     NOT_STARTED
 
-        Les choses qui se produise lorsque le jeu est dans cette état:
+        Les choses qui se produisent lorsque le jeu est dans cet état :
 
             1. Lorsqu'un joueur se connecte, il est téléporté dans se que l'on appelle, la waitingRoom.
                Temps que le jeu n'a pas démarré, les joueurs ne peuvent pas sortir de la waitingRoom.
             2. Les joueurs ne peuvent pas subir de dégâts.
-            3. Les joueurs ne perde pas de nourritures
+            3. Les joueurs ne perdent pas de nourritures
             4. Le PvP est désactivé
 
     RUNNING
 
-        Les choses qui se produise lorsque le jeu est dans cette état:
+        Les choses qui se produisent lorsque le jeu est dans cet état :
 
             1. Les joueurs recevront un message leur disant ou se trouve leur base respective.
             2. Le comptage du temps démarre. On commence au jour 1 à la minute 0 et à la seconde 0.
                Chaque prochaine 20 minutes est un nouveau jour qui commence.
 
+    PAUSED
 
-    Règles:
+        Les choses suivantes se produisent lorsque le jeu est en pause :
+
+            1. Les joueurs ne peuvent pas bouger, excepté les joueurs OP.
+            2. Les entités ne peuvent pas se déplacer.
+            3. Le temps est arrêté.
+            4. Les items ne peuvent pas despawn
+            5. Les joueurs ne peuvent pas subir de dégâts.
+            6. Les joueurs ne perdent pas de nourritures
+
+Les règles du FK
+
+    REGLES CONCERNANT LA POSE ET LE CASSAGE DE BLOCS
 
         CASSAGE DE BLOCS
-            À l'intérieur de sa propre base : Tous les blocs peuvent être cassés
-            Dans la zone de proximité de sa propre base : Tous les blocs peuvent être cassés
+            À l'intérieur de sa propre base :
+                Tous les blocs peuvent être cassés
+            Dans la zone de proximité de sa propre base :
+                Tous les blocs peuvent être cassés
 
-            À l'intérieur d'une base enemies : Aucuns blocs ne peut être cassé, excepté la TNT, les torches en redstone et les torches
-            Dans la zone de proximité d'une base enemies : Aucuns blocs ne peut être cassé, excepté la TNT, les torches en redstone et les torches
+            À l'intérieur d'une base enemies :
+                Aucuns blocs ne peut être cassé, excepté la TNT, les torches en redstone et les torches
+                et seulement si les assauts sont activé
+            Dans la zone de proximité d'une base enemies :
+                Aucuns blocs ne peut être cassé, excepté la TNT, les torches en redstone et les torches
+                et seulement si les assauts sont activé
 
         POSE DE BLOCS
-            À l'intérieur de sa propre base : Tous les blocs peuvent être placés
-            Dans la zone de proximité de sa propre base : Aucun bloc ne peut être placé
+            À l'intérieur de sa propre base :
+                Tous les blocs peuvent être placés
+            Dans la zone de proximité de sa propre base :
+                Aucun bloc ne peut être placé
 
-            À l'intérieur d'une base enemies : Aucuns blocs ne peut être placé, excepté la TNT, les torches en redstone et les torches
-            Dans la zone de proximité d'une base enemies : Aucuns blocs ne peut être placé, excepté la TNT, les torches en redstone et les torches
+            À l'intérieur d'une base enemies :
+                Aucuns blocs ne peut être placé, excepté la TNT, les torches en redstone et les torches
+                et seulement si les assauts sont activé
+            Dans la zone de proximité d'une base enemies :
+                Aucuns blocs ne peut être placé, excepté la TNT, les torches en redstone et les torches
+                et seulement si les assauts sont activé
+
+
+    REGLES CONCERNANT LE REMPLISSAGE ET LE VIDAGE DE SCEAU
 
         REMPLISSAGE DE SCEAU
-            À l'intérieur de sa propre base : Sceau d'eau et lava peuvent être remplie
-            Dans la zone de proximité de sa propre base : Sceau d'eau et lava peuvent être remplie
+            À l'intérieur de sa propre base :
+                Sceau d'eau et lava peuvent être remplie
+            Dans la zone de proximité de sa propre base :
+                Sceau d'eau et lava peuvent être remplie
 
-            À l'intérieur d'une base enemies : Aucun sceau ne peut être rempli
-            Dans la zone de proximité d'une base enemies : Aucun sceau ne peut être rempli
+            À l'intérieur d'une base enemies :
+                Aucun sceau ne peut être rempli
+            Dans la zone de proximité d'une base enemies :
+                Aucun sceau ne peut être rempli
 
         VIDAGE DE SCEAU
-            À l'intérieur de sa propre base : Sceau d'eau et lava peuvent être vidé
-            Dans la zone de proximité de sa propre base : Aucun sceau ne peut être vidé
+            À l'intérieur de sa propre base :
+                Sceau d'eau et lava peuvent être vidé
+            Dans la zone de proximité de sa propre base :
+                Aucun sceau ne peut être vidé
 
-            À l'intérieur d'une base enemies : Aucun sceau ne peut être vidé
-            Dans la zone de proximité d'une base enemies : Aucun sceau ne peut être vidé
+            À l'intérieur d'une base enemies :
+                Aucun sceau ne peut être vidé
+            Dans la zone de proximité d'une base enemies :
+                Aucun sceau ne peut être vidé
 
+    REGLES GENERAL
+        1. Les joueurs ont le droit de crafter en dehors de leur base
+        2. Les ressources doivent être stockées dans la salle des coffres
+        3. Les joueurs ont également le droit de stocker des ressources en dehors de la salle des coffres,
+           mais pas dans des coffres, ni des barrels.
 
-NOTES IMPORTANTES
-    1. Les joueurs OP ne sont affecté par rien.
+    REGLES CONCERNANT LA BASE
+        1. Interdiction de bloquer un joueur adverse dans sa propre base
+           Si vous construisez des pièges, le joueur doit pouvoir en sortir, soit par un chemin, soit par la mort
+        2. Interdiction d'utiliser de l'obsidienne pour construire la muraille
+        3. Lorsque les assauts sont activés, les choses suivantes doivent impérativement avoir été faite :
+            1. La salle des coffres doit être construite et répondre aux règles la concernant
+            2. Il ne doit plus y avoir des coffres qui ne sont pas dans la salle des coffres
+
+    REGLES CONCERNANT LA SALLE DES COFFRES
+        1. La salle des coffres doit être accessible sans casser de blocs
+        2. La salle des coffres soit se situer maximum 30 blocs en dessous de la surface de la base
+
+    REGLES DE VICTOIRE
+        Vous êtes déclaré victorieux si et seulement si les conditions suivantes sont remplis :
+            1. Les assauts doivent être activés
+            2. Trouver la salle des coffres et y rester pendant au moins 1 minute sans mourir
+

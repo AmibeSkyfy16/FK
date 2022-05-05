@@ -12,6 +12,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.TntBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.MovementType;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
@@ -34,7 +35,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Optional;
 import java.util.stream.StreamSupport;
 
 @SuppressWarnings("FieldCanBeLocal")
@@ -72,7 +72,8 @@ public class FKGame {
         }
     }
 
-    public void pause() {}
+    public void pause() {
+    }
 
     public void resume() {
         // If the timeline wasn't started (in the case of a server restart with gamestate at PAUSE OR RUNNING)
@@ -123,29 +124,21 @@ public class FKGame {
         UseBlockCallback.EVENT.register(fkGameEvents::cancelPlayerFromFiringATNT);
         AttackEntityCallback.EVENT.register(fkGameEvents::cancelPlayerPvP);
         PlayerEnterPortalCallback.EVENT.register(fkGameEvents::cancelPlayerFromEnteringInPortal);
-        PlayerMoveCallback.EVENT.register(fkGameEvents::cancelPlayersFromMoving);
+        PlayerMoveCallback.EVENT.register(fkGameEvents::onPlayerMove);
         PlayerDamageCallback.EVENT.register(fkGameEvents::onPlayerDamage);
         PlayerHungerCallback.EVENT.register(fkGameEvents::onPlayerHungerUpdate);
         PlayerJoinCallback.EVENT.register(fkGameEvents::onPlayerJoin);
         EntitySpawnCallback.EVENT.register(fkGameEvents::onEntitySpawn);
-        ItemDespawnCallback.EVENT.register(itemEntity -> {
-            if(!GameUtils.isGameState_PAUSED())return ActionResult.PASS;
-            return ActionResult.FAIL;
-        });
-
-//        server.getOverworld().getEntitiesByType(TypeFilter.instanceOf(ItemEntity.class), itemEntity -> true);
+        ItemDespawnCallback.EVENT.register(fkGameEvents::onItemDespawn);
 
         // Event use when the game state is "pause"
         EntityMoveCallback.EVENT.register(pauseEvents::stopEntitiesFromMoving);
         TimeOfDayUpdatedCallback.EVENT.register(pauseEvents::cancelTimeOfDayToBeingUpdated);
-
-        // Event use when the game state is NOT_STARTED
     }
 
     /**
      * This class contains events that will be used when the game state is "RUNNING
      */
-    @SuppressWarnings("ConstantConditions")
     public class FKGameEvents {
 
         @SuppressWarnings({"RedundantIfStatement"})
@@ -391,15 +384,13 @@ public class FKGame {
             return ActionResult.PASS;
         }
 
-        private ActionResult cancelPlayersFromMoving(PlayerMoveCallback.MoveData moveData, ServerPlayerEntity player) {
+        private ActionResult onPlayerMove(PlayerMoveCallback.MoveData moveData, ServerPlayerEntity player) {
             if (player.hasPermissionLevel(4)) return ActionResult.PASS; // OP Player can move anymore
 
-            // Cancel player from going outside the waitingRoom
             if (GameUtils.isGameStateNOT_STARTED()) {
                 var waitingRoom = Configs.FK_CONFIG.config.getWaitingRoom();
-                if (Utils.cancelPlayerFromLeavingACube(waitingRoom.getCube(), player, Optional.of(waitingRoom.getSpawnLocation())))
+                if (Utils.cancelPlayerFromLeavingAnArea(waitingRoom.getCube(), player, null))
                     return ActionResult.FAIL;
-
                 return ActionResult.PASS;
             }
 
@@ -408,7 +399,7 @@ public class FKGame {
                 return ActionResult.FAIL;
 
             // Cancel the player from going too far into the map
-            if (Utils.cancelPlayerFromLeavingACube(Configs.WORLD_CONFIG.config.getWorldInfo().getWorldDimension(), player, Optional.empty())) {
+            if (Utils.cancelPlayerFromLeavingAnArea(Configs.WORLD_CONFIG.config.getWorldInfo().getCube(), player, null)) {
                 player.sendMessage(new LiteralText("You reach the border limit !").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
                 return ActionResult.FAIL;
             }
@@ -439,6 +430,11 @@ public class FKGame {
             return ActionResult.PASS;
         }
 
+        private ActionResult onItemDespawn(ItemEntity itemEntity){
+            if (!GameUtils.isGameState_PAUSED()) return ActionResult.PASS;
+            return ActionResult.FAIL;
+        }
+
         private void onPlayerJoin(ServerPlayerEntity player, MinecraftServer server) {
 
             if (GameUtils.isGameStateNOT_STARTED()) {
@@ -449,8 +445,10 @@ public class FKGame {
                         .ifPresent(serverWorld -> player.teleport(serverWorld, spawnLoc.getX(), spawnLoc.getY(), spawnLoc.getZ(), spawnLoc.getYaw(), spawnLoc.getPitch()));
             }
 
-            updateTeam(server, player);
-            updateSidebar(player);
+            if(GameUtils.isFKPlayer(player.getName().asString())) {
+                updateTeam(server, player);
+                updateSidebar(player);
+            }
         }
 
     }

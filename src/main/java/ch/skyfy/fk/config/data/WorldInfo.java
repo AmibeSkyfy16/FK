@@ -9,11 +9,11 @@ public class WorldInfo {
     private final String dimensionName;
 
     @Getter
-    private final Cube worldDimension;
+    private final Cube cube;
 
-    public WorldInfo(String dimensionName, Cube worldDimension) {
+    public WorldInfo(String dimensionName, Cube cube) {
         this.dimensionName = dimensionName;
-        this.worldDimension = worldDimension;
+        this.cube = cube;
     }
 
 }

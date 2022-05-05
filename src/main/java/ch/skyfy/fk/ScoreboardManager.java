@@ -49,7 +49,7 @@ public class ScoreboardManager {
         var fkTeam = GameUtils.getFKTeamOfPlayerByName(player.getName().asString());
 
         if(fkTeam != null){
-            list.add(new LiteralText("Team name: " + GameUtils.getFKTeamOfPlayerByName(player.getName().asString()).getName()).setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
+            list.add(new LiteralText("Team name: " + GameUtils.getFKTeamOfPlayerByName(player.getName().asString()).getName()).setStyle(Style.EMPTY.withColor(Formatting.valueOf(fkTeam.getColor()))));
             list.add(new LiteralText("").setStyle(Style.EMPTY));
         }
 

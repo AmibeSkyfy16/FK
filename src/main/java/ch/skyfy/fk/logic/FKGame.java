@@ -111,7 +111,8 @@ public class FKGame {
 
         var team = serverScoreboard.getTeam(fkTeam.getName());
         if (team == null) { // Create a new team
-            team = serverScoreboard.addTeam(fkTeam.getName());
+            team = serverScoreboard.addTeam(fkTeam.getName().replaceAll("[^a-zA-Z\\d]","")); // minecraft internal team name can't have space or special char
+            team.setDisplayName(new LiteralText(fkTeam.getName()).setStyle(Style.EMPTY.withColor(Formatting.byName(fkTeam.getColor()))));
             team.setColor(Formatting.byName(fkTeam.getColor()));
         }
 

@@ -26,7 +26,10 @@ dependencies {
 
     implementation("com.google.code.gson:gson:2.9.0")
 
-    implementation("com.github.SparklingComet:java-mojang-api:-SNAPSHOT")?.let { shadow(it) }
+    implementation("com.github.saibotk:JMAW:0.3.1")?.let { shadow(it) }
+//    implementation("com.github.KevinPriv:MojangAPI:1.0")?.let { shadow(it) }
+//    implementation("com.github.SparklingComet:java-mojang-api:-SNAPSHOT")?.let { shadow(it) }
+//    implementation("com.github.SparklingComet:java-mojang-api:-SNAPSHOT")
 
     compileOnly("org.projectlombok:lombok:1.18.24")
     annotationProcessor("org.projectlombok:lombok:1.18.24")
@@ -59,7 +62,6 @@ tasks {
         from(compileJava)
         from(processResources)
     }
-
 
     shadowJar {
         configurations = listOf(project.configurations.shadow.get())

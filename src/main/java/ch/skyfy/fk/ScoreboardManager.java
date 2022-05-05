@@ -22,7 +22,7 @@ public class ScoreboardManager {
 
     private ScoreboardManager() {
         generalSidebar = new Sidebar(Sidebar.Priority.MEDIUM);
-        generalSidebar.setTitle(new LiteralText("<< Fallen Kingdoms >>").setStyle(Style.EMPTY.withColor(Formatting.GOLD).withBold(true)));
+        generalSidebar.setTitle(new LiteralText(">> Fallen Kingdoms <<").setStyle(Style.EMPTY.withColor(Formatting.GOLD).withBold(true)));
     }
 
     public void updateSidebar(ServerPlayerEntity player, int day, int minutes, int seconds) {
@@ -35,7 +35,9 @@ public class ScoreboardManager {
     }
 
     private void updateSidebar(int day, int minutes, int seconds) {
-        generalSidebar.setLine(8, new LiteralText("Game Status: " + FKGameAllData.FK_GAME_DATA.config.getGameState().name()).setStyle(Style.EMPTY.withColor(Formatting.WHITE).withBold(true)));
+        generalSidebar.setLine(9, new LiteralText("").setStyle(Style.EMPTY));
+
+        generalSidebar.setLine(8, new LiteralText("Game Status: " + FKGameAllData.FK_GAME_DATA.config.getGameState().name()).setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
 
         generalSidebar.setLine(7, new LiteralText("").setStyle(Style.EMPTY));
 
@@ -45,9 +47,9 @@ public class ScoreboardManager {
         generalSidebar.setLine(4, new LiteralText("").setStyle(Style.EMPTY));
 
         generalSidebar.setLine(3, new LiteralText("PvP: " + getSentence(GameUtils.isPvPEnabled(day))).setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)));
-        generalSidebar.setLine(2, new LiteralText("Assault: " + getSentence(GameUtils.areAssaultEnabled(day))).setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
-        generalSidebar.setLine(1, new LiteralText("Nether: " + getSentence(GameUtils.isNetherEnabled(day))).setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
-        generalSidebar.setLine(0, new LiteralText("End: " + getSentence(GameUtils.isEndEnabled(day))).setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
+        generalSidebar.setLine(2, new LiteralText("Assault: " + getSentence(GameUtils.areAssaultEnabled(day))).setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)));
+        generalSidebar.setLine(1, new LiteralText("Nether: " + getSentence(GameUtils.isNetherEnabled(day))).setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)));
+        generalSidebar.setLine(0, new LiteralText("End: " + getSentence(GameUtils.isEndEnabled(day))).setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)));
     }
 
     private String getSentence(boolean bool){

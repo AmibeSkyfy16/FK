@@ -1,14 +1,15 @@
 package ch.skyfy.fk.logic.data;
 
 import ch.skyfy.fk.FKMod;
-import ch.skyfy.fk.json.Validable;
+import ch.skyfy.fk.json.Validatable;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class FKGameData implements Validable {
+public class FKGameData implements Validatable {
 
     @Getter
     @Setter
@@ -23,7 +24,9 @@ public class FKGameData implements Validable {
     }
 
     @Override
-    public List<String> validate() {
-        return Collections.emptyList();
+    public void validate() {
+        var errors = new ArrayList<String>();
+
+        confirmValidate(errors);
     }
 }

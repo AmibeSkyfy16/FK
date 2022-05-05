@@ -37,8 +37,6 @@ public class FKMod implements DedicatedServerModInitializer {
 
     public static final Path CONFIG_DIRECTORY = FabricLoader.getInstance().getConfigDir().resolve(MOD_ID);
 
-    public static boolean DISABLED = false;
-
     private boolean firstJoin = false;
 
     private final AtomicReference<Optional<FKGame>> optFKGameRef;
@@ -50,16 +48,10 @@ public class FKMod implements DedicatedServerModInitializer {
     public FKMod() throws Exception {
 
         // Create a config directory named with the MOD_ID under config folder of the server
-        if(!createConfigDirectory()){
-            DISABLED = true;
-            throw new Exception("CANNOT CREATE DIRECTORY");
-        }
+        createConfigDirectory();
 
         // Load Configs.class a class that contains all our configuration data class
-        if(!ReflectionUtils.loadConfigByReflection(new Class[]{Configs.class})){
-            DISABLED = true;
-            throw new Exception("GAME IS DISABLE DU TO ERROR WITH CONFIGS");
-        }
+        ReflectionUtils.loadConfigByReflection(new Class[]{Configs.class});
 
         optFKGameRef = new AtomicReference<>(Optional.empty());
 
@@ -70,7 +62,6 @@ public class FKMod implements DedicatedServerModInitializer {
 
     @Override
     public void onInitializeServer() {
-        if(DISABLED)return;
         PlayerJoinCallback.EVENT.register(this::onFirstPlayerJoin);
         registerCommands();
     }
@@ -87,7 +78,6 @@ public class FKMod implements DedicatedServerModInitializer {
                 FKGameAllData.FK_GAME_DATA.config.setGameState(GameState.PAUSED);
 
             fkGame.updateSidebar(player);
-
         }
     }
 
@@ -101,15 +91,14 @@ public class FKMod implements DedicatedServerModInitializer {
         });
     }
 
-    private static boolean createConfigDirectory() {
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    private static void createConfigDirectory() {
         try {
             var file = CONFIG_DIRECTORY.toFile();
-            if (!file.exists()) return file.mkdir();
+            if (!file.exists()) file.mkdir();
         } catch (UnsupportedOperationException | SecurityException e) {
-            e.printStackTrace();
-            return false;
+            throw new RuntimeException(e);
         }
-        return true;
     }
 
 }

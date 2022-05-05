@@ -3,7 +3,7 @@ package ch.skyfy.fk.config;
 import ch.skyfy.fk.config.data.Base;
 import ch.skyfy.fk.config.data.Cube;
 import ch.skyfy.fk.config.data.FKTeam;
-import ch.skyfy.fk.json.Validable;
+import ch.skyfy.fk.json.Validatable;
 import lombok.Getter;
 import net.minecraft.util.Formatting;
 
@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class TeamsConfig implements Validable {
+public class TeamsConfig implements Validatable {
 
     @Getter
     private final List<FKTeam> teams;
@@ -23,7 +23,10 @@ public class TeamsConfig implements Validable {
     }
 
     @Override
-    public List<String> validate() {
-        return Collections.emptyList();
+    public void validate() {
+        var errors = new ArrayList<String>();
+
+
+        confirmValidate(errors);
     }
 }

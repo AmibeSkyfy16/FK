@@ -12,7 +12,6 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.TntBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.MovementType;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
@@ -35,10 +34,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Field;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.StreamSupport;
 
 @SuppressWarnings("FieldCanBeLocal")
@@ -80,7 +76,7 @@ public class FKGame {
 
     public void resume() {
         // If the timeline wasn't started (in the case of a server restart with gamestate at PAUSE OR RUNNING)
-        if (!timeline.getIsStartedRef().get())
+        if (!timeline.getIsTimerStartedRef().get())
             timeline.startTimer();
     }
 

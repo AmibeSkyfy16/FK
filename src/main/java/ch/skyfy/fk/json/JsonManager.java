@@ -3,18 +3,15 @@ package ch.skyfy.fk.json;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonIOException;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 
 @SuppressWarnings({"UnstableApiUsage", "unused"})
-public class JsonManager<T extends Validable> {
+public class JsonManager<T extends Validatable> {
 
     private final Class<T> tClass;
 
@@ -35,13 +32,17 @@ public class JsonManager<T extends Validable> {
         this(tClass, new GsonBuilder().setPrettyPrinting().create(), file);
     }
 
-    public @NotNull T getOrCreateConfig() throws Exception {
+    public @NotNull T getOrCreateConfig() {
         T config;
-        if (file.exists())
-            config = get();
-        else {
-            config = tClass.getDeclaredConstructor().newInstance();
-            save(config);
+        try {
+            if (file.exists())
+                config = get();
+            else {
+                config = tClass.getDeclaredConstructor().newInstance();
+                save(config);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
         return config;
     }

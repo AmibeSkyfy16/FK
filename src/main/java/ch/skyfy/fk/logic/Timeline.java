@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Timeline {
 
-    private final AtomicBoolean isStartedRef = new AtomicBoolean(false);
+    private final AtomicBoolean isTimerStartedRef = new AtomicBoolean(false);
 
     public final TimelineData timelineData;
 
@@ -26,46 +26,38 @@ public class Timeline {
 
     public Timeline(MinecraftServer server) {
         this.server = server;
-
-        TimeOfDayUpdatedCallback.EVENT.register(timeOfDay -> {
-            if(GameUtils.isGameStateRUNNING()){
-                if(isStartedRef.get()){
-                    updateTime(timeOfDay);
-                }
-            }
-
-            return ActionResult.PASS;
-        });
+        TimeOfDayUpdatedCallback.EVENT.register(this::update);
     }
 
     public void startTimer() {
-        isStartedRef.set(true);
+        isTimerStartedRef.set(true);
     }
 
-    private void updateTime(long timeOfDay){
-
-        // TODO TICK PROBLEM -> second timer
+    private ActionResult update(long timeOfDay) {
+        if (!GameUtils.isGameStateRUNNING()) return ActionResult.PASS;
+        if(!isTimerStartedRef.get())return ActionResult.PASS;
 
         var previousMinutes = timelineData.getMinutes();
-
         var remainingTime = timeOfDay % 24_000;
 
         timelineData.setMinutes((int) (remainingTime / 1200d));
         timelineData.setSeconds((int) (((remainingTime / 1200d) - timelineData.getMinutes()) * 60));
 
-        if(remainingTime == 0)
+        if (remainingTime == 0)
             timelineData.setDay(timelineData.getDay() + 1);
 
         // TODO UNCOMMENT
-        if(previousMinutes != timelineData.getMinutes())
+        if (previousMinutes != timelineData.getMinutes())
             saveData();
 
         // Update player sidebar
         for (var fkPlayer : GameUtils.getAllConnectedFKPlayers(server.getPlayerManager().getPlayerList()))
             ScoreboardManager.getInstance().updateSidebar(fkPlayer, timelineData.getDay(), timelineData.getMinutes(), timelineData.getSeconds());
+
+        return ActionResult.PASS;
     }
 
-    private void saveData(){
+    private void saveData() {
         try {
             FKGameAllData.FK_GAME_DATA.jsonManager.save(FKGameAllData.FK_GAME_DATA.config);
         } catch (IOException e) {
@@ -74,7 +66,7 @@ public class Timeline {
         }
     }
 
-    public AtomicBoolean getIsStartedRef() {
-        return isStartedRef;
+    public AtomicBoolean getIsTimerStartedRef() {
+        return isTimerStartedRef;
     }
 }

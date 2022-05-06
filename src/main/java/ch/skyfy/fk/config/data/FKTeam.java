@@ -18,10 +18,10 @@ public class FKTeam {
     @Getter
     private final Base base;
 
-    public FKTeam(String name, String color, List<String> team, Base base) {
+    public FKTeam(String name, String color, List<String> players, Base base) {
         this.name = name;
         this.color = color;
-        this.players = team;
+        this.players = players;
         this.base = base;
     }
 }

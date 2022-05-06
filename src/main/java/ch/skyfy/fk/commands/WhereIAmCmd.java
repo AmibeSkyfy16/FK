@@ -12,7 +12,6 @@ import net.minecraft.util.Formatting;
 public class WhereIAmCmd implements Command<ServerCommandSource> {
     @Override
     public int run(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-
         var player = context.getSource().getPlayer();
 
         var whereIsThePlayer = (GameUtils.WhereIsThePlayer<Void>) (isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase) -> {

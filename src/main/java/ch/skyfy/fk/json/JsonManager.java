@@ -13,8 +13,6 @@ import java.io.IOException;
 @SuppressWarnings({"UnstableApiUsage", "unused"})
 public class JsonManager<T extends Validatable> {
 
-    private final Class<T> tClass;
-
     private final TypeToken<T> typeToken;
 
     private final Gson gson;
@@ -24,7 +22,6 @@ public class JsonManager<T extends Validatable> {
     private final T defaultConfig;
 
     public JsonManager(Class<T> tClass, Gson gson, File file, T defaultConfig) {
-        this.tClass = tClass;
         this.typeToken = TypeToken.of(tClass);
         this.gson = gson;
         this.file = file;

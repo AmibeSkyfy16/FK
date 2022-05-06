@@ -45,7 +45,7 @@ public class FKGame {
 
     private final MinecraftServer server;
 
-    public Timeline timeline;
+    private final Timeline timeline;
 
     private final PauseEvents pauseEvents;
 

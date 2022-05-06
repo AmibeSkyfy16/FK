@@ -3,6 +3,7 @@ package ch.skyfy.fk.logic;
 import ch.skyfy.fk.FKMod;
 import ch.skyfy.fk.config.Configs;
 import ch.skyfy.fk.config.data.FKTeam;
+import ch.skyfy.fk.constants.Where;
 import ch.skyfy.fk.logic.data.FKGameAllData;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
@@ -25,7 +26,7 @@ public class GameUtils {
 
     @FunctionalInterface
     public interface WhereIsThePlayer<T> {
-        T impl(boolean isPlayerInHisOwnBase, boolean isPlayerInAnEnemyBase, boolean isPlayerCloseToHisOwnBase, boolean isPlayerCloseToAnEnemyBase);
+        T impl(Where where);
 
     }
 
@@ -99,8 +100,9 @@ public class GameUtils {
         }
     }
 
-    @SuppressWarnings("RedundantIfStatement")
     public static <T> T whereIsThePlayer(PlayerEntity player, Vec3d blockPos, WhereIsThePlayer<T> whereIsThePlayer) {
+
+        Where where = null;
 
         var isPlayerInHisOwnBase = false;
 
@@ -112,51 +114,38 @@ public class GameUtils {
         // Is the player close to an enemy base, but not inside
         var isPlayerCloseToAnEnemyBase = false;
 
-        for (FKTeam team : TEAMS.config.getTeams()) {
-            var baseSquare = team.getBase().getCube();
+        for (var team : TEAMS.config.getTeams()) {
+            var baseCube = team.getBase().getCube();
 
             // Is this base the base of the player who break the block ?
             var isBaseOfPlayer = team.getPlayers().stream().anyMatch(fkPlayerName -> player.getName().asString().equals(fkPlayerName));
 
-            var isPlayerCloseToABase = false;
-
-//            var proximitySquare = new Cube((short) (baseSquare.getSize() + 20), baseSquare.getNumberOfBlocksDown() + 10, baseSquare.getNumberOfBlocksUp() + 10, baseSquare.getX(), baseSquare.getY(), baseSquare.getZ());
-            if (Utils.isPlayerInsideCube(team.getBase().getProximityCube(), blockPos)) {
-                isPlayerCloseToABase = true;
-            }
-
             // If player is inside a base
-            if (Utils.isPlayerInsideCube(baseSquare, blockPos)) {
+            if (Utils.isPlayerInsideCube(baseCube, blockPos)) {
 
                 // And this base is not his own
-                if (!isBaseOfPlayer) {
-                    isPlayerInAnEnemyBase = true;
-                } else {
-                    isPlayerInHisOwnBase = true;
-                }
+                if (!isBaseOfPlayer)
+                    where = Where.INSIDE_AN_ENEMY_BASE;
+                 else
+                    where = Where.INSIDE_HIS_OWN_BASE;
 
             } else {
+                var isPlayerCloseToABase = false;
 
-                // If the player is close to a base, but not inside
-                if (isPlayerCloseToABase) {
-                    if (!isPlayerInHisOwnBase) {
-                        if (isBaseOfPlayer) isPlayerCloseToHisOwnBase = true;
-                        else isPlayerCloseToAnEnemyBase = true;
-                    } else if (!isPlayerInAnEnemyBase) {
-                        if (!isBaseOfPlayer) isPlayerCloseToAnEnemyBase = true;
-                        else isPlayerCloseToHisOwnBase = true;
-                    }
+                if (Utils.isPlayerInsideCube(team.getBase().getProximityCube(), blockPos)) {
+                    if (isBaseOfPlayer) where = Where.CLOSE_TO_HIS_OWN_BASE;
+                    else where = Where.CLOSE_TO_AN_ENEMY_BASE;
                 }
-
             }
 
+            if(where == null) where = Where.IN_THE_WILD;
         }
 
-        return whereIsThePlayer.impl(isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase);
+        return whereIsThePlayer.impl(where);
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    public static boolean isGameStateRUNNING() {
+    public static boolean isGameState_RUNNING() {
         return FKGameAllData.FK_GAME_DATA.config.getGameState() == FKMod.GameState.RUNNING;
     }
 
@@ -165,7 +154,7 @@ public class GameUtils {
         return FKGameAllData.FK_GAME_DATA.config.getGameState() == FKMod.GameState.PAUSED;
     }
 
-    public static boolean isGameStateNOT_STARTED() {
+    public static boolean isGameState_NOT_STARTED() {
         return FKGameAllData.FK_GAME_DATA.config.getGameState() == FKMod.GameState.NOT_STARTED;
     }
 

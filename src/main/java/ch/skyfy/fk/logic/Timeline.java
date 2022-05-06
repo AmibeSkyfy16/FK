@@ -36,7 +36,7 @@ public class Timeline {
     }
 
     private void updateTimeTest(MinecraftServer server) {
-        if (!GameUtils.isGameStateRUNNING() || !isTimerStartedRef.get()) return;
+        if (!GameUtils.isGameState_RUNNING() || !isTimerStartedRef.get()) return;
 
         if (timeOfDay.get() >= 24000) {
             timeOfDay.set(0);

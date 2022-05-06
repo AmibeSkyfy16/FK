@@ -4,6 +4,7 @@ import ch.skyfy.fk.FKMod;
 import ch.skyfy.fk.ScoreboardManager;
 import ch.skyfy.fk.config.Configs;
 import ch.skyfy.fk.events.*;
+import ch.skyfy.fk.features.ChestRoomFeature;
 import ch.skyfy.fk.logic.data.FKGameAllData;
 import lombok.Getter;
 import me.bymartrixx.playerevents.api.event.PlayerJoinCallback;
@@ -35,11 +36,12 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 import org.jetbrains.annotations.Nullable;
 
-@SuppressWarnings("FieldCanBeLocal")
+@SuppressWarnings({"FieldCanBeLocal", "unused"})
 public class FKGame {
 
     private final MinecraftServer server;
@@ -51,11 +53,15 @@ public class FKGame {
 
     private final FKGameEvents fkGameEvents;
 
+    private final ChestRoomFeature chestRoomFeature;
+
     public FKGame(MinecraftServer server, ServerPlayerEntity firstPlayerToJoin) {
         this.server = server;
         this.timeline = new Timeline();
         pauseEvents = new PauseEvents();
         fkGameEvents = new FKGameEvents();
+
+        chestRoomFeature = new ChestRoomFeature();
 
         initialize(firstPlayerToJoin);
 
@@ -64,7 +70,7 @@ public class FKGame {
     }
 
     private void initialize(ServerPlayerEntity firstPlayerToJoin) {
-        if (GameUtils.isGameStateRUNNING())
+        if (GameUtils.isGameState_RUNNING())
             FKGameAllData.FK_GAME_DATA.config.setGameState(FKMod.GameState.PAUSED);
         update(firstPlayerToJoin);
         teleportPlayerToWaitingRoom(firstPlayerToJoin);
@@ -141,7 +147,7 @@ public class FKGame {
     }
 
     private void teleportPlayerToWaitingRoom(ServerPlayerEntity player) {
-        if (GameUtils.isGameStateNOT_STARTED()) {
+        if (GameUtils.isGameState_NOT_STARTED()) {
             var spawnLoc = Configs.FK_CONFIG.config.getWaitingRoom().getSpawnLocation();
             GameUtils.getServerWorldByIdentifier(server, spawnLoc.getDimensionName()).ifPresent(serverWorld -> player.teleport(serverWorld, spawnLoc.getX(), spawnLoc.getY(), spawnLoc.getZ(), spawnLoc.getYaw(), spawnLoc.getPitch()));
         }
@@ -185,86 +191,57 @@ public class FKGame {
      */
     public class FKGameEvents {
 
-        @SuppressWarnings({"RedundantIfStatement"})
         private boolean cancelPlayerFromBreakingBlocks(World world, PlayerEntity player, BlockPos pos, BlockState state, /* Nullable */ BlockEntity blockEntity) {
             if (player.hasPermissionLevel(4)) return true;
 
-            if (!GameUtils.isGameStateRUNNING()) return false;
+            if (!GameUtils.isGameState_RUNNING()) return false;
 
-            var breakPlace = (GameUtils.WhereIsThePlayer<Boolean>) (isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase) -> {
+            var breakPlace = (GameUtils.WhereIsThePlayer<Boolean>) (where) -> {
                 var block = world.getBlockState(pos).getBlock();
-
-                // If the player is inside an enemy base
-                if (isPlayerInAnEnemyBase) {
-                    if (block != Blocks.TNT) { // We cancel the block that had to be broken except if it is TNT
-                        return false;
-                    }
-                    return true;
-                }
-
-                if (isPlayerInHisOwnBase) {
-                    return true;
-                }
-
-                if (isPlayerCloseToHisOwnBase) {
-                    return true;
-                }
-
-                // In the rules of this FK, players can break blocks outside their base. Except near an enemy base
-                if (isPlayerCloseToAnEnemyBase) {
-                    if (block != Blocks.TNT) { // We cancel the block that had to be broken except if it is TNT
-                        return false;
-                    }
-                    return true;
-                }
-
-                // Player is in the wild
-
-                return true;
+                return switch (where) {
+                    case INSIDE_HIS_OWN_BASE -> true;
+                    case CLOSE_TO_HIS_OWN_BASE -> true;
+                    case INSIDE_AN_ENEMY_BASE ->
+                            block != Blocks.TNT || block != Blocks.REDSTONE_TORCH || block != Blocks.LEVER;
+                    case CLOSE_TO_AN_ENEMY_BASE ->
+                            block != Blocks.TNT || block != Blocks.REDSTONE_TORCH || block != Blocks.LEVER;
+                    case IN_THE_WILD -> true;
+                };
             };
-
             return GameUtils.whereIsThePlayer(player, new Vec3d(pos.getX(), pos.getY(), pos.getZ()), breakPlace);
-
         }
 
         private ActionResult cancelPlayerFromPlacingBlocks(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
             if (player.hasPermissionLevel(4)) return ActionResult.PASS;
 
-            if (!GameUtils.isGameStateRUNNING()) return ActionResult.FAIL;
+            if (!GameUtils.isGameState_RUNNING()) return ActionResult.FAIL;
 
-            var placeBlock = (GameUtils.WhereIsThePlayer<ActionResult>) (isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase) -> {
+            var placeBlock = (GameUtils.WhereIsThePlayer<ActionResult>) (where) -> {
 
                 var placedItemStack = player.getStackInHand(player.getActiveHand());
 
-                // If the player is inside an enemy base
-                if (isPlayerInAnEnemyBase) {
-                    if (!placedItemStack.isOf(Items.TNT))
-                        return ActionResult.FAIL;
-                    if (!GameUtils.areAssaultEnabled(timeline.getTimelineData().getDay()))
-                        return ActionResult.FAIL;
+                if (!Registry.BLOCK.containsId(Registry.ITEM.getId(placedItemStack.getItem()))) // It's not a block
                     return ActionResult.PASS;
-                }
 
-                if (isPlayerInHisOwnBase) {
-                    return ActionResult.PASS;
-                }
-
-                if (isPlayerCloseToHisOwnBase) {
-                    return ActionResult.FAIL;
-                }
-
-                // A player can place blocks outside his base, except if it is near another base (except TNT)
-                if (isPlayerCloseToAnEnemyBase) {
-                    if (!placedItemStack.isOf(Items.TNT))
-                        return ActionResult.FAIL;
-                    if (!GameUtils.areAssaultEnabled(timeline.getTimelineData().getDay()))
-                        return ActionResult.FAIL;
-                    return ActionResult.PASS;
-                }
-
-                // Player is in the wild
-
-                return ActionResult.PASS;
+                return switch (where) {
+                    case INSIDE_HIS_OWN_BASE -> ActionResult.PASS;
+                    case CLOSE_TO_HIS_OWN_BASE -> ActionResult.FAIL;
+                    case INSIDE_AN_ENEMY_BASE -> {
+                        if (!placedItemStack.isOf(Items.TNT))
+                            yield ActionResult.FAIL;
+                        if (!GameUtils.areAssaultEnabled(timeline.getTimelineData().getDay()))
+                            yield ActionResult.FAIL;
+                        yield ActionResult.PASS;
+                    }
+                    case CLOSE_TO_AN_ENEMY_BASE -> {
+                        if (!placedItemStack.isOf(Items.TNT))
+                            yield ActionResult.FAIL;
+                        if (!GameUtils.areAssaultEnabled(timeline.getTimelineData().getDay()))
+                            yield ActionResult.FAIL;
+                        yield ActionResult.PASS;
+                    }
+                    case IN_THE_WILD -> ActionResult.PASS;
+                };
             };
 
             var blockPos = hitResult.getBlockPos();
@@ -274,40 +251,27 @@ public class FKGame {
         private TypedActionResult<ItemStack> cancelPlayerFromFillingABucket(World world, PlayerEntity player, Hand hand, Fluid fillFluid, BucketItem bucketItem, BlockHitResult blockHitResult) {
             if (player.hasPermissionLevel(4)) return TypedActionResult.pass(player.getStackInHand(hand));
 
-            if (!GameUtils.isGameStateRUNNING()) return TypedActionResult.fail(player.getStackInHand(hand));
+            if (!GameUtils.isGameState_RUNNING()) return TypedActionResult.fail(player.getStackInHand(hand));
 
-            var fillBucketImpl = (GameUtils.WhereIsThePlayer<TypedActionResult<ItemStack>>) (isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase) -> {
+            var fillBucketImpl = (GameUtils.WhereIsThePlayer<TypedActionResult<ItemStack>>) (where) -> {
 
                 var placedItemStack = player.getStackInHand(player.getActiveHand());
 
-                // If the player is inside an enemy base
-                if (isPlayerInAnEnemyBase) {
-                    // Player cannot fill a bucket with water or lava inside an enemy base
-                    if (fillFluid instanceof LavaFluid || fillFluid instanceof WaterFluid) {
-                        return TypedActionResult.fail(placedItemStack);
+                return switch (where) {
+                    case INSIDE_HIS_OWN_BASE -> TypedActionResult.pass(placedItemStack);
+                    case CLOSE_TO_HIS_OWN_BASE -> TypedActionResult.pass(placedItemStack);
+                    case INSIDE_AN_ENEMY_BASE -> {
+                        if (fillFluid instanceof LavaFluid || fillFluid instanceof WaterFluid)
+                            yield TypedActionResult.fail(placedItemStack);
+                        yield TypedActionResult.pass(placedItemStack);
                     }
-                    return TypedActionResult.pass(placedItemStack);
-                }
-
-                if (isPlayerInHisOwnBase) {
-                    return TypedActionResult.pass(placedItemStack);
-                }
-
-                if (isPlayerCloseToHisOwnBase) {
-                    return TypedActionResult.pass(placedItemStack);
-                }
-
-                // A player can fill bucket outside his base, except if it is near another base
-                if (isPlayerCloseToAnEnemyBase) {
-                    if (fillFluid instanceof LavaFluid || fillFluid instanceof WaterFluid) {
-                        return TypedActionResult.fail(placedItemStack);
+                    case CLOSE_TO_AN_ENEMY_BASE -> {
+                        if (fillFluid instanceof LavaFluid || fillFluid instanceof WaterFluid)
+                            yield TypedActionResult.fail(placedItemStack);
+                        yield TypedActionResult.pass(placedItemStack);
                     }
-                    return TypedActionResult.pass(placedItemStack);
-                }
-
-                // Player is in the wild
-
-                return TypedActionResult.pass(placedItemStack);
+                    case IN_THE_WILD -> TypedActionResult.pass(placedItemStack);
+                };
             };
 
             var blockPos = blockHitResult.getBlockPos();
@@ -317,40 +281,27 @@ public class FKGame {
         private TypedActionResult<ItemStack> cancelPlayerFromEmptyingABucket(World world, PlayerEntity player, Hand hand, Fluid emptyFluid, BucketItem bucketItem, BlockHitResult blockHitResult) {
             if (player.hasPermissionLevel(4)) return TypedActionResult.pass(player.getStackInHand(hand));
 
-            if (!GameUtils.isGameStateRUNNING()) return TypedActionResult.fail(player.getStackInHand(hand));
+            if (!GameUtils.isGameState_RUNNING()) return TypedActionResult.fail(player.getStackInHand(hand));
 
-            var emptyBucketImpl = (GameUtils.WhereIsThePlayer<TypedActionResult<ItemStack>>) (isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase) -> {
+            var emptyBucketImpl = (GameUtils.WhereIsThePlayer<TypedActionResult<ItemStack>>) (where) -> {
 
                 var placedItemStack = player.getStackInHand(player.getActiveHand());
 
-                // If the player is inside an enemy base
-                if (isPlayerInAnEnemyBase) {
-                    // Player cannot empty a bucket with water or lava inside an enemy base
-                    if (emptyFluid instanceof LavaFluid || emptyFluid instanceof WaterFluid) {
-                        return TypedActionResult.fail(placedItemStack);
+                return switch (where) {
+                    case INSIDE_HIS_OWN_BASE -> TypedActionResult.pass(placedItemStack);
+                    case CLOSE_TO_HIS_OWN_BASE -> TypedActionResult.fail(placedItemStack);
+                    case INSIDE_AN_ENEMY_BASE -> {
+                        if (emptyFluid instanceof LavaFluid || emptyFluid instanceof WaterFluid)
+                            yield TypedActionResult.fail(placedItemStack);
+                        yield TypedActionResult.pass(placedItemStack);
                     }
-                    return TypedActionResult.pass(placedItemStack);
-                }
-
-                if (isPlayerInHisOwnBase) {
-                    return TypedActionResult.pass(placedItemStack);
-                }
-
-                if (isPlayerCloseToHisOwnBase) {
-                    return TypedActionResult.fail(placedItemStack);
-                }
-
-                // A player can empty bucket outside his base, except if it is near another base
-                if (isPlayerCloseToAnEnemyBase) {
-                    if (emptyFluid instanceof LavaFluid || emptyFluid instanceof WaterFluid) {
-                        return TypedActionResult.fail(placedItemStack);
+                    case CLOSE_TO_AN_ENEMY_BASE -> {
+                        if (emptyFluid instanceof LavaFluid || emptyFluid instanceof WaterFluid)
+                            yield TypedActionResult.fail(placedItemStack);
+                        yield TypedActionResult.pass(placedItemStack);
                     }
-                    return TypedActionResult.pass(placedItemStack);
-                }
-
-                // Player is in the wild
-
-                return TypedActionResult.pass(placedItemStack);
+                    case IN_THE_WILD -> TypedActionResult.pass(placedItemStack);
+                };
             };
 
             var blockPos = blockHitResult.getBlockPos();
@@ -360,51 +311,32 @@ public class FKGame {
         private ActionResult cancelPlayerFromFiringATNT(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
             if (player.hasPermissionLevel(4)) return ActionResult.PASS;
 
-            if (!GameUtils.isGameStateRUNNING()) return ActionResult.FAIL;
+            if (!GameUtils.isGameState_RUNNING()) return ActionResult.FAIL;
 
-            var emptyBucketImpl = (GameUtils.WhereIsThePlayer<ActionResult>) (isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase) -> {
+            var emptyBucketImpl = (GameUtils.WhereIsThePlayer<ActionResult>) (where) -> {
 
                 var stackInHand = player.getStackInHand(hand);
 
-                var didPlayerTryToFireATNT = false;
-
                 if (stackInHand.isOf(Items.FLINT_AND_STEEL)) {
                     var block = world.getBlockState(hitResult.getBlockPos()).getBlock();
-                    if (block instanceof TntBlock)
-                        didPlayerTryToFireATNT = true;
+                    if (!(block instanceof TntBlock)) return ActionResult.PASS;
                 }
 
-                // If the player is inside an enemy base
-                if (isPlayerInAnEnemyBase) {
-                    if (didPlayerTryToFireATNT) {
-                        if (!GameUtils.areAssaultEnabled(timeline.getTimelineData().getDay())) {
-                            return ActionResult.FAIL;
-                        }
+                return switch (where) {
+                    case INSIDE_HIS_OWN_BASE -> ActionResult.PASS;
+                    case CLOSE_TO_HIS_OWN_BASE -> ActionResult.PASS;
+                    case INSIDE_AN_ENEMY_BASE -> {
+                        if (!GameUtils.areAssaultEnabled(timeline.getTimelineData().getDay()))
+                            yield ActionResult.FAIL;
+                        yield ActionResult.PASS;
                     }
-                    return ActionResult.PASS;
-                }
-
-                if (isPlayerInHisOwnBase) {
-                    return ActionResult.PASS;
-                }
-
-                if (isPlayerCloseToHisOwnBase) {
-                    return ActionResult.PASS;
-                }
-
-                // A player can empty bucket outside his base, except if it is near another base
-                if (isPlayerCloseToAnEnemyBase) {
-                    if (didPlayerTryToFireATNT) {
-                        if (!GameUtils.areAssaultEnabled(timeline.getTimelineData().getDay())) {
-                            return ActionResult.FAIL;
-                        }
+                    case CLOSE_TO_AN_ENEMY_BASE -> {
+                        if (!GameUtils.areAssaultEnabled(timeline.getTimelineData().getDay()))
+                            yield ActionResult.FAIL;
+                        yield ActionResult.PASS;
                     }
-                    return ActionResult.PASS;
-                }
-
-                // Player is in the wild
-
-                return ActionResult.PASS;
+                    case IN_THE_WILD -> ActionResult.PASS;
+                };
             };
 
             var blockPos = hitResult.getBlockPos();
@@ -414,7 +346,7 @@ public class FKGame {
         private ActionResult cancelPlayerPvP(PlayerEntity player, World world, Hand hand, Entity entity, @Nullable EntityHitResult hitResult) {
             if (player.hasPermissionLevel(4)) return ActionResult.PASS;
 
-            if (!GameUtils.isGameStateRUNNING()) return ActionResult.FAIL;
+            if (!GameUtils.isGameState_RUNNING()) return ActionResult.FAIL;
 
             if (entity instanceof PlayerEntity)
                 if (!GameUtils.isPvPEnabled(timeline.getTimelineData().getDay()))
@@ -425,7 +357,7 @@ public class FKGame {
         private ActionResult cancelPlayerFromEnteringInPortal(ServerPlayerEntity player, Identifier dimensionId) {
             if (player.hasPermissionLevel(4)) return ActionResult.PASS;
 
-            if (!GameUtils.isGameStateRUNNING()) return ActionResult.FAIL;
+            if (!GameUtils.isGameState_RUNNING()) return ActionResult.FAIL;
 
             if (dimensionId == DimensionType.THE_NETHER_ID) {
                 if (!GameUtils.isNetherEnabled(timeline.getTimelineData().getDay()))
@@ -441,7 +373,7 @@ public class FKGame {
         private ActionResult onPlayerMove(PlayerMoveCallback.MoveData moveData, ServerPlayerEntity player) {
             if (player.hasPermissionLevel(4)) return ActionResult.PASS; // OP Player can move anymore
 
-            if (GameUtils.isGameStateNOT_STARTED()) {
+            if (GameUtils.isGameState_NOT_STARTED()) {
                 var waitingRoom = Configs.FK_CONFIG.config.getWaitingRoom();
                 if (Utils.cancelPlayerFromLeavingAnArea(waitingRoom.getCube(), player, waitingRoom.getSpawnLocation()))
                     return ActionResult.FAIL;
@@ -464,7 +396,7 @@ public class FKGame {
         private ActionResult onPlayerDamage(ServerPlayerEntity player, DamageSource source, float amount) {
             if (player.hasPermissionLevel(4)) return ActionResult.PASS;
 
-            if (GameUtils.isGameState_PAUSED() || GameUtils.isGameStateNOT_STARTED())
+            if (GameUtils.isGameState_PAUSED() || GameUtils.isGameState_NOT_STARTED())
                 return ActionResult.FAIL;
             return ActionResult.PASS;
         }
@@ -472,7 +404,7 @@ public class FKGame {
         private ActionResult onPlayerHungerUpdate(PlayerEntity player) {
             if (player.hasPermissionLevel(4)) return ActionResult.PASS;
 
-            if (GameUtils.isGameStateNOT_STARTED() || GameUtils.isGameState_PAUSED()) {
+            if (GameUtils.isGameState_NOT_STARTED() || GameUtils.isGameState_PAUSED()) {
                 return ActionResult.FAIL;
             }
             return ActionResult.PASS;

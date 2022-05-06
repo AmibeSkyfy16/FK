@@ -14,29 +14,34 @@ public class WhereIAmCmd implements Command<ServerCommandSource> {
     public int run(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         var player = context.getSource().getPlayer();
 
-        var whereIsThePlayer = (GameUtils.WhereIsThePlayer<Void>) (isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase) -> {
+        var whereIsThePlayer = (GameUtils.WhereIsThePlayer<Void>) (where) -> {
 
-            if (isPlayerInHisOwnBase) {
-                player.sendMessage(new LiteralText("You are in your own base").setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)), false);
-                return null;
+            switch (where) {
+                case INSIDE_HIS_OWN_BASE -> {
+                    player.sendMessage(new LiteralText("You are in your own base").setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)), false);
+                    return null;
+                }
+                case CLOSE_TO_HIS_OWN_BASE -> {
+                    player.sendMessage(new LiteralText("You are in the proximity area of your own base").setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)), false);
+                    return null;
+                }
+                case INSIDE_AN_ENEMY_BASE -> {
+                    player.sendMessage(new LiteralText("You are in an enemy base").setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)), false);
+                    return null;
+                }
+                case CLOSE_TO_AN_ENEMY_BASE -> {
+                    player.sendMessage(new LiteralText("You are in the proximity area of an enemy base").setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)), false);
+                    return null;
+                }
+                case IN_THE_WILD -> {
+                    player.sendMessage(new LiteralText("You are in the wild").setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)), false);
+                    return null;
+                }
+                default -> {
+                    player.sendMessage(new LiteralText("Hummm this is strange").setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)), false);
+                    return null;
+                }
             }
-            if (isPlayerCloseToHisOwnBase) {
-                player.sendMessage(new LiteralText("You are in the proximity area of your own base").setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)), false);
-                return null;
-            }
-
-            if (isPlayerInAnEnemyBase) {
-                player.sendMessage(new LiteralText("You are in an enemy base").setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)), false);
-                return null;
-            }
-            if (isPlayerCloseToAnEnemyBase) {
-                player.sendMessage(new LiteralText("You are in the proximity area of an enemy base").setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)), false);
-                return null;
-            }
-
-            player.sendMessage(new LiteralText("You are in the wild").setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)), false);
-
-            return null;
         };
 
         GameUtils.whereIsThePlayer(player, player.getPos(), whereIsThePlayer);

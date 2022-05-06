@@ -20,7 +20,7 @@ import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 @SuppressWarnings("ClassCanBeRecord")
 public class SetFKTime implements Command<ServerCommandSource> {
 
-    public void register(CommandDispatcher<ServerCommandSource> dispatcher, boolean dedicated) {
+    public void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(CommandManager.literal("setFKTime")
                 .then(
                         CommandManager.argument("timeOfDay", IntegerArgumentType.integer(0, 24000))

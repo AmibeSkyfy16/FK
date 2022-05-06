@@ -1,4 +1,4 @@
-package ch.skyfy.fk.exception;
+package ch.skyfy.fk.exceptions;
 
 @SuppressWarnings("unused")
 public class FKModException extends RuntimeException{

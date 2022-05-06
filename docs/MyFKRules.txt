@@ -143,6 +143,10 @@ Les règles du FK
     REGLES CONCERNANT LA SALLE DES COFFRES
         1. La salle des coffres doit être accessible sans casser de blocs
         2. La salle des coffres soit se situer maximum 30 blocs en dessous de la surface de la base
+        3. Règle des dimensions de la salle des coffres
+            3.1 Sa largeur doit être de minimum 5 blocs
+            3.2 Sa longueur doit être de minimum 5 blocs
+            3.3 Sa hauteur doit être de minimum 2 blocs
 
     REGLES DE VICTOIRE
         Vous êtes déclaré victorieux si et seulement si les conditions suivantes sont remplis :

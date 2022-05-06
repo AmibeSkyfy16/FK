@@ -75,7 +75,7 @@ public class FKMod implements DedicatedServerModInitializer {
 
     public void registerCommands() {
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
-            setFKTime.register(dispatcher, dedicated);
+            setFKTime.register(dispatcher);
             dispatcher.register(net.minecraft.server.command.CommandManager.literal("FKStart").executes(startCmd));
             dispatcher.register(net.minecraft.server.command.CommandManager.literal("FKPause").executes(pauseCmd));
             dispatcher.register(net.minecraft.server.command.CommandManager.literal("FKResume").executes(resumeCmd));

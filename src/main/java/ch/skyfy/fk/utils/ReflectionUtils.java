@@ -1,7 +1,7 @@
 package ch.skyfy.fk.utils;
 
 import ch.skyfy.fk.FKMod;
-import ch.skyfy.fk.exception.FKModException;
+import ch.skyfy.fk.exceptions.FKModException;
 
 public class ReflectionUtils {
 

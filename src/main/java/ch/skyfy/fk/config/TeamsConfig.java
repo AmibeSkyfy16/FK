@@ -8,6 +8,7 @@ import de.saibotk.jmaw.ApiResponseException;
 import de.saibotk.jmaw.MojangAPI;
 import lombok.Getter;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,6 +64,7 @@ public class TeamsConfig implements Validatable {
             ValidateUtils.checkForNegativeValueInCubeClass(base.getProximityCube(), errors);
         });
 
+
         /*
          * A base with coordinates close to another one could break the game.
          *
@@ -74,6 +76,12 @@ public class TeamsConfig implements Validatable {
          */
         for (var team : teams) {
             var base1 = team.getBase();
+
+            // Check is the dimensionName field is correct
+            if (!Identifier.isValid(base1.getSpawnLocation().getDimensionName())) {
+                errors.add("dimensionName " + base1.getSpawnLocation().getDimensionName() + " is not a valid dimension name");
+            }
+
             for (var fkTeam : teams) {
                 var base2 = fkTeam.getBase();
                 if (base2 == base1) continue;
@@ -101,7 +109,7 @@ public class TeamsConfig implements Validatable {
             }
         }
 
-//         Check if the base is inside the world border
+        // Check if the base is inside the world border
         var worldBorderCube = Configs.WORLD_CONFIG.config.getWorldBorderData().getCube();
         for (var team : teams)
             if (!MathUtils.isInside(worldBorderCube, team.getBase().getProximityCube()))

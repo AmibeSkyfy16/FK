@@ -21,15 +21,23 @@ public class FKConfig implements Validatable {
     @Getter
     private final int dayOfAuthorizationOfThePvP;
     @Getter
+    private final boolean shouldTeleportPlayersToTheirOwnBaseWhenGameIsStarted;
+    @Getter
     private final WaitingRoom waitingRoom;
     @Getter
     private final SpawnLocation worldSpawn;
 
-    public FKConfig(int dayOfAuthorizationOfTheAssaults, int dayOfAuthorizationOfTheEntryInTheNether, int dayOfAuthorizationOfTheEntryInTheEnd, int dayOfAuthorizationOfThePvP, WaitingRoom waitingRoom, SpawnLocation worldSpawn) {
+    public FKConfig(int dayOfAuthorizationOfTheAssaults,
+                    int dayOfAuthorizationOfTheEntryInTheNether,
+                    int dayOfAuthorizationOfTheEntryInTheEnd,
+                    int dayOfAuthorizationOfThePvP,
+                    boolean shouldTeleportPlayersToTheirOwnBaseWhenGameIsStarted, WaitingRoom waitingRoom, SpawnLocation worldSpawn) {
+
         this.dayOfAuthorizationOfTheAssaults = dayOfAuthorizationOfTheAssaults;
         this.dayOfAuthorizationOfTheEntryInTheNether = dayOfAuthorizationOfTheEntryInTheNether;
         this.dayOfAuthorizationOfTheEntryInTheEnd = dayOfAuthorizationOfTheEntryInTheEnd;
         this.dayOfAuthorizationOfThePvP = dayOfAuthorizationOfThePvP;
+        this.shouldTeleportPlayersToTheirOwnBaseWhenGameIsStarted = shouldTeleportPlayersToTheirOwnBaseWhenGameIsStarted;
         this.waitingRoom = waitingRoom;
         this.worldSpawn = worldSpawn;
     }

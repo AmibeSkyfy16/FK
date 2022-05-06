@@ -4,6 +4,7 @@ import lombok.Getter;
 
 import java.util.List;
 
+@SuppressWarnings("ClassCanBeRecord")
 public class FKTeam {
 
     @Getter

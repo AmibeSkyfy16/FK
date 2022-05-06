@@ -11,6 +11,7 @@ import java.util.List;
 /**
  * This is the default config, just a template
  */
+@SuppressWarnings("unused")
 public class DefaultConfigs {
 
     public static final FKConfig DEFAULT_FKCONFIG = new FKConfig(
@@ -18,6 +19,7 @@ public class DefaultConfigs {
             3,
             3,
             2,
+            false,
             new WaitingRoom(
                     new Cube((short) 20, 50, 80, 0, 63, 0),
                     new SpawnLocation("minecraft:overworld", 1000, 70, 1000, 8, 8)
@@ -29,13 +31,15 @@ public class DefaultConfigs {
             new FKTeam("The_Green_Team", Formatting.GREEN.name(), List.of("Alex"),
                     new Base("The_Green_Base",
                             new Cube((short) 15, 40, 500, 20, -34, 20),
-                            new Cube((short) 55, 5, 5, 20, -34, 20)
+                            new Cube((short) 55, 5, 5, 20, -34, 20),
+                            new SpawnLocation("minecraft:overworld",20, -31, 20, 8f, 8f)
                     )
             ),
             new FKTeam("The_Red_Team", Formatting.RED.name(), List.of("Steve"),
                     new Base("The_Red_Base",
                             new Cube((short) 15, 40, 500, -20, -34, -20),
-                            new Cube((short) 55, 5, 5, -20, -34, -20)
+                            new Cube((short) 55, 5, 5, -20, -34, -20),
+                            new SpawnLocation("minecraft:overworld",-20, -31, -20, 8f, 8f)
                     )
             )
     ));

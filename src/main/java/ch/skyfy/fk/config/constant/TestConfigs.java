@@ -15,6 +15,7 @@ public class TestConfigs {
             3,
             3,
             2,
+            false,
             new WaitingRoom(
                     new Cube((short) 4, 50, 80, 0, 63, 0),
                     new SpawnLocation("minecraft:overworld", 0, -34, 0, 8, 8)
@@ -26,13 +27,15 @@ public class TestConfigs {
             new FKTeam("The_Green_Team", Formatting.GREEN.name(), List.of("Skyfy16"),
                     new Base("The_Green_Base",
                             new Cube((short) 9, 40, 500, 20, -34, 20),
-                            new Cube((short) 14, 5, 5, 20, -34, 20)
+                            new Cube((short) 14, 5, 5, 20, -34, 20),
+                            new SpawnLocation("minecraft:overworld",20, -31, 20, 8f, 8f)
                     )
             ),
             new FKTeam("The_Red_Team", Formatting.RED.name(), List.of("AmibeSkyfy16"),
                     new Base("The_Red_Base",
                             new Cube((short) 9, 40, 500, -20, -34, -20),
-                            new Cube((short) 14, 5, 5, -20, -34, -20)
+                            new Cube((short) 14, 5, 5, -20, -34, -20),
+                            new SpawnLocation("minecraft:overworld",-20, -31, -20, 8f, 8f)
                     )
             )
     ));

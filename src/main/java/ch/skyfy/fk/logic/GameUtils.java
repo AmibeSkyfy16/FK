@@ -5,7 +5,9 @@ import ch.skyfy.fk.config.Configs;
 import ch.skyfy.fk.config.data.FKTeam;
 import ch.skyfy.fk.logic.data.FKGameAllData;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -13,6 +15,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.StreamSupport;
 
 import static ch.skyfy.fk.config.Configs.TEAMS;
 
@@ -45,7 +49,8 @@ public class GameUtils {
      * @return True if the player is part of the game. False otherwise
      */
     public static boolean isFKPlayer(String playerName) {
-        return TEAMS.config.getTeams().stream().map(FKTeam::getName).anyMatch(fkPlayerName -> fkPlayerName.equals(playerName));
+//        return TEAMS.config.getTeams().stream().map(FKTeam::getName).anyMatch(fkPlayerName -> fkPlayerName.equals(playerName));
+        return TEAMS.config.getTeams().stream().flatMap(fkTeam -> fkTeam.getPlayers().stream()).anyMatch(fkPlayerName -> fkPlayerName.equals(playerName));
     }
 
     /**
@@ -65,6 +70,12 @@ public class GameUtils {
             if (fkTeam.getPlayers().stream().anyMatch(name::equals))
                 return new BlockPos(fkTeam.getBase().getCube().getX(), fkTeam.getBase().getCube().getY(), fkTeam.getBase().getCube().getZ());
         return null;
+    }
+
+    public static Optional<ServerWorld> getServerWorldByIdentifier(MinecraftServer server, String id){
+        return StreamSupport.stream(server.getWorlds().spliterator(), false)
+                .filter(serverWorld -> serverWorld.getDimension().getEffects().toString().equals(id))
+                .findFirst();
     }
 
     @Nullable

@@ -14,10 +14,14 @@ public class Base {
     @Getter
     private final Cube proximityCube;
 
-    public Base(String name, Cube cube, Cube proximityCube) {
+    @Getter
+    private final SpawnLocation spawnLocation;
+
+    public Base(String name, Cube cube, Cube proximityCube, SpawnLocation spawnLocation) {
         this.name = name;
         this.cube = cube;
         this.proximityCube = proximityCube;
+        this.spawnLocation = spawnLocation;
     }
 
 }

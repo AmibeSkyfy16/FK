@@ -1,7 +1,9 @@
 package ch.skyfy.fk.config;
 
+import ch.skyfy.fk.config.data.Cube;
 import ch.skyfy.fk.config.data.FKTeam;
 import ch.skyfy.fk.json.Validatable;
+import ch.skyfy.fk.utils.MathUtils;
 import de.saibotk.jmaw.ApiResponseException;
 import de.saibotk.jmaw.MojangAPI;
 import lombok.Getter;
@@ -9,7 +11,7 @@ import net.minecraft.util.Formatting;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.function.Consumer;
 
 @SuppressWarnings("ClassCanBeRecord")
 public class TeamsConfig implements Validatable {
@@ -30,6 +32,11 @@ public class TeamsConfig implements Validatable {
             if (fkTeam.getName().isEmpty()) errors.add("A team name cannot be empty !");
         });
 
+        // Check if a base name is empty
+        teams.stream().map(FKTeam::getBase).forEach(base -> {
+            if (base.getName().isEmpty()) errors.add("A base name cannot be empty !");
+        });
+
         // Check if players are existing player on the mojang api
         teams.stream().flatMap(fkTeam -> fkTeam.getPlayers().stream()).forEach(playerName -> {
             try {
@@ -37,8 +44,8 @@ public class TeamsConfig implements Validatable {
             } catch (ApiResponseException e) {
                 if (e.getStatusCode() == 400) {
                     errors.add("Player " + playerName + " does not exist");
+                    errors.add("An error occurred while checking the player name : " + playerName);
                 }
-                errors.add("An error occurred while checking the player name : " + playerName);
             }
         });
 
@@ -51,42 +58,51 @@ public class TeamsConfig implements Validatable {
             }
         });
 
-        // Check that no bases overlap
-        for (FKTeam team : teams) {
-            var baseToCheck = team.getBase();
-            for (FKTeam fkTeam : teams) {
-                if (fkTeam.getBase() == baseToCheck) {
-                    System.out.println("skip");
-                    continue;
-                }
-                var x1 = baseToCheck.getCube().getX();
-                var z1 = baseToCheck.getCube().getZ();
-                var w1 = baseToCheck.getCube().getSize() * 2;
-                var h1 = baseToCheck.getCube().getSize() * 2;
+        // check for negative value
+        Consumer<Cube> check = cube -> {
+            if(cube.getSize() <= 0)
+                errors.add("The size of the base is "+cube.getSize()+", this is not a correct value");
+            if(cube.getNumberOfBlocksDown() <= 0) errors.add("The numberOfBlocksDown of the base is "+cube.getNumberOfBlocksDown()+", this is not a correct value");
+            if(cube.getNumberOfBlocksUp() <= 0) errors.add("The numberOfBlocksUp of the base is "+cube.getNumberOfBlocksUp()+", this is not a correct value");
+        };
+        teams.stream().map(FKTeam::getBase).forEach(base -> {
+            check.accept(base.getCube());
+            check.accept(base.getProximityCube());
+        });
 
-                var x2 = fkTeam.getBase().getCube().getX();
-                var z2 = fkTeam.getBase().getCube().getZ();
-                var w2 = fkTeam.getBase().getCube().getSize() * 2;
-                var h2 = fkTeam.getBase().getCube().getSize() * 2;
+        /*
+         * A base with coordinates close to another one could break the game.
+         *
+         * this must not happen
+         *
+         * Here, each base is checked with all the others to see if they overlap, or if one is inside another
+         */
+        for (var team : teams) {
+            var base1 = team.getBase();
+            for (var fkTeam : teams) {
+                var base2 = fkTeam.getBase();
+                if (base2 == base1) continue;
 
-                var intersect = true;
-                if(x1 + (w1 / 2d) < x2 - (w2 / 2d)){
-                    intersect = false;
+                if(MathUtils.intersect(base1.getCube(), base2.getCube())){
+                    errors.add("Base " + base1.getName() + " intersect base " + base2.getName());
                 }
-                if(x1 - (w1 / 2d) > x2 + (w2 / 2d)){
-                    intersect = false;
+                if(MathUtils.intersect(base1.getProximityCube(), base2.getProximityCube())){
+                    errors.add("Base proximity " + base1.getName() + " intersect base proximity " + base2.getName());
                 }
-                if(z1 + (h1 / 2d) < z2 - (h2 / 2d)){
-                    intersect = false;
+                if(MathUtils.isInside(base1.getProximityCube(), base2.getProximityCube())){
+                    errors.add("Base " + base2.getName() + " is inside base " + base1.getName());
                 }
-                if(z1 - (h1 / 2d) > z2 + (h2 / 2d)){
-                    intersect = false;
+                if(MathUtils.isInside(base1.getCube(), base2.getCube())){
+                    errors.add("Base proximity " + base2.getName() + " is inside base proximity " + base1.getName());
                 }
+            }
+        }
 
-                if(intersect){
-                    errors.add("Base " + baseToCheck.getName()  + " intersect " + fkTeam.getBase().getName());
-                }
-
+        // Check if the base is inside the world border
+        var worldBorderCube = Configs.WORLD_CONFIG.config.getWorldBorderData().getCube();
+        for (var team : teams) {
+            if(!MathUtils.isInside(worldBorderCube, team.getBase().getProximityCube())){
+                errors.add("the base " + team.getBase().getName() +" is not inside the world border !");
             }
         }
 

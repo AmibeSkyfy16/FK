@@ -4,6 +4,7 @@ import ch.skyfy.fk.config.data.Cube;
 import ch.skyfy.fk.config.data.FKTeam;
 import ch.skyfy.fk.json.Validatable;
 import ch.skyfy.fk.utils.MathUtils;
+import ch.skyfy.fk.utils.ValidateUtils;
 import de.saibotk.jmaw.ApiResponseException;
 import de.saibotk.jmaw.MojangAPI;
 import lombok.Getter;
@@ -59,15 +60,9 @@ public class TeamsConfig implements Validatable {
         });
 
         // check for negative value
-        Consumer<Cube> check = cube -> {
-            if(cube.getSize() <= 0)
-                errors.add("The size of the base is "+cube.getSize()+", this is not a correct value");
-            if(cube.getNumberOfBlocksDown() <= 0) errors.add("The numberOfBlocksDown of the base is "+cube.getNumberOfBlocksDown()+", this is not a correct value");
-            if(cube.getNumberOfBlocksUp() <= 0) errors.add("The numberOfBlocksUp of the base is "+cube.getNumberOfBlocksUp()+", this is not a correct value");
-        };
         teams.stream().map(FKTeam::getBase).forEach(base -> {
-            check.accept(base.getCube());
-            check.accept(base.getProximityCube());
+            ValidateUtils.checkForNegativeValueInCubeClass(base.getCube(), errors);
+            ValidateUtils.checkForNegativeValueInCubeClass(base.getProximityCube(), errors);
         });
 
         /*
@@ -76,6 +71,8 @@ public class TeamsConfig implements Validatable {
          * this must not happen
          *
          * Here, each base is checked with all the others to see if they overlap, or if one is inside another
+         *
+         * Also check for the waiting room
          */
         for (var team : teams) {
             var base1 = team.getBase();
@@ -95,6 +92,9 @@ public class TeamsConfig implements Validatable {
                 if(MathUtils.isInside(base1.getCube(), base2.getCube())){
                     errors.add("Base proximity " + base2.getName() + " is inside base proximity " + base1.getName());
                 }
+
+                var waitingRoom = Configs.FK_CONFIG.config.getWaitingRoom();
+
             }
         }
 

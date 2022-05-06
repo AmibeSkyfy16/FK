@@ -2,12 +2,16 @@ package ch.skyfy.fk.config;
 
 
 import ch.skyfy.fk.config.data.Cube;
+import ch.skyfy.fk.config.data.FKTeam;
 import ch.skyfy.fk.config.data.WorldBorderData;
 import ch.skyfy.fk.json.Validatable;
+import ch.skyfy.fk.utils.ValidateUtils;
 import lombok.Getter;
+import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
 
+@SuppressWarnings("ClassCanBeRecord")
 public class WorldBorderConfig implements Validatable {
 
     @Getter
@@ -17,13 +21,15 @@ public class WorldBorderConfig implements Validatable {
         this.worldBorderData = worldBorderData;
     }
 
-    public WorldBorderConfig() {
-        worldBorderData = new WorldBorderData("minecraft:overworld", new Cube((short)500,64, 319, 0, 0, 0));
-    }
-
     @Override
     public void validate() {
         var errors = new ArrayList<String>();
+
+        if(!Identifier.isValid(worldBorderData.getDimensionName())){
+            errors.add("dimensionName " + worldBorderData.getDimensionName() + " is not a valid dimension name");
+        }
+
+        ValidateUtils.checkForNegativeValueInCubeClass(worldBorderData.getCube(), errors);
 
         confirmValidate(errors);
     }

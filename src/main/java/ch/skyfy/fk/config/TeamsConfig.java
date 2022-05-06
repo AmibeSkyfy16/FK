@@ -78,16 +78,16 @@ public class TeamsConfig implements Validatable {
                 var base2 = fkTeam.getBase();
                 if (base2 == base1) continue;
 
-                if(MathUtils.intersect(base1.getCube(), base2.getCube())){
+                if (MathUtils.intersect(base1.getCube(), base2.getCube())) {
                     errors.add("Base " + base1.getName() + " intersect base " + base2.getName());
                 }
-                if(MathUtils.intersect(base1.getProximityCube(), base2.getProximityCube())){
+                if (MathUtils.intersect(base1.getProximityCube(), base2.getProximityCube())) {
                     errors.add("Base proximity " + base1.getName() + " intersect base proximity " + base2.getName());
                 }
-                if(MathUtils.isInside(base1.getProximityCube(), base2.getProximityCube())){
+                if (MathUtils.isInside(base1.getProximityCube(), base2.getProximityCube())) {
                     errors.add("Base " + base2.getName() + " is inside base " + base1.getName());
                 }
-                if(MathUtils.isInside(base1.getCube(), base2.getCube())){
+                if (MathUtils.isInside(base1.getCube(), base2.getCube())) {
                     errors.add("Base proximity " + base2.getName() + " is inside base proximity " + base1.getName());
                 }
 
@@ -101,13 +101,11 @@ public class TeamsConfig implements Validatable {
             }
         }
 
-        // Check if the base is inside the world border
+//         Check if the base is inside the world border
         var worldBorderCube = Configs.WORLD_CONFIG.config.getWorldBorderData().getCube();
-        for (var team : teams) {
-            if(!MathUtils.isInside(worldBorderCube, team.getBase().getProximityCube())){
-                errors.add("the base " + team.getBase().getName() +" is not inside the world border !");
-            }
-        }
+        for (var team : teams)
+            if (!MathUtils.isInside(worldBorderCube, team.getBase().getProximityCube()))
+                errors.add("the base " + team.getBase().getName() + " is not inside the world border !");
 
         confirmValidate(errors);
     }

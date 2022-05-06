@@ -17,7 +17,6 @@ public class JsonDataClass<C extends Validatable> {
         this.jsonManager = new JsonManager<>(cClass, ModUtils.getRelativeFile(relativeFilePath), defaultConfig);
 
         config = jsonManager.getOrCreateConfig();
-//        config.validate();
     }
 
 }

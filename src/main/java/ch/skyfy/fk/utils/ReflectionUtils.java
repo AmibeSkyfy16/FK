@@ -1,17 +1,18 @@
 package ch.skyfy.fk.utils;
 
 import ch.skyfy.fk.FKMod;
+import ch.skyfy.fk.exception.FKModException;
 
 public class ReflectionUtils {
 
     public static void loadConfigByReflection(Class<?>[] classesToLoad) {
-        for (Class<?> config : classesToLoad) {
+        for (var config : classesToLoad) {
             var canonicalName = config.getCanonicalName();
             try {
                 Class.forName(canonicalName);
             } catch (ClassNotFoundException e) {
-                FKMod.LOGGER.fatal("GAME IS DISABLE DU TO ERROR WITH CONFIGS");
-                throw new RuntimeException(e);
+                FKMod.LOGGER.fatal("A FATAL ERROR OCCURRED WITH FKMod");
+                throw new FKModException(e);
             }
         }
     }

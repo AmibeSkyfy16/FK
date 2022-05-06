@@ -1,8 +1,6 @@
 package ch.skyfy.fk.config;
 
 
-import ch.skyfy.fk.config.data.Cube;
-import ch.skyfy.fk.config.data.FKTeam;
 import ch.skyfy.fk.config.data.WorldBorderData;
 import ch.skyfy.fk.json.Validatable;
 import ch.skyfy.fk.utils.ValidateUtils;

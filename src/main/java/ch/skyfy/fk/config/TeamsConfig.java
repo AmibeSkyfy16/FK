@@ -1,6 +1,5 @@
 package ch.skyfy.fk.config;
 
-import ch.skyfy.fk.config.data.Cube;
 import ch.skyfy.fk.config.data.FKTeam;
 import ch.skyfy.fk.json.Validatable;
 import ch.skyfy.fk.utils.MathUtils;
@@ -12,7 +11,6 @@ import net.minecraft.util.Formatting;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 @SuppressWarnings("ClassCanBeRecord")
 public class TeamsConfig implements Validatable {
@@ -94,7 +92,12 @@ public class TeamsConfig implements Validatable {
                 }
 
                 var waitingRoom = Configs.FK_CONFIG.config.getWaitingRoom();
-
+                if(MathUtils.intersect(base1.getCube(), waitingRoom.getCube())){
+                    errors.add("Base " + base1.getName() + " intersect waiting room ");
+                }
+                if(MathUtils.isInside(base1.getCube(), waitingRoom.getCube())){
+                    errors.add("Base " + base1.getName() + " is inside waiting room ");
+                }
             }
         }
 

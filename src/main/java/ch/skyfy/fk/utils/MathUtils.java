@@ -6,7 +6,7 @@ public class MathUtils {
 
     /**
      * <a href="https://math.stackexchange.com/questions/3086589/determine-if-a-rectangle-is-inside-overlaps-doesnt-overlaps-another-rectangle">https://math.stackexchange.com/questions/3086589/determine-if-a-rectangle-is-inside-overlaps-doesnt-overlaps-another-rectangle</a>
-     * @return return true if the area of the tow cube intersect
+     * @return return true if the area of the two cube intersect
      */
     public static boolean intersect(Cube cube1, Cube cube2) {
         var x1 = cube1.getX();

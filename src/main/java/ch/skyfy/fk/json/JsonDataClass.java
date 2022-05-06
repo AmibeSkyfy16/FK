@@ -3,6 +3,7 @@ package ch.skyfy.fk.json;
 import ch.skyfy.fk.utils.ModUtils;
 
 public class JsonDataClass<C extends Validatable> {
+
     public final C config;
     public final String relativeFilePath;
     public final Class<C> cClass;
@@ -16,6 +17,7 @@ public class JsonDataClass<C extends Validatable> {
         this.jsonManager = new JsonManager<>(cClass, ModUtils.getRelativeFile(relativeFilePath), defaultConfig);
 
         config = jsonManager.getOrCreateConfig();
-        config.validate();
+//        config.validate();
     }
+
 }

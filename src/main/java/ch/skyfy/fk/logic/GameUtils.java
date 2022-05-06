@@ -2,7 +2,6 @@ package ch.skyfy.fk.logic;
 
 import ch.skyfy.fk.FKMod;
 import ch.skyfy.fk.config.Configs;
-import ch.skyfy.fk.config.data.Cube;
 import ch.skyfy.fk.config.data.FKTeam;
 import ch.skyfy.fk.logic.data.FKGameAllData;
 import net.minecraft.entity.player.PlayerEntity;
@@ -14,6 +13,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static ch.skyfy.fk.config.Configs.TEAMS;
 
 @SuppressWarnings({"unused"})
 public class GameUtils {
@@ -29,8 +30,8 @@ public class GameUtils {
      */
     public static List<String> ArePlayersReady(List<ServerPlayerEntity> onlinePlayers) {
         var missingPlayers = new ArrayList<String>();
-        for (FKTeam fkTeam : Configs.TEAMS.config.getTeams()) {
-            for (String fkPlayerName : fkTeam.getPlayers()) {
+        for (var fkTeam : TEAMS.config.getTeams()) {
+            for (var fkPlayerName : fkTeam.getPlayers()) {
                 if (onlinePlayers.stream().noneMatch(serverPlayerEntity -> serverPlayerEntity.getName().asString().equals(fkPlayerName))) {
                     missingPlayers.add(fkPlayerName);
                 }
@@ -44,7 +45,7 @@ public class GameUtils {
      * @return True if the player is part of the game. False otherwise
      */
     public static boolean isFKPlayer(String playerName) {
-        return Configs.TEAMS.config.getTeams().stream().map(FKTeam::getName).anyMatch(fkPlayerName -> fkPlayerName.equals(playerName));
+        return TEAMS.config.getTeams().stream().map(FKTeam::getName).anyMatch(fkPlayerName -> fkPlayerName.equals(playerName));
     }
 
     /**
@@ -52,7 +53,7 @@ public class GameUtils {
      * @return A list with only the players participating in the FK
      */
     public static List<ServerPlayerEntity> getAllConnectedFKPlayers(List<ServerPlayerEntity> onlinePlayers) {
-        return Configs.TEAMS.config.getTeams().stream()
+        return TEAMS.config.getTeams().stream()
                 .flatMap(fkTeam -> onlinePlayers.stream()
                         .filter(player -> fkTeam.getPlayers().contains(player.getName().asString())))
                 .toList();
@@ -60,35 +61,28 @@ public class GameUtils {
 
     @Nullable
     public static BlockPos getBaseCoordinateByPlayer(String name) {
-        for (var fkTeam : Configs.TEAMS.config.getTeams()) {
-            if (fkTeam.getPlayers().stream().anyMatch(name::equals)) {
+        for (var fkTeam : TEAMS.config.getTeams())
+            if (fkTeam.getPlayers().stream().anyMatch(name::equals))
                 return new BlockPos(fkTeam.getBase().getCube().getX(), fkTeam.getBase().getCube().getY(), fkTeam.getBase().getCube().getZ());
-            }
-        }
         return null;
     }
 
     @Nullable
     public static FKTeam getFKTeamOfPlayerByName(String name) {
-        for (FKTeam fkTeam : Configs.TEAMS.config.getTeams()) {
-            if (fkTeam.getPlayers().stream().anyMatch(name::equals)) {
-                return fkTeam;
-            }
-        }
+        for (var fkTeam : TEAMS.config.getTeams())
+            if (fkTeam.getPlayers().stream().anyMatch(name::equals)) return fkTeam;
         return null;
     }
 
-    public static boolean isInTheSameTeam(String playerName, String anotherPlayerName) {
-        for (FKTeam fkTeam : Configs.TEAMS.config.getTeams()) {
-            if (fkTeam.getPlayers().stream().anyMatch(playerName::equals) && fkTeam.getPlayers().stream().anyMatch(anotherPlayerName::equals))
+    public static boolean isInTheSameTeam(String playerName1, String playerName2) {
+        for (var fkTeam : TEAMS.config.getTeams())
+            if (fkTeam.getPlayers().stream().anyMatch(playerName1::equals) && fkTeam.getPlayers().stream().anyMatch(playerName2::equals))
                 return true;
-        }
         return false;
     }
 
     public static boolean areMissingPlayers(List<ServerPlayerEntity> onlinePlayers) {
-        var missingPlayers = GameUtils.ArePlayersReady(onlinePlayers);
-        return !missingPlayers.isEmpty();
+        return !GameUtils.ArePlayersReady(onlinePlayers).isEmpty();
     }
 
     public static void sendMissingPlayersMessage(ServerPlayerEntity player, List<ServerPlayerEntity> onlinePlayers) {
@@ -113,7 +107,7 @@ public class GameUtils {
         // Is the player close to an enemy base, but not inside
         var isPlayerCloseToAnEnemyBase = false;
 
-        for (FKTeam team : Configs.TEAMS.config.getTeams()) {
+        for (FKTeam team : TEAMS.config.getTeams()) {
             var baseSquare = team.getBase().getCube();
 
             // Is this base the base of the player who break the block ?

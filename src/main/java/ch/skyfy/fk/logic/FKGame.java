@@ -127,7 +127,7 @@ public class FKGame {
     }
 
     private void updateSidebar(ServerPlayerEntity player) {
-        var timelineData = timeline.timelineData;
+        var timelineData = timeline.getTimelineData();
         ScoreboardManager.getInstance().updateSidebar(player, timelineData.getDay(), timelineData.getMinutes(), timelineData.getSeconds());
     }
 
@@ -234,7 +234,7 @@ public class FKGame {
                 if (isPlayerInAnEnemyBase) {
                     if (!placedItemStack.isOf(Items.TNT))
                         return ActionResult.FAIL;
-                    if (!GameUtils.areAssaultEnabled(timeline.timelineData.getDay()))
+                    if (!GameUtils.areAssaultEnabled(timeline.getTimelineData().getDay()))
                         return ActionResult.FAIL;
                     return ActionResult.PASS;
                 }
@@ -251,7 +251,7 @@ public class FKGame {
                 if (isPlayerCloseToAnEnemyBase) {
                     if (!placedItemStack.isOf(Items.TNT))
                         return ActionResult.FAIL;
-                    if (!GameUtils.areAssaultEnabled(timeline.timelineData.getDay()))
+                    if (!GameUtils.areAssaultEnabled(timeline.getTimelineData().getDay()))
                         return ActionResult.FAIL;
                     return ActionResult.PASS;
                 }
@@ -371,7 +371,7 @@ public class FKGame {
                 // If the player is inside an enemy base
                 if (isPlayerInAnEnemyBase) {
                     if (didPlayerTryToFireATNT) {
-                        if (!GameUtils.areAssaultEnabled(timeline.timelineData.getDay())) {
+                        if (!GameUtils.areAssaultEnabled(timeline.getTimelineData().getDay())) {
                             return ActionResult.FAIL;
                         }
                     }
@@ -389,7 +389,7 @@ public class FKGame {
                 // A player can empty bucket outside his base, except if it is near another base
                 if (isPlayerCloseToAnEnemyBase) {
                     if (didPlayerTryToFireATNT) {
-                        if (!GameUtils.areAssaultEnabled(timeline.timelineData.getDay())) {
+                        if (!GameUtils.areAssaultEnabled(timeline.getTimelineData().getDay())) {
                             return ActionResult.FAIL;
                         }
                     }
@@ -411,7 +411,7 @@ public class FKGame {
             if (!GameUtils.isGameStateRUNNING()) return ActionResult.FAIL;
 
             if (entity instanceof PlayerEntity)
-                if (!GameUtils.isPvPEnabled(timeline.timelineData.getDay()))
+                if (!GameUtils.isPvPEnabled(timeline.getTimelineData().getDay()))
                     return ActionResult.FAIL;
             return ActionResult.PASS;
         }
@@ -422,10 +422,10 @@ public class FKGame {
             if (!GameUtils.isGameStateRUNNING()) return ActionResult.FAIL;
 
             if (dimensionId == DimensionType.THE_NETHER_ID) {
-                if (!GameUtils.isNetherEnabled(timeline.timelineData.getDay()))
+                if (!GameUtils.isNetherEnabled(timeline.getTimelineData().getDay()))
                     return ActionResult.FAIL;
             } else if (dimensionId == DimensionType.THE_END_ID) {
-                if (!GameUtils.isEndEnabled(timeline.timelineData.getDay()))
+                if (!GameUtils.isEndEnabled(timeline.getTimelineData().getDay()))
                     return ActionResult.FAIL;
             }
 

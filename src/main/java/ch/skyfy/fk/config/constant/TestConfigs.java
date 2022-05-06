@@ -16,7 +16,7 @@ public class TestConfigs {
             3,
             2,
             new WaitingRoom(
-                    new Cube((short) 20, 50, 80, 0, 63, 0),
+                    new Cube((short) 4, 50, 80, 0, 63, 0),
                     new SpawnLocation("minecraft:overworld", 0, -34, 0, 8, 8)
             ),
             new SpawnLocation("minecraft:overworld", 50, -34, 50, 8, 8)

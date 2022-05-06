@@ -5,6 +5,7 @@ import ch.skyfy.fk.ScoreboardManager;
 import ch.skyfy.fk.events.TimeOfDayUpdatedCallback;
 import ch.skyfy.fk.logic.data.FKGameAllData;
 import ch.skyfy.fk.logic.data.TimelineData;
+import lombok.Getter;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ActionResult;
 
@@ -13,9 +14,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Timeline {
 
+    @Getter
     private final AtomicBoolean isTimerStartedRef = new AtomicBoolean(false);
 
-    public final TimelineData timelineData;
+    @Getter
+    private final TimelineData timelineData;
 
     private final MinecraftServer server;
 
@@ -62,9 +65,5 @@ public class Timeline {
             FKMod.LOGGER.warn("An error occurred while trying to save game data");
             e.printStackTrace();
         }
-    }
-
-    public AtomicBoolean getIsTimerStartedRef() {
-        return isTimerStartedRef;
     }
 }

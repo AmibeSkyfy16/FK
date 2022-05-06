@@ -2,15 +2,15 @@ package ch.skyfy.fk.logic;
 
 import ch.skyfy.fk.FKMod;
 import ch.skyfy.fk.ScoreboardManager;
-import ch.skyfy.fk.events.TimeOfDayUpdatedCallback;
 import ch.skyfy.fk.logic.data.FKGameAllData;
 import ch.skyfy.fk.logic.data.TimelineData;
 import lombok.Getter;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ActionResult;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Timeline {
 
@@ -18,35 +18,35 @@ public class Timeline {
     private final AtomicBoolean isTimerStartedRef = new AtomicBoolean(false);
 
     @Getter
-    private final TimelineData timelineData;
+    private final AtomicInteger timeOfDay = new AtomicInteger(0);
 
-    private final MinecraftServer server;
+    @Getter
+    private final TimelineData timelineData;
 
     {
         timelineData = FKGameAllData.FK_GAME_DATA.config.getTimelineData();
     }
 
-    public Timeline(MinecraftServer server) {
-        this.server = server;
-        TimeOfDayUpdatedCallback.EVENT.register(this::update);
+    public Timeline() {
+        ServerTickEvents.END_SERVER_TICK.register(this::updateTimeTest);
     }
 
     public void startTimer() {
         isTimerStartedRef.set(true);
     }
 
-    private ActionResult update(long timeOfDay) {
-        if (!GameUtils.isGameStateRUNNING()) return ActionResult.PASS;
-        if(!isTimerStartedRef.get())return ActionResult.PASS;
+    private void updateTimeTest(MinecraftServer server) {
+        if (!GameUtils.isGameStateRUNNING() || !isTimerStartedRef.get()) return;
+
+        if (timeOfDay.get() >= 24000) {
+            timeOfDay.set(0);
+            timelineData.setDay(timelineData.getDay() + 1);
+        }
 
         var previousMinutes = timelineData.getMinutes();
-        var remainingTime = timeOfDay % 24_000;
 
-        timelineData.setMinutes((int) (remainingTime / 1200d));
-        timelineData.setSeconds((int) (((remainingTime / 1200d) - timelineData.getMinutes()) * 60));
-
-        if (remainingTime == 0)
-            timelineData.setDay(timelineData.getDay() + 1);
+        timelineData.setMinutes((int) (timeOfDay.get() / 1200d));
+        timelineData.setSeconds((int) (((timeOfDay.get() / 1200d) - timelineData.getMinutes()) * 60));
 
         if (previousMinutes != timelineData.getMinutes())
             saveData();
@@ -55,7 +55,7 @@ public class Timeline {
         for (var fkPlayer : GameUtils.getAllConnectedFKPlayers(server.getPlayerManager().getPlayerList()))
             ScoreboardManager.getInstance().updateSidebar(fkPlayer, timelineData.getDay(), timelineData.getMinutes(), timelineData.getSeconds());
 
-        return ActionResult.PASS;
+        timeOfDay.getAndIncrement();
     }
 
     private void saveData() {

@@ -5,6 +5,7 @@ import ch.skyfy.fk.ScoreboardManager;
 import ch.skyfy.fk.config.Configs;
 import ch.skyfy.fk.events.*;
 import ch.skyfy.fk.logic.data.FKGameAllData;
+import lombok.Getter;
 import me.bymartrixx.playerevents.api.event.PlayerJoinCallback;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
@@ -43,6 +44,7 @@ public class FKGame {
 
     private final MinecraftServer server;
 
+    @Getter
     private final Timeline timeline;
 
     private final PauseEvents pauseEvents;
@@ -51,7 +53,7 @@ public class FKGame {
 
     public FKGame(MinecraftServer server, ServerPlayerEntity firstPlayerToJoin) {
         this.server = server;
-        this.timeline = new Timeline(server);
+        this.timeline = new Timeline();
         pauseEvents = new PauseEvents();
         fkGameEvents = new FKGameEvents();
 

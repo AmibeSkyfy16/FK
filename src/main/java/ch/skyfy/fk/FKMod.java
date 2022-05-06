@@ -1,10 +1,7 @@
 package ch.skyfy.fk;
 
 
-import ch.skyfy.fk.commands.PauseCmd;
-import ch.skyfy.fk.commands.ResumeCmd;
-import ch.skyfy.fk.commands.StartCmd;
-import ch.skyfy.fk.commands.WhereIAmCmd;
+import ch.skyfy.fk.commands.*;
 import ch.skyfy.fk.config.Configs;
 import ch.skyfy.fk.logic.FKGame;
 import ch.skyfy.fk.utils.ReflectionUtils;
@@ -43,6 +40,8 @@ public class FKMod implements DedicatedServerModInitializer {
     private final PauseCmd pauseCmd;
     private final ResumeCmd resumeCmd;
 
+    private final SetFKTime setFKTime;
+
     public FKMod() throws Exception {
         // Create a config directory named with the MOD_ID under config folder of the server
         createConfigDirectory();
@@ -55,6 +54,8 @@ public class FKMod implements DedicatedServerModInitializer {
         startCmd = new StartCmd(optFKGameRef);
         pauseCmd = new PauseCmd(optFKGameRef);
         resumeCmd = new ResumeCmd(optFKGameRef);
+        setFKTime = new SetFKTime(optFKGameRef);
+
     }
 
     @Override
@@ -74,6 +75,7 @@ public class FKMod implements DedicatedServerModInitializer {
 
     public void registerCommands() {
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
+            setFKTime.register(dispatcher, dedicated);
             dispatcher.register(net.minecraft.server.command.CommandManager.literal("FKStart").executes(startCmd));
             dispatcher.register(net.minecraft.server.command.CommandManager.literal("FKPause").executes(pauseCmd));
             dispatcher.register(net.minecraft.server.command.CommandManager.literal("FKResume").executes(resumeCmd));

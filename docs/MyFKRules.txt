@@ -130,6 +130,7 @@ Les règles du FK
         3. Les joueurs ont également le droit de stocker des ressources en dehors de la salle des coffres,
            mais pas dans des coffres, ni des barrels.
         4. Interdiction de spawn kill les joueurs
+        5. Interdiction de casser/voler des blocs/items provenant de structure de décoration
 
     REGLES CONCERNANT LA BASE
         1. Interdiction de bloquer un joueur adverse dans sa propre base

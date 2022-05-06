@@ -2,6 +2,7 @@ package ch.skyfy.fk.commands;
 
 import ch.skyfy.fk.FKMod;
 import ch.skyfy.fk.logic.FKGame;
+import ch.skyfy.fk.logic.GameUtils;
 import ch.skyfy.fk.logic.data.FKGameAllData;
 import ch.skyfy.fk.logic.data.FKGameData;
 import com.mojang.brigadier.Command;
@@ -48,10 +49,9 @@ public class ResumeCmd implements Command<ServerCommandSource> {
             case PAUSED -> {
 
                 // TODO UNCOMMENT
-//                if (GameUtils.areMissingPlayers(source.getServer().getPlayerManager().getPlayerList())) {
-//                    GameUtils.sendMissingPlayersMessage(player, source.getServer().getPlayerManager().getPlayerList());
-//                    return 0;
-//                }
+                if(GameUtils.getMissingFKPlayer(source.getServer().getPlayerManager().getPlayerList()).size() > 0){
+                    GameUtils.sendMissingPlayersMessage(player, source.getServer().getPlayerManager().getPlayerList());
+                }
 
                 source.getServer().getPlayerManager().broadcast(new LiteralText("The game has been resumed").setStyle(Style.EMPTY.withColor(Formatting.GREEN)), MessageType.CHAT, NIL_UUID);
 

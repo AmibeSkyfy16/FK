@@ -29,7 +29,6 @@ public class PauseCmd implements Command<ServerCommandSource> {
         this.optFKGameRef = optFKGameRef;
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Override
     public int run(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
 

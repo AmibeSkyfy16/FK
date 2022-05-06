@@ -32,13 +32,12 @@ public class GameUtils {
     /**
      * If among the connected players, one is missing, the game is not started
      */
-    public static List<String> ArePlayersReady(List<ServerPlayerEntity> onlinePlayers) {
+    public static List<String> getMissingFKPlayer(List<ServerPlayerEntity> onlinePlayers) {
         var missingPlayers = new ArrayList<String>();
         for (var fkTeam : TEAMS.config.getTeams()) {
             for (var fkPlayerName : fkTeam.getPlayers()) {
-                if (onlinePlayers.stream().noneMatch(serverPlayerEntity -> serverPlayerEntity.getName().asString().equals(fkPlayerName))) {
+                if (onlinePlayers.stream().noneMatch(serverPlayerEntity -> serverPlayerEntity.getName().asString().equals(fkPlayerName)))
                     missingPlayers.add(fkPlayerName);
-                }
             }
         }
         return missingPlayers;
@@ -49,7 +48,6 @@ public class GameUtils {
      * @return True if the player is part of the game. False otherwise
      */
     public static boolean isFKPlayer(String playerName) {
-//        return TEAMS.config.getTeams().stream().map(FKTeam::getName).anyMatch(fkPlayerName -> fkPlayerName.equals(playerName));
         return TEAMS.config.getTeams().stream().flatMap(fkTeam -> fkTeam.getPlayers().stream()).anyMatch(fkPlayerName -> fkPlayerName.equals(playerName));
     }
 
@@ -92,12 +90,8 @@ public class GameUtils {
         return false;
     }
 
-    public static boolean areMissingPlayers(List<ServerPlayerEntity> onlinePlayers) {
-        return !GameUtils.ArePlayersReady(onlinePlayers).isEmpty();
-    }
-
     public static void sendMissingPlayersMessage(ServerPlayerEntity player, List<ServerPlayerEntity> onlinePlayers) {
-        var missingPlayers = GameUtils.ArePlayersReady(onlinePlayers);
+        var missingPlayers = GameUtils.getMissingFKPlayer(onlinePlayers);
         if (!missingPlayers.isEmpty()) {
             var sb = new StringBuilder();
             missingPlayers.forEach(missingPlayer -> sb.append(missingPlayer).append("\n"));
@@ -160,7 +154,6 @@ public class GameUtils {
 
         return whereIsThePlayer.impl(isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase);
     }
-
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public static boolean isGameStateRUNNING() {

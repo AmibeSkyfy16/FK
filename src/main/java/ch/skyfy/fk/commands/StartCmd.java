@@ -49,7 +49,7 @@ public class StartCmd implements Command<ServerCommandSource> {
             case NOT_STARTED -> {
 
                 // TODO UNCOMMENT
-                if(GameUtils.areMissingPlayers(source.getServer().getPlayerManager().getPlayerList())){
+                if(GameUtils.getMissingFKPlayer(source.getServer().getPlayerManager().getPlayerList()).size() > 0){
                     GameUtils.sendMissingPlayersMessage(player, source.getServer().getPlayerManager().getPlayerList());
                 }
 

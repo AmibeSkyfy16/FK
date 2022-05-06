@@ -11,14 +11,12 @@ import ch.skyfy.fk.json.JsonDataClass;
  *
  * IMPORTANT: The order in which the variables are initialized must not be changed
  */
+@SuppressWarnings("CommentedOutCode")
 public class Configs {
 
     public static final JsonDataClass<WorldBorderConfig> WORLD_CONFIG;
-//    public static final JsonDataClass<WorldConfig> WORLD_CONFIG = new JsonDataClass<>("worldconfig.json5", WorldConfig.class, DefaultConfigs.DEFAULT_WORLD_INFO_CONFIG);
 
-    //    public static final JsonDataClass<FKConfig> FK_CONFIG = new JsonDataClass<>("fkconfig.json5", FKConfig.class, DefaultConfigs.DEFAULT_FKCONFIG);
     public static final JsonDataClass<FKConfig> FK_CONFIG;
-//    public static final JsonDataClass<TeamsConfig> TEAMS = new JsonDataClass<>("teams.json5", TeamsConfig.class, DefaultConfigs.DEFAULT_TEAMS_CONFIG);
     public static final JsonDataClass<TeamsConfig> TEAMS;
 
     static {

@@ -24,7 +24,7 @@ public class Timeline {
     private final TimelineData timelineData;
 
     {
-        timelineData = FKGameAllData.FK_GAME_DATA.config.getTimelineData();
+        timelineData = FKGameAllData.FK_GAME_DATA.data.getTimelineData();
     }
 
     public Timeline() {
@@ -60,7 +60,7 @@ public class Timeline {
 
     private void saveData() {
         try {
-            FKGameAllData.FK_GAME_DATA.jsonManager.save(FKGameAllData.FK_GAME_DATA.config);
+            FKGameAllData.FK_GAME_DATA.jsonManager.save(FKGameAllData.FK_GAME_DATA.data);
         } catch (IOException e) {
             FKMod.LOGGER.warn("An error occurred while trying to save game data");
             e.printStackTrace();

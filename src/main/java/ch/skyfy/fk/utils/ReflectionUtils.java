@@ -12,6 +12,9 @@ public class ReflectionUtils {
                 Class.forName(canonicalName);
             } catch (ClassNotFoundException e) {
                 FKMod.LOGGER.fatal("A FATAL ERROR OCCURRED WITH FKMod");
+                FKMod.LOGGER.fatal("A FATAL ERROR OCCURRED WITH FKMod");
+                FKMod.LOGGER.fatal("A FATAL ERROR OCCURRED WITH FKMod");
+                FKMod.LOGGER.fatal("A FATAL ERROR OCCURRED WITH FKMod");
                 throw new FKModException(e);
             }
         }

@@ -2,9 +2,7 @@ package ch.skyfy.fk.commands;
 
 import ch.skyfy.fk.FKMod;
 import ch.skyfy.fk.logic.FKGame;
-import ch.skyfy.fk.logic.GameUtils;
 import ch.skyfy.fk.logic.data.FKGameAllData;
-import ch.skyfy.fk.logic.data.FKGameData;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
@@ -36,7 +34,6 @@ public class ResumeCmd implements Command<ServerCommandSource> {
 
     @Override
     public int run(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-
         var source = context.getSource();
         var player = source.getPlayer();
 
@@ -46,22 +43,19 @@ public class ResumeCmd implements Command<ServerCommandSource> {
 //            return 0;
 //        }
 
-        switch (FKGameAllData.FK_GAME_DATA.config.getGameState()) {
+        switch (FKGameAllData.FK_GAME_DATA.data.getGameState()) {
             case NOT_STARTED ->
                     player.sendMessage(new LiteralText("The game cannot be resumed because it is not started !").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
             case RUNNING ->
                     player.sendMessage(new LiteralText("The game cannot be resumed because it is running !").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
             case PAUSED -> {
-
                 // TODO UNCOMMENT
 //                if(GameUtils.getMissingFKPlayer(source.getServer().getPlayerManager().getPlayerList()).size() > 0){
 //                    GameUtils.sendMissingPlayersMessage(player, source.getServer().getPlayerManager().getPlayerList());
 //                    return 0;
 //                }
 
-                source.getServer().getPlayerManager().broadcast(new LiteralText("The game has been resumed").setStyle(Style.EMPTY.withColor(Formatting.GREEN)), MessageType.CHAT, NIL_UUID);
-
-                FKGameAllData.FK_GAME_DATA.config.setGameState(FKMod.GameState.RUNNING);
+                FKGameAllData.FK_GAME_DATA.data.setGameState(FKMod.GameState.RUNNING);
                 optFKGameRef.get().ifPresent(FKGame::resume);
             }
         }

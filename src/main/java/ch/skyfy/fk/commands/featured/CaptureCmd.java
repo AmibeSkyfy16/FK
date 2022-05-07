@@ -1,6 +1,7 @@
 package ch.skyfy.fk.commands.featured;
 
 import ch.skyfy.fk.config.Configs;
+import ch.skyfy.fk.constants.MsgBase;
 import ch.skyfy.fk.logic.FKGame;
 import ch.skyfy.fk.logic.GameUtils;
 import com.mojang.brigadier.Command;
@@ -9,8 +10,6 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.Style;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Vec3d;
 
@@ -19,6 +18,25 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @SuppressWarnings("ClassCanBeRecord")
 public class CaptureCmd implements Command<ServerCommandSource> {
+
+    private static class Msg extends MsgBase {
+
+        public static Msg ASSAULT_NOT_ENABLED = new Msg("You cannot use this command, because the assaults are not enabled", Formatting.RED);
+        public static Msg VAULT_FEATURE_NOT_ENABLED = new Msg("You cannot use this command, because Vault feature is not enabled", Formatting.RED);
+        public static Msg NOT_A_FK_PLAYER = new Msg("You cannot use this command, because you are not an FKPlayer", Formatting.RED);
+        public static Msg NO_BASE_HERE = new Msg("There is no base where you are", Formatting.GOLD);
+        public static Msg NO_BASE_FOUND_IN_BASE = new Msg("No vault found inside the %s team base", Formatting.GOLD);
+        public static Msg VAULT_IS_NOT_VALID = new Msg("The vault found inside the %s team base is not valid", Formatting.GOLD);
+        public static Msg IN_YOUR_BASE_BUT_NO_IN_YOUR_VAULT = new Msg("You are inside your own base, but not inside your vault", Formatting.GOLD);
+        public static Msg IN_YOUR_BASE_IN_YOUR_VAULT = new Msg("You cannot capture your own vault", Formatting.GOLD);
+        public static Msg IN_AN_ENEMY_BASE_BUT_NO_IN_VAULT = new Msg("You are inside an enemy base, but not inside the vault", Formatting.GOLD);
+
+
+
+        protected Msg(String text, Formatting formatting) {
+            super(text, formatting);
+        }
+    }
 
     private final AtomicReference<Optional<FKGame>> optFKGameRef;
 
@@ -36,24 +54,24 @@ public class CaptureCmd implements Command<ServerCommandSource> {
     public int run(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         if (optFKGameRef.get().isEmpty()) return 0;
 
-        var fkGame = optFKGameRef.get().get();
-
         var playerAttacker = context.getSource().getPlayer();
 
-        if (!GameUtils.areAssaultEnabled(fkGame.getTimeline().getTimelineData().getDay())) {
-            playerAttacker.sendMessage(new LiteralText("Assault are not enabled! So you cannot win").setStyle(Style.EMPTY.withColor(Formatting.GOLD)), false);
+        if (!Configs.CHEST_ROOM_CONFIG.data.isEnabled()) {
+            Msg.VAULT_FEATURE_NOT_ENABLED.send(playerAttacker);
             return 0;
         }
 
-        if (!Configs.CHEST_ROOM_CONFIG.config.isEnabled()) {
-            playerAttacker.sendMessage(new LiteralText("Chest Room Feature is not enabled").setStyle(Style.EMPTY.withColor(Formatting.GOLD)), false);
+        var fkGame = optFKGameRef.get().get();
+
+        if (!GameUtils.areAssaultEnabled(fkGame.getTimeline().getTimelineData().getDay())) {
+            Msg.ASSAULT_NOT_ENABLED.send(playerAttacker);
             return 0;
         }
 
         var playerName = playerAttacker.getName().asString();
 
         if (!GameUtils.isFKPlayer(playerName)) {
-            playerAttacker.sendMessage(new LiteralText("Only a FKPlayer can run this command").setStyle(Style.EMPTY.withColor(Formatting.GOLD)), false);
+            Msg.NOT_A_FK_PLAYER.send(playerAttacker);
             return 0;
         }
 
@@ -61,7 +79,7 @@ public class CaptureCmd implements Command<ServerCommandSource> {
         var optFKTeamVictim = GameUtils.getTeamByCoordinate(playerPos);
 
         if (optFKTeamVictim.isEmpty()) {
-            playerAttacker.sendMessage(new LiteralText("There is no fkTeam here !").setStyle(Style.EMPTY.withColor(Formatting.GOLD)), false);
+            Msg.NO_BASE_HERE.send(playerAttacker);
             return 0;
         }
 
@@ -69,27 +87,27 @@ public class CaptureCmd implements Command<ServerCommandSource> {
         var optVault = GameUtils.getVaultByTeamName(fkTeamVictim.getName());
 
         if (optVault.isEmpty()) {
-            playerAttacker.sendMessage(new LiteralText("No vault found for team " + fkTeamVictim.getName()).setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
+            Msg.NO_BASE_FOUND_IN_BASE.formatted(fkTeamVictim.getColor().toLowerCase()).send(playerAttacker);
             return 0;
         }
 
         var vault = optVault.get();
 
         if (!vault.isValid()) {
-            playerAttacker.sendMessage(new LiteralText("vault found for team " + fkTeamVictim.getName() + " is not a valid vault").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
+            Msg.VAULT_IS_NOT_VALID.formatted(fkTeamVictim.getColor().toLowerCase()).send(playerAttacker);
             return 0;
         }
 
         var chestRoomFeature = fkGame.getChestRoomFeature();
         switch (chestRoomFeature.whereIsThePlayer(playerAttacker)) {
             case INSIDE_HIS_OWN_BASE -> {
-                playerAttacker.sendMessage(new LiteralText("You are inside your own base, but not inside your vault").setStyle(Style.EMPTY.withColor(Formatting.GOLD)), false);
+                Msg.IN_YOUR_BASE_BUT_NO_IN_YOUR_VAULT.send(playerAttacker);
             }
             case INSIDE_THE_VAULT_OF_HIS_OWN_BASE -> {
-                playerAttacker.sendMessage(new LiteralText("You cannot capture your own vault").setStyle(Style.EMPTY.withColor(Formatting.GOLD)), false);
+                Msg.IN_YOUR_BASE_IN_YOUR_VAULT.send(playerAttacker);
             }
             case INSIDE_AN_ENEMY_BASE -> {
-                playerAttacker.sendMessage(new LiteralText("You are inside an enemy base, but not inside the vault").setStyle(Style.EMPTY.withColor(Formatting.GOLD)), false);
+                Msg.IN_AN_ENEMY_BASE_BUT_NO_IN_VAULT.send(playerAttacker);
             }
             case INSIDE_THE_VAULT_OF_AN_ENEMY_BASE -> {
                 chestRoomFeature.addCapture(vault, fkTeamVictim, GameUtils.getFKTeamOfPlayerByName(playerAttacker.getName().asString()), playerAttacker);

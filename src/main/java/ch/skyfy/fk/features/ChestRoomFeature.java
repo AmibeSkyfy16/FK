@@ -48,7 +48,7 @@ import static net.minecraft.util.Util.NIL_UUID;
 @SuppressWarnings({"unused", "FieldCanBeLocal"})
 public class ChestRoomFeature {
 
-    public static class Msg extends MsgBase {
+    private static class Msg extends MsgBase {
         public static final Msg GAME_IS_OVER = new Msg("The game is over ! ", GOLD);
         public static final Msg WINNER = new Msg("Team %s won by capturing vault of team %s", GOLD);
         public static final Msg CAPTURE1 = new Msg("The %s player of the %s team has started the capture of your vault", GOLD);
@@ -67,8 +67,8 @@ public class ChestRoomFeature {
         FKMod.LOGGER.info(VaultConstant.class.getCanonicalName() + " loaded successfully");
     }
 
-    private final ChestRoomFeatureConfig config = Configs.CHEST_ROOM_CONFIG.config;
-    private final Vaults vaults = VaultConstant.VAULTS.config;
+    private final ChestRoomFeatureConfig config = Configs.CHEST_ROOM_CONFIG.data;
+    private final Vaults vaults = VaultConstant.VAULTS.data;
     private final MinecraftServer server;
     private final Map<FKTeam, Capture> captureMap;
 
@@ -139,7 +139,7 @@ public class ChestRoomFeature {
         var where = GameUtils.whereIsThePlayer(player, new Vec3d(player.getX(), player.getY(), player.getZ()), w -> w);
         var playerPos = new Vec3d(player.getX(), player.getY(), player.getZ());
         Box box;
-        for (var vault : VaultConstant.VAULTS.config.getVaults()) {
+        for (var vault : VaultConstant.VAULTS.data.getVaults()) {
             if (vault.getBlockPos()[0] == null || vault.getBlockPos()[1] == null) continue;
             box = BlockPos.toBox(vault.getBlockPos());
             switch (where) {

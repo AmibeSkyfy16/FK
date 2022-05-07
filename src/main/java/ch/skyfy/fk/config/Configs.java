@@ -27,10 +27,10 @@ public class Configs {
 
         CHEST_ROOM_CONFIG = new JsonDataClass<>("features\\chestroom.json5", ChestRoomFeatureConfig.class, TestConfigs.CHEST_ROOM_CONFIG);
 
-        WORLD_CONFIG.config.validate();
-        FK_CONFIG.config.validate();
-        TEAMS.config.validate();
-        CHEST_ROOM_CONFIG.config.validate();
+        WORLD_CONFIG.data.validate();
+        FK_CONFIG.data.validate();
+        TEAMS.data.validate();
+        CHEST_ROOM_CONFIG.data.validate();
 
 
         // The default config

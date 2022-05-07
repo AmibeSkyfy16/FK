@@ -3,6 +3,7 @@ package ch.skyfy.fk.logic;
 import ch.skyfy.fk.FKMod;
 import ch.skyfy.fk.ScoreboardManager;
 import ch.skyfy.fk.config.Configs;
+import ch.skyfy.fk.constants.MsgBase;
 import ch.skyfy.fk.events.*;
 import ch.skyfy.fk.features.ChestRoomFeature;
 import ch.skyfy.fk.logic.data.FKGameAllData;
@@ -28,6 +29,7 @@ import net.minecraft.fluid.WaterFluid;
 import net.minecraft.item.BucketItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.network.MessageType;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
@@ -42,8 +44,28 @@ import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 import org.jetbrains.annotations.Nullable;
 
+import static net.minecraft.util.Util.NIL_UUID;
+
 @SuppressWarnings({"FieldCanBeLocal", "unused"})
 public class FKGame {
+
+    private static class Msg extends MsgBase {
+
+        public static Msg GAME_BEGINS = new Msg("The game is launched, good luck to all", Formatting.GREEN);
+        public static Msg BASE_COORDINATES = new Msg("Here are the coordinates of your base : X:%d Y:%d Z:%d", Formatting.GREEN);
+        public static Msg GAME_HAS_BEEN_PAUSED = new Msg("The game has been paused", Formatting.GOLD);
+        public static Msg GAME_HAS_BEEN_RESUMED = new Msg("The game has been resumed", Formatting.GOLD);
+
+
+        protected Msg(String text, Formatting formatting) {
+            super(text, formatting);
+        }
+    }
+
+    static {
+        ReflectionUtils.loadClassesByReflection(new Class[]{FKGameAllData.class});
+        FKMod.LOGGER.info(FKGameAllData.class.getCanonicalName() + " loaded successfully");
+    }
 
     private final MinecraftServer server;
 
@@ -57,10 +79,6 @@ public class FKGame {
     @Getter
     private final ChestRoomFeature chestRoomFeature;
 
-    static {
-        ReflectionUtils.loadClassesByReflection(new Class[]{FKGameAllData.class});
-        FKMod.LOGGER.info(FKGameAllData.class.getCanonicalName() +  " loaded successfully");
-    }
 
     public FKGame(MinecraftServer server, ServerPlayerEntity firstPlayerToJoin) {
         this.server = server;
@@ -78,7 +96,7 @@ public class FKGame {
 
     private void initialize(ServerPlayerEntity firstPlayerToJoin) {
         if (GameUtils.isGameState_RUNNING())
-            FKGameAllData.FK_GAME_DATA.config.setGameState(FKMod.GameState.PAUSED);
+            FKGameAllData.FK_GAME_DATA.data.setGameState(FKMod.GameState.PAUSED);
         update(firstPlayerToJoin);
         teleportPlayerToWaitingRoom(firstPlayerToJoin);
         setupWorldBorder();
@@ -89,28 +107,28 @@ public class FKGame {
         server.getOverworld().setTimeOfDay(0);
         timeline.startTimer();
 
-        // Send a message to all fk player to tell them where their respective base is
-        for (ServerPlayerEntity fkPlayer : GameUtils.getAllConnectedFKPlayers(server.getPlayerManager().getPlayerList())) {
+        server.getPlayerManager().broadcast(Msg.GAME_BEGINS.text(), MessageType.CHAT, NIL_UUID);
+
+        for (var fkPlayer : GameUtils.getAllConnectedFKPlayers(server.getPlayerManager().getPlayerList())) {
             var fkTeam = GameUtils.getFKTeamOfPlayerByName(fkPlayer.getName().asString());
             var base = fkTeam.getBase();
-
-            if (Configs.FK_CONFIG.config.isShouldTeleportPlayersToTheirOwnBaseWhenGameIsStarted()) {
+            if (Configs.FK_CONFIG.data.isShouldTeleportPlayersToTheirOwnBaseWhenGameIsStarted()) {
                 var spawnLoc = base.getSpawnLocation();
                 var optServerWorld = GameUtils.getServerWorldByIdentifier(server, spawnLoc.getDimensionName());
                 optServerWorld.ifPresent(serverWorld -> fkPlayer.teleport(serverWorld, spawnLoc.getX(), spawnLoc.getY(), spawnLoc.getZ(), spawnLoc.getYaw(), spawnLoc.getPitch()));
-            } else {
-                var baseLoc = new BlockPos(base.getCube().getX(), base.getCube().getY(), base.getCube().getZ());
-                var message = new LiteralText("Your base is at this coords: X: " + baseLoc.getX() + " Y: " + baseLoc.getY() + " Z: " + baseLoc.getZ())
-                        .setStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE));
-                fkPlayer.sendMessage(message, false);
-            }
+            } else
+                Msg.BASE_COORDINATES.formatted(base.getCube().getX(), base.getCube().getY(), base.getCube().getZ()).send(fkPlayer);
         }
     }
 
     public void pause() {
+        FKGameAllData.FK_GAME_DATA.data.setGameState(FKMod.GameState.PAUSED);
+        server.getPlayerManager().broadcast(Msg.GAME_HAS_BEEN_PAUSED.text(), MessageType.CHAT, NIL_UUID);
     }
 
     public void resume() {
+        server.getPlayerManager().broadcast(Msg.GAME_HAS_BEEN_RESUMED.text(), MessageType.CHAT, NIL_UUID);
+
         // If the timeline wasn't started (in the case of a server restart with gamestate at PAUSE OR RUNNING)
         if (!timeline.getIsTimerStartedRef().get())
             timeline.startTimer();
@@ -132,20 +150,18 @@ public class FKGame {
         if (fkTeam == null) return;
 
         var team = serverScoreboard.getTeam(fkTeam.getName());
-        if (team == null) { // Create a new team
+        if (team == null) {
             team = serverScoreboard.addTeam(GameUtils.getFKTeamIdentifierByName(fkTeam.getName())); // minecraft internal team name can't have space or special char
             team.setDisplayName(new LiteralText(fkTeam.getName()).setStyle(Style.EMPTY.withColor(Formatting.byName(fkTeam.getColor()))));
             team.setColor(Formatting.byName(fkTeam.getColor()));
         }
 
         var playerTeam = serverScoreboard.getPlayerTeam(playerName);
-        if (playerTeam == null) { // Player has no team
+        if (playerTeam == null)
             serverScoreboard.addPlayerToTeam(playerName, team);
-        }
 
         serverScoreboard.updateScoreboardTeamAndPlayers(team);
         serverScoreboard.updateScoreboardTeam(team);
-
     }
 
     private void updateSidebar(ServerPlayerEntity player) {
@@ -155,26 +171,25 @@ public class FKGame {
 
     private void teleportPlayerToWaitingRoom(ServerPlayerEntity player) {
         if (GameUtils.isGameState_NOT_STARTED()) {
-            var spawnLoc = Configs.FK_CONFIG.config.getWaitingRoom().getSpawnLocation();
+            var spawnLoc = Configs.FK_CONFIG.data.getWaitingRoom().getSpawnLocation();
             GameUtils.getServerWorldByIdentifier(server, spawnLoc.getDimensionName()).ifPresent(serverWorld -> player.teleport(serverWorld, spawnLoc.getX(), spawnLoc.getY(), spawnLoc.getZ(), spawnLoc.getYaw(), spawnLoc.getPitch()));
         }
     }
 
     private void setupWorldBorder() {
-        var worldBorderCube = Configs.WORLD_CONFIG.config.getWorldBorderData().getCube();
+        var worldBorderCube = Configs.WORLD_CONFIG.data.getWorldBorderData().getCube();
         server.getOverworld().getWorldBorder().setSize(worldBorderCube.getSize() * 2);
         server.getOverworld().getWorldBorder().setCenter(worldBorderCube.getX(), worldBorderCube.getZ());
         server.getOverworld().getWorldBorder().tick();
     }
 
     private void setWorldSpawn() {
-        var spawnLocation = Configs.FK_CONFIG.config.getWorldSpawn();
+        var spawnLocation = Configs.FK_CONFIG.data.getWorldSpawn();
         server.getOverworld().setSpawnPos(new BlockPos(spawnLocation.getX(), spawnLocation.getY(), spawnLocation.getZ()), 1.0f);
     }
 
     private void registerEvents() {
         // Event use when the game state is "running"
-
         PlayerBlockBreakEvents.BEFORE.register(fkGameEvents::cancelPlayerFromBreakingBlocks);
         UseBlockCallback.EVENT.register(FKGameEvents.SECOND, fkGameEvents::cancelPlayerFromFiringATNT);
         UseBlockCallback.EVENT.register(FKGameEvents.SECOND, fkGameEvents::cancelPlayerFromPlacingBlocks);
@@ -394,7 +409,7 @@ public class FKGame {
             if (player.hasPermissionLevel(4)) return ActionResult.PASS; // OP Player can move anymore
 
             if (GameUtils.isGameState_NOT_STARTED()) {
-                var waitingRoom = Configs.FK_CONFIG.config.getWaitingRoom();
+                var waitingRoom = Configs.FK_CONFIG.data.getWaitingRoom();
                 if (Utils.cancelPlayerFromLeavingAnArea(waitingRoom.getCube(), player, waitingRoom.getSpawnLocation()))
                     return ActionResult.FAIL;
                 return ActionResult.PASS;
@@ -405,7 +420,7 @@ public class FKGame {
                 return ActionResult.FAIL;
 
             // Cancel the player from going too far into the map
-            if (Utils.cancelPlayerFromLeavingAnArea(Configs.WORLD_CONFIG.config.getWorldBorderData().getCube(), player, null)) {
+            if (Utils.cancelPlayerFromLeavingAnArea(Configs.WORLD_CONFIG.data.getWorldBorderData().getCube(), player, null)) {
                 player.sendMessage(new LiteralText("You reach the border limit !").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
                 return ActionResult.FAIL;
             }

@@ -101,7 +101,7 @@ public class TeamsConfig implements Validatable {
                     errors.add("Base proximity " + base2.getName() + " is inside base proximity " + base1.getName());
                 }
 
-                var waitingRoom = Configs.FK_CONFIG.config.getWaitingRoom();
+                var waitingRoom = Configs.FK_CONFIG.data.getWaitingRoom();
                 if(MathUtils.intersect(base1.getCube(), waitingRoom.getCube())){
                     errors.add("Base " + base1.getName() + " intersect waiting room ");
                 }
@@ -112,7 +112,7 @@ public class TeamsConfig implements Validatable {
         }
 
         // Check if the base is inside the world border
-        var worldBorderCube = Configs.WORLD_CONFIG.config.getWorldBorderData().getCube();
+        var worldBorderCube = Configs.WORLD_CONFIG.data.getWorldBorderData().getCube();
         for (var team : teams)
             if (!MathUtils.isInside(worldBorderCube, team.getBase().getProximityCube()))
                 errors.add("the base " + team.getBase().getName() + " is not inside the world border !");

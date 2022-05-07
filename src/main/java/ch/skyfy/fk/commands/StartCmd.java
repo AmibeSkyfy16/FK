@@ -35,7 +35,6 @@ public class StartCmd implements Command<ServerCommandSource> {
 
     @Override
     public int run(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-
         var source = context.getSource();
         var player = source.getPlayer();
 
@@ -45,22 +44,18 @@ public class StartCmd implements Command<ServerCommandSource> {
 //            return 0;
 //        }
 
-        switch (FKGameAllData.FK_GAME_DATA.config.getGameState()) {
+        switch (FKGameAllData.FK_GAME_DATA.data.getGameState()) {
             case PAUSED ->
                     player.sendMessage(new LiteralText("The game cannot be started because it is paused !").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
             case RUNNING ->
                     player.sendMessage(new LiteralText("The game has already started !").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
             case NOT_STARTED -> {
-
                 // TODO UNCOMMENT
-                if (GameUtils.getMissingFKPlayer(source.getServer().getPlayerManager().getPlayerList()).size() > 0) {
-                    GameUtils.sendMissingPlayersMessage(player, source.getServer().getPlayerManager().getPlayerList());
-                }
-
-                source.getServer().getPlayerManager().broadcast(new LiteralText("The game begins !").setStyle(Style.EMPTY.withColor(Formatting.GREEN)), MessageType.CHAT, NIL_UUID);
-
-                FKGameAllData.FK_GAME_DATA.config.setGameState(FKMod.GameState.RUNNING);
-
+//                if (GameUtils.getMissingFKPlayer(source.getServer().getPlayerManager().getPlayerList()).size() > 0) {
+//                    GameUtils.sendMissingPlayersMessage(player, source.getServer().getPlayerManager().getPlayerList());
+//                    return 0;
+//                }
+                FKGameAllData.FK_GAME_DATA.data.setGameState(FKMod.GameState.RUNNING);
                 optFKGameRef.get().ifPresent(FKGame::start);
             }
         }

@@ -17,9 +17,7 @@ import net.minecraft.util.Formatting;
 public class GetMarkerCmd implements Command<ServerCommandSource> {
 
     public void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        dispatcher.register(CommandManager.literal("getMarker")
-                .executes(this)
-        );
+        dispatcher.register(CommandManager.literal("getMarker").executes(this));
     }
 
     @Override

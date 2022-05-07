@@ -2,21 +2,21 @@ package ch.skyfy.fk.json;
 
 import ch.skyfy.fk.utils.ModUtils;
 
-public class JsonDataClass<C extends Validatable> {
+public class JsonDataClass<T extends Validatable> {
 
-    public final C config;
+    public final T data;
     public final String relativeFilePath;
-    public final Class<C> cClass;
+    public final Class<T> cClass;
 
-    public final JsonManager<C> jsonManager;
+    public final JsonManager<T> jsonManager;
 
-    public JsonDataClass(String relativeFilePath, Class<C> cClass, C defaultConfig) {
+    public JsonDataClass(String relativeFilePath, Class<T> cClass, T defaultConfig) {
         this.relativeFilePath = relativeFilePath;
         this.cClass = cClass;
 
         this.jsonManager = new JsonManager<>(cClass, ModUtils.getRelativeFile(relativeFilePath), defaultConfig);
 
-        config = jsonManager.getOrCreateConfig();
+        data = jsonManager.getOrCreateConfig();
     }
 
 }

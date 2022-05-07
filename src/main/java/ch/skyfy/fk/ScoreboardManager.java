@@ -43,7 +43,7 @@ public class ScoreboardManager {
         var list = new ArrayList<Text>();
 
         list.add(new LiteralText("").setStyle(Style.EMPTY));
-        list.add(new LiteralText("Game Status: " + FKGameAllData.FK_GAME_DATA.config.getGameState().name()).setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
+        list.add(new LiteralText("Game Status: " + FKGameAllData.FK_GAME_DATA.data.getGameState().name()).setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
         list.add(new LiteralText("").setStyle(Style.EMPTY));
 
         var fkTeam = GameUtils.getFKTeamOfPlayerByName(player.getName().asString());

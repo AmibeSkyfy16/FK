@@ -62,7 +62,7 @@ public class FKConfig implements Validatable {
         }
 
 //         Check if the waiting room is inside the world border
-        var worldBorderCube = Configs.WORLD_CONFIG.config.getWorldBorderData().getCube();
+        var worldBorderCube = Configs.WORLD_CONFIG.data.getWorldBorderData().getCube();
         if(!MathUtils.isInside(worldBorderCube, waitingRoom.getCube())){
             errors.add("the waiting room is not inside the world border !");
         }

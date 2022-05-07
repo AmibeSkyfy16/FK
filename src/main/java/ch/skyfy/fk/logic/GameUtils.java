@@ -18,7 +18,6 @@ import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
@@ -39,7 +38,7 @@ public class GameUtils {
      */
     public static List<String> getMissingFKPlayer(List<ServerPlayerEntity> onlinePlayers) {
         var missingPlayers = new ArrayList<String>();
-        for (var fkTeam : TEAMS.config.getTeams()) {
+        for (var fkTeam : TEAMS.data.getTeams()) {
             for (var fkPlayerName : fkTeam.getPlayers()) {
                 if (onlinePlayers.stream().noneMatch(serverPlayerEntity -> serverPlayerEntity.getName().asString().equals(fkPlayerName)))
                     missingPlayers.add(fkPlayerName);
@@ -53,7 +52,7 @@ public class GameUtils {
      * @return True if the player is part of the game. False otherwise
      */
     public static boolean isFKPlayer(String playerName) {
-        return TEAMS.config.getTeams().stream().flatMap(fkTeam -> fkTeam.getPlayers().stream()).anyMatch(fkPlayerName -> fkPlayerName.equals(playerName));
+        return TEAMS.data.getTeams().stream().flatMap(fkTeam -> fkTeam.getPlayers().stream()).anyMatch(fkPlayerName -> fkPlayerName.equals(playerName));
     }
 
     /**
@@ -61,7 +60,7 @@ public class GameUtils {
      * @return A list with only the players participating in the FK
      */
     public static List<ServerPlayerEntity> getAllConnectedFKPlayers(List<ServerPlayerEntity> onlinePlayers) {
-        return TEAMS.config.getTeams().stream()
+        return TEAMS.data.getTeams().stream()
                 .flatMap(fkTeam -> onlinePlayers.stream()
                         .filter(player -> fkTeam.getPlayers().contains(player.getName().asString())))
                 .toList();
@@ -76,21 +75,21 @@ public class GameUtils {
 
     @Nullable
     public static BlockPos getBaseCoordinateByPlayer(String name) {
-        for (var fkTeam : TEAMS.config.getTeams())
+        for (var fkTeam : TEAMS.data.getTeams())
             if (fkTeam.getPlayers().stream().anyMatch(name::equals))
                 return new BlockPos(fkTeam.getBase().getCube().getX(), fkTeam.getBase().getCube().getY(), fkTeam.getBase().getCube().getZ());
         return null;
     }
 
     public static Optional<FKTeam> getTeamByCoordinate(Vec3d pos) {
-        for (var team : TEAMS.config.getTeams())
+        for (var team : TEAMS.data.getTeams())
             if (Utils.isAPosInsideCube(team.getBase().getCube(), pos))
                 return Optional.of(team);
         return Optional.empty();
     }
 
     public static Optional<Vault> getVaultByTeamName(String teamName) {
-        return VaultConstant.VAULTS.config.getVaults().stream().filter(vault -> vault.getTeamId().equals(getFKTeamIdentifierByName(teamName))).findFirst();
+        return VaultConstant.VAULTS.data.getVaults().stream().filter(vault -> vault.getTeamId().equals(getFKTeamIdentifierByName(teamName))).findFirst();
     }
 
     public static Optional<ServerWorld> getServerWorldByIdentifier(MinecraftServer server, String id) {
@@ -100,13 +99,13 @@ public class GameUtils {
     }
 
     public static FKTeam getFKTeamOfPlayerByName(String name) {
-        for (var fkTeam : TEAMS.config.getTeams())
+        for (var fkTeam : TEAMS.data.getTeams())
             if (fkTeam.getPlayers().stream().anyMatch(name::equals)) return fkTeam;
         return null;
     }
 
     public static boolean isInTheSameTeam(String playerName1, String playerName2) {
-        for (var fkTeam : TEAMS.config.getTeams())
+        for (var fkTeam : TEAMS.data.getTeams())
             if (fkTeam.getPlayers().stream().anyMatch(playerName1::equals) && fkTeam.getPlayers().stream().anyMatch(playerName2::equals))
                 return true;
         return false;
@@ -135,7 +134,7 @@ public class GameUtils {
         // Is the player close to an enemy base, but not inside
         var isPlayerCloseToAnEnemyBase = false;
 
-        for (var team : TEAMS.config.getTeams()) {
+        for (var team : TEAMS.data.getTeams()) {
             var baseCube = team.getBase().getCube();
 
             // Is this base the base of the player who break the block ?
@@ -171,32 +170,32 @@ public class GameUtils {
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public static boolean isGameState_RUNNING() {
-        return FKGameAllData.FK_GAME_DATA.config.getGameState() == FKMod.GameState.RUNNING;
+        return FKGameAllData.FK_GAME_DATA.data.getGameState() == FKMod.GameState.RUNNING;
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public static boolean isGameState_PAUSED() {
-        return FKGameAllData.FK_GAME_DATA.config.getGameState() == FKMod.GameState.PAUSED;
+        return FKGameAllData.FK_GAME_DATA.data.getGameState() == FKMod.GameState.PAUSED;
     }
 
     public static boolean isGameState_NOT_STARTED() {
-        return FKGameAllData.FK_GAME_DATA.config.getGameState() == FKMod.GameState.NOT_STARTED;
+        return FKGameAllData.FK_GAME_DATA.data.getGameState() == FKMod.GameState.NOT_STARTED;
     }
 
     public static boolean areAssaultEnabled(int currentDay) {
-        return currentDay >= Configs.FK_CONFIG.config.getDayOfAuthorizationOfTheAssaults();
+        return currentDay >= Configs.FK_CONFIG.data.getDayOfAuthorizationOfTheAssaults();
     }
 
     public static boolean isNetherEnabled(int currentDay) {
-        return currentDay >= Configs.FK_CONFIG.config.getDayOfAuthorizationOfTheEntryInTheNether();
+        return currentDay >= Configs.FK_CONFIG.data.getDayOfAuthorizationOfTheEntryInTheNether();
     }
 
     public static boolean isEndEnabled(int currentDay) {
-        return currentDay >= Configs.FK_CONFIG.config.getDayOfAuthorizationOfTheEntryInTheEnd();
+        return currentDay >= Configs.FK_CONFIG.data.getDayOfAuthorizationOfTheEntryInTheEnd();
     }
 
     public static boolean isPvPEnabled(int currentDay) {
-        return currentDay >= Configs.FK_CONFIG.config.getDayOfAuthorizationOfThePvP();
+        return currentDay >= Configs.FK_CONFIG.data.getDayOfAuthorizationOfThePvP();
     }
 
 }

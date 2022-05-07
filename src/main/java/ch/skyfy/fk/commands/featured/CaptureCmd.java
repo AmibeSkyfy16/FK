@@ -54,7 +54,7 @@ public class CaptureCmd implements Command<ServerCommandSource> {
 
         var playerAttacker = context.getSource().getPlayer();
 
-        if (!Configs.CHEST_ROOM_CONFIG.data.isEnabled()) {
+        if (!Configs.VAULT_CONFIG.data.isEnabled()) {
             Msg.VAULT_FEATURE_NOT_ENABLED.send(playerAttacker);
             return 0;
         }
@@ -96,7 +96,7 @@ public class CaptureCmd implements Command<ServerCommandSource> {
             return 0;
         }
 
-        var chestRoomFeature = fkGame.getChestRoomFeature();
+        var chestRoomFeature = fkGame.getVaultFeature();
         switch (chestRoomFeature.whereIsThePlayer(playerAttacker)) {
             case INSIDE_HIS_OWN_BASE -> {
                 Msg.IN_YOUR_BASE_BUT_NO_IN_YOUR_VAULT.send(playerAttacker);

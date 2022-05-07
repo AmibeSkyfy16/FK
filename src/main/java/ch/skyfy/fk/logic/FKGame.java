@@ -5,7 +5,7 @@ import ch.skyfy.fk.ScoreboardManager;
 import ch.skyfy.fk.config.Configs;
 import ch.skyfy.fk.constants.MsgBase;
 import ch.skyfy.fk.events.*;
-import ch.skyfy.fk.features.ChestRoomFeature;
+import ch.skyfy.fk.features.VaultFeature;
 import ch.skyfy.fk.logic.data.FKGameAllData;
 import ch.skyfy.fk.utils.ReflectionUtils;
 import lombok.Getter;
@@ -77,7 +77,7 @@ public class FKGame {
     private final FKGameEvents fkGameEvents;
 
     @Getter
-    private final ChestRoomFeature chestRoomFeature;
+    private final VaultFeature vaultFeature;
 
     public FKGame(MinecraftServer server, ServerPlayerEntity firstPlayerToJoin) {
         this.server = server;
@@ -85,7 +85,7 @@ public class FKGame {
         pauseEvents = new PauseEvents();
         fkGameEvents = new FKGameEvents();
 
-        chestRoomFeature = new ChestRoomFeature(server);
+        vaultFeature = new VaultFeature(server);
 
         fkGameEvents.onPlayerJoin(firstPlayerToJoin, server); // Remind: when constructor is called, it's from a PlayerJoinCallback
 

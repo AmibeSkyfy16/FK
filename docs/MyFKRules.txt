@@ -16,10 +16,10 @@ LES ETATS DU JEU
     NOT_STARTED -> Le jeu n'a encore jamais été démarré sur ce serveur.
                    C'est l'état par défaut, lorsque le mod est installé sur le serveur.
 
-    RUNNING -> Le jeu est en cours (les joueurs minent, construisent leur muraille, etc.).
+    RUNNING → Le jeu est en cours (les joueurs minent, construisent leur muraille, etc.).
                Le jeu se met dans l'état RUNNING lorsque la commande /FKStart ou /FKResume est exécuté
 
-    PAUSED -> Le jeu est en pause.
+    PAUSED → Le jeu est en pause.
               Le jeu se met dans l'état PAUSED lorsque la commande /FKPause est exécuté
               ou que le serveur à redémarrer et qu'il se trouvait déjà dans l'état PAUSED ou RUNNING.
 
@@ -59,6 +59,7 @@ LES ETATS DU JEU EN DETAILS
     RUNNING
 
         Les choses qui sont appliquées lorsque le jeu est dans cet état :
+
             1. Certaines règles sont gérées par le mod et s'appliquent automatiquement
                 Ex : les joueurs ne pourront pas poser de bloc dans la base des enemies
 
@@ -97,52 +98,48 @@ Les règles du FK
 
     REGLES CONCERNANT LA POSE ET LE CASSAGE DE BLOCS
 
-        CASSAGE DE BLOCS
+        CASSAGE DE BLOCS [Gérer par le mod]
             À l'intérieur de sa propre base :
                 Tous les blocs peuvent être cassés
             Dans la zone de proximité de sa propre base :
                 Tous les blocs peuvent être cassés
-
             À l'intérieur d'une base enemies :
-                Aucuns blocs ne peut être cassé, excepté la TNT, les torches en redstone et les torches
+                Aucuns blocs ne peut être cassé, excepté la TNT, les torches en redstone et les leviers
                 et seulement si les assauts sont activé
             Dans la zone de proximité d'une base enemies :
-                Aucuns blocs ne peut être cassé, excepté la TNT, les torches en redstone et les torches
+                Aucuns blocs ne peut être cassé, excepté la TNT, les torches en redstone et les leviers
                 et seulement si les assauts sont activé
 
-        POSE DE BLOCS
+        POSE DE BLOCS [Gérer par le mod]
             À l'intérieur de sa propre base :
                 Tous les blocs peuvent être placés
             Dans la zone de proximité de sa propre base :
                 Aucun bloc ne peut être placé
-
             À l'intérieur d'une base enemies :
-                Aucuns blocs ne peut être placé, excepté la TNT, les torches en redstone et les torches
+                Aucuns blocs ne peut être placé, excepté la TNT, les torches en redstone et les leviers
                 et seulement si les assauts sont activé
             Dans la zone de proximité d'une base enemies :
-                Aucuns blocs ne peut être placé, excepté la TNT, les torches en redstone et les torches
+                Aucuns blocs ne peut être placé, excepté la TNT, les torches en redstone et les leviers
                 et seulement si les assauts sont activé
 
 
     REGLES CONCERNANT LE REMPLISSAGE ET LE VIDAGE DE SCEAU
 
-        REMPLISSAGE DE SCEAU
+        REMPLISSAGE DE SCEAU [Gérer par le mod]
             À l'intérieur de sa propre base :
                 Sceau d'eau et lava peuvent être remplie
             Dans la zone de proximité de sa propre base :
                 Sceau d'eau et lava peuvent être remplie
-
             À l'intérieur d'une base enemies :
                 Aucun sceau ne peut être rempli
             Dans la zone de proximité d'une base enemies :
                 Aucun sceau ne peut être rempli
 
-        VIDAGE DE SCEAU
+        VIDAGE DE SCEAU [Gérer par le mod]
             À l'intérieur de sa propre base :
                 Sceau d'eau et lava peuvent être vidé
             Dans la zone de proximité de sa propre base :
                 Aucun sceau ne peut être vidé
-
             À l'intérieur d'une base enemies :
                 Aucun sceau ne peut être vidé
             Dans la zone de proximité d'une base enemies :
@@ -162,12 +159,13 @@ Les règles du FK
         2. Interdiction d'utiliser de l'obsidienne pour construire la muraille
         3. Lorsque les assauts sont activés, les choses suivantes doivent impérativement avoir été faite :
             1. La salle des coffres doit être construite et répondre aux règles la concernant
+                1.1 // TODO Ajouter une option configurable permettant d'éliminer une team, si aucune salle des coffres n'a été construite
             2. Il ne doit plus y avoir des coffres qui ne sont pas dans la salle des coffres
 
     REGLES CONCERNANT LA SALLE DES COFFRES
         1. La salle des coffres doit être accessible sans casser de blocs
-        2. La salle des coffres soit se situer maximum 30 blocs en dessous de la surface de la base
-        3. Règle des dimensions de la salle des coffres
+        2. La salle des coffres soit se situer maximum 30 blocs en dessous de la surface de la base [Gérer par le mod (Vault Feature)], [Configurable]
+        3. Règle des dimensions de la salle des coffres [Gérer par le mod (Vault Feature)], [Configurable]
             3.1 Sa largeur doit être de minimum 5 blocs
             3.2 Sa longueur doit être de minimum 5 blocs
             3.3 Sa hauteur doit être de minimum 2 blocs
@@ -175,5 +173,5 @@ Les règles du FK
     REGLES DE VICTOIRE
         Vous êtes déclaré victorieux si et seulement si les conditions suivantes sont remplis :
             1. Les assauts doivent être activés
-            2. Trouver la salle des coffres et y rester pendant au moins 1 minute sans mourir
+            2. Trouver la salle des coffres et y rester pendant au moins 1 minute sans mourir [Gérer par le mod (Vault Feature)]
 

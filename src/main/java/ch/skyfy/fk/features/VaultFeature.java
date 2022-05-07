@@ -3,7 +3,7 @@ package ch.skyfy.fk.features;
 import ch.skyfy.fk.FKMod;
 import ch.skyfy.fk.config.Configs;
 import ch.skyfy.fk.config.data.FKTeam;
-import ch.skyfy.fk.config.features.ChestRoomFeatureConfig;
+import ch.skyfy.fk.config.features.VaultFeatureConfig;
 import ch.skyfy.fk.constants.MsgBase;
 import ch.skyfy.fk.constants.Where;
 import ch.skyfy.fk.events.PlayerMoveCallback;
@@ -46,7 +46,7 @@ import static net.minecraft.util.Formatting.*;
 import static net.minecraft.util.Util.NIL_UUID;
 
 @SuppressWarnings({"unused", "FieldCanBeLocal"})
-public class ChestRoomFeature {
+public class VaultFeature {
 
     private static class Msg extends MsgBase {
         private static final Msg GAME_IS_OVER = new Msg("The game is over ! ", GOLD);
@@ -80,12 +80,12 @@ public class ChestRoomFeature {
         FKMod.LOGGER.info(VaultConstant.class.getCanonicalName() + " loaded successfully");
     }
 
-    private final ChestRoomFeatureConfig config = Configs.CHEST_ROOM_CONFIG.data;
+    private final VaultFeatureConfig config = Configs.VAULT_CONFIG.data;
     private final Vaults vaults = VaultConstant.VAULTS.data;
     private final MinecraftServer server;
     private final Map<FKTeam, Capture> captureMap;
 
-    public ChestRoomFeature(MinecraftServer server) {
+    public VaultFeature(MinecraftServer server) {
         this.server = server;
         captureMap = new HashMap<>();
 

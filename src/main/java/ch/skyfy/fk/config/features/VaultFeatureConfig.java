@@ -6,7 +6,7 @@ import lombok.Getter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ChestRoomFeatureConfig extends FeatureConfig implements Validatable {
+public class VaultFeatureConfig extends FeatureConfig implements Validatable {
 
     @Getter
     private final int minWidth;
@@ -17,7 +17,7 @@ public class ChestRoomFeatureConfig extends FeatureConfig implements Validatable
     @Getter
     private final int maximumNumberOfBlocksDown;
 
-    public ChestRoomFeatureConfig(boolean enabled, int minWidth, int minLength, int minHeight, int maximumNumberOfBlocksDown) {
+    public VaultFeatureConfig(boolean enabled, int minWidth, int minLength, int minHeight, int maximumNumberOfBlocksDown) {
         super(enabled);
         this.minWidth = minWidth;
         this.minLength = minLength;

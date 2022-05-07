@@ -4,7 +4,7 @@ import ch.skyfy.fk.config.FKConfig;
 import ch.skyfy.fk.config.TeamsConfig;
 import ch.skyfy.fk.config.WorldBorderConfig;
 import ch.skyfy.fk.config.data.*;
-import ch.skyfy.fk.config.features.ChestRoomFeatureConfig;
+import ch.skyfy.fk.config.features.VaultFeatureConfig;
 import net.minecraft.util.Formatting;
 
 import java.util.List;
@@ -46,7 +46,7 @@ public class TestConfigs {
             new Cube((short) 500, 64, 319, 0, 0, 0))
     );
 
-    public static final ChestRoomFeatureConfig CHEST_ROOM_CONFIG = new ChestRoomFeatureConfig(
+    public static final VaultFeatureConfig CHEST_ROOM_CONFIG = new VaultFeatureConfig(
             true,
             4,
             4,

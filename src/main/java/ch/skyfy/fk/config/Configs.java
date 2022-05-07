@@ -2,7 +2,7 @@ package ch.skyfy.fk.config;
 
 import ch.skyfy.fk.FKMod;
 import ch.skyfy.fk.config.constant.TestConfigs;
-import ch.skyfy.fk.config.features.ChestRoomFeatureConfig;
+import ch.skyfy.fk.config.features.VaultFeatureConfig;
 import ch.skyfy.fk.json.JsonDataClass;
 
 /**
@@ -16,7 +16,7 @@ public class Configs {
     public static final JsonDataClass<FKConfig> FK_CONFIG;
     public static final JsonDataClass<TeamsConfig> TEAMS;
 
-    public static final JsonDataClass<ChestRoomFeatureConfig> CHEST_ROOM_CONFIG;
+    public static final JsonDataClass<VaultFeatureConfig> VAULT_CONFIG;
 
     static {
 
@@ -25,12 +25,12 @@ public class Configs {
         FK_CONFIG = new JsonDataClass<>("fkconfig.json5", FKConfig.class, TestConfigs.TEST_FKCONFIG);
         TEAMS = new JsonDataClass<>("teams.json5", TeamsConfig.class, TestConfigs.TEST_TEAMS_CONFIG);
 
-        CHEST_ROOM_CONFIG = new JsonDataClass<>("features\\chestroom.json5", ChestRoomFeatureConfig.class, TestConfigs.CHEST_ROOM_CONFIG);
+        VAULT_CONFIG = new JsonDataClass<>("features\\vault.json5", VaultFeatureConfig.class, TestConfigs.CHEST_ROOM_CONFIG);
 
         WORLD_CONFIG.data.validate();
         FK_CONFIG.data.validate();
         TEAMS.data.validate();
-        CHEST_ROOM_CONFIG.data.validate();
+        VAULT_CONFIG.data.validate();
 
 
         // The default config

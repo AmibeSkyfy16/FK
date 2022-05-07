@@ -6,6 +6,7 @@ import ch.skyfy.fk.config.Configs;
 import ch.skyfy.fk.events.*;
 import ch.skyfy.fk.features.ChestRoomFeature;
 import ch.skyfy.fk.logic.data.FKGameAllData;
+import ch.skyfy.fk.utils.ReflectionUtils;
 import lombok.Getter;
 import me.bymartrixx.playerevents.api.event.PlayerJoinCallback;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
@@ -53,7 +54,13 @@ public class FKGame {
 
     private final FKGameEvents fkGameEvents;
 
+    @Getter
     private final ChestRoomFeature chestRoomFeature;
+
+    static {
+        ReflectionUtils.loadClassesByReflection(new Class[]{FKGameAllData.class});
+        System.out.println("FKGame DATA LOADED WITH NO ERROR");
+    }
 
     public FKGame(MinecraftServer server, ServerPlayerEntity firstPlayerToJoin) {
         this.server = server;
@@ -126,7 +133,7 @@ public class FKGame {
 
         var team = serverScoreboard.getTeam(fkTeam.getName());
         if (team == null) { // Create a new team
-            team = serverScoreboard.addTeam(fkTeam.getName().replaceAll("[^a-zA-Z\\d]", "")); // minecraft internal team name can't have space or special char
+            team = serverScoreboard.addTeam(GameUtils.getFKTeamIdentifierByName(fkTeam.getName())); // minecraft internal team name can't have space or special char
             team.setDisplayName(new LiteralText(fkTeam.getName()).setStyle(Style.EMPTY.withColor(Formatting.byName(fkTeam.getColor()))));
             team.setColor(Formatting.byName(fkTeam.getColor()));
         }
@@ -167,11 +174,12 @@ public class FKGame {
 
     private void registerEvents() {
         // Event use when the game state is "running"
+
         PlayerBlockBreakEvents.BEFORE.register(fkGameEvents::cancelPlayerFromBreakingBlocks);
-        UseBlockCallback.EVENT.register(fkGameEvents::cancelPlayerFromPlacingBlocks);
+        UseBlockCallback.EVENT.register(FKGameEvents.SECOND, fkGameEvents::cancelPlayerFromFiringATNT);
+        UseBlockCallback.EVENT.register(FKGameEvents.SECOND, fkGameEvents::cancelPlayerFromPlacingBlocks);
         BucketFillCallback.EVENT.register(fkGameEvents::cancelPlayerFromFillingABucket);
         BucketEmptyCallback.EVENT.register(fkGameEvents::cancelPlayerFromEmptyingABucket);
-        UseBlockCallback.EVENT.register(fkGameEvents::cancelPlayerFromFiringATNT);
         AttackEntityCallback.EVENT.register(fkGameEvents::cancelPlayerPvP);
         PlayerEnterPortalCallback.EVENT.register(fkGameEvents::cancelPlayerFromEnteringInPortal);
         PlayerMoveCallback.EVENT.register(fkGameEvents::onPlayerMove);
@@ -191,6 +199,13 @@ public class FKGame {
      */
     public class FKGameEvents {
 
+        public static final Identifier FIRST = new Identifier("fabric", "first");
+        public static final Identifier SECOND = new Identifier("fabric", "second");
+
+        public FKGameEvents() {
+            UseBlockCallback.EVENT.addPhaseOrdering(FIRST, SECOND);
+        }
+
         private boolean cancelPlayerFromBreakingBlocks(World world, PlayerEntity player, BlockPos pos, BlockState state, /* Nullable */ BlockEntity blockEntity) {
             if (player.hasPermissionLevel(4)) return true;
 
@@ -206,6 +221,7 @@ public class FKGame {
                     case CLOSE_TO_AN_ENEMY_BASE ->
                             block != Blocks.TNT || block != Blocks.REDSTONE_TORCH || block != Blocks.LEVER;
                     case IN_THE_WILD -> true;
+                    default -> true;
                 };
             };
             return GameUtils.whereIsThePlayer(player, new Vec3d(pos.getX(), pos.getY(), pos.getZ()), breakPlace);
@@ -216,31 +232,32 @@ public class FKGame {
 
             if (!GameUtils.isGameState_RUNNING()) return ActionResult.FAIL;
 
+            var itemInHand = player.getStackInHand(player.getActiveHand());
+
             var placeBlock = (GameUtils.WhereIsThePlayer<ActionResult>) (where) -> {
 
-                var placedItemStack = player.getStackInHand(player.getActiveHand());
-
-                if (!Registry.BLOCK.containsId(Registry.ITEM.getId(placedItemStack.getItem()))) // It's not a block
+                if (!Registry.BLOCK.containsId(Registry.ITEM.getId(itemInHand.getItem()))) // It's not a block
                     return ActionResult.PASS;
 
                 return switch (where) {
                     case INSIDE_HIS_OWN_BASE -> ActionResult.PASS;
                     case CLOSE_TO_HIS_OWN_BASE -> ActionResult.FAIL;
                     case INSIDE_AN_ENEMY_BASE -> {
-                        if (!placedItemStack.isOf(Items.TNT))
+                        if (!itemInHand.isOf(Items.TNT))
                             yield ActionResult.FAIL;
                         if (!GameUtils.areAssaultEnabled(timeline.getTimelineData().getDay()))
                             yield ActionResult.FAIL;
                         yield ActionResult.PASS;
                     }
                     case CLOSE_TO_AN_ENEMY_BASE -> {
-                        if (!placedItemStack.isOf(Items.TNT))
+                        if (!itemInHand.isOf(Items.TNT))
                             yield ActionResult.FAIL;
                         if (!GameUtils.areAssaultEnabled(timeline.getTimelineData().getDay()))
                             yield ActionResult.FAIL;
                         yield ActionResult.PASS;
                     }
                     case IN_THE_WILD -> ActionResult.PASS;
+                    default -> ActionResult.PASS;
                 };
             };
 
@@ -271,6 +288,7 @@ public class FKGame {
                         yield TypedActionResult.pass(placedItemStack);
                     }
                     case IN_THE_WILD -> TypedActionResult.pass(placedItemStack);
+                    default -> TypedActionResult.pass(placedItemStack);
                 };
             };
 
@@ -301,6 +319,7 @@ public class FKGame {
                         yield TypedActionResult.pass(placedItemStack);
                     }
                     case IN_THE_WILD -> TypedActionResult.pass(placedItemStack);
+                    default -> TypedActionResult.pass(placedItemStack);
                 };
             };
 
@@ -313,11 +332,11 @@ public class FKGame {
 
             if (!GameUtils.isGameState_RUNNING()) return ActionResult.FAIL;
 
+            var itemInHand = player.getStackInHand(hand);
+
             var emptyBucketImpl = (GameUtils.WhereIsThePlayer<ActionResult>) (where) -> {
 
-                var stackInHand = player.getStackInHand(hand);
-
-                if (stackInHand.isOf(Items.FLINT_AND_STEEL)) {
+                if (itemInHand.isOf(Items.FLINT_AND_STEEL)) {
                     var block = world.getBlockState(hitResult.getBlockPos()).getBlock();
                     if (!(block instanceof TntBlock)) return ActionResult.PASS;
                 }
@@ -336,6 +355,7 @@ public class FKGame {
                         yield ActionResult.PASS;
                     }
                     case IN_THE_WILD -> ActionResult.PASS;
+                    default -> ActionResult.PASS;
                 };
             };
 

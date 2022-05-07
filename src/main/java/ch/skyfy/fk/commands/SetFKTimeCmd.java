@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 
 @SuppressWarnings("ClassCanBeRecord")
-public class SetFKTime implements Command<ServerCommandSource> {
+public class SetFKTimeCmd implements Command<ServerCommandSource> {
 
     public void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(CommandManager.literal("setFKTime")
@@ -31,7 +31,7 @@ public class SetFKTime implements Command<ServerCommandSource> {
 
     private final AtomicReference<Optional<FKGame>> optFKGameRef;
 
-    public SetFKTime(final AtomicReference<Optional<FKGame>> optFKGameRef) {
+    public SetFKTimeCmd(final AtomicReference<Optional<FKGame>> optFKGameRef) {
         this.optFKGameRef = optFKGameRef;
     }
 

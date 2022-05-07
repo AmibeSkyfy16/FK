@@ -27,6 +27,8 @@ public class TeamsConfig implements Validatable {
     public void validate() {
         var errors = new ArrayList<String>();
 
+        // TODO two teams cannot have the same name of the same color
+
         // Check if a team name is empty
         teams.forEach(fkTeam -> {
             if (fkTeam.getName().isEmpty()) errors.add("A team name cannot be empty !");

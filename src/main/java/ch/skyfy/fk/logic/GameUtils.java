@@ -2,8 +2,11 @@ package ch.skyfy.fk.logic;
 
 import ch.skyfy.fk.FKMod;
 import ch.skyfy.fk.config.Configs;
+import ch.skyfy.fk.config.data.Base;
 import ch.skyfy.fk.config.data.FKTeam;
 import ch.skyfy.fk.constants.Where;
+import ch.skyfy.fk.features.data.Vault;
+import ch.skyfy.fk.features.data.VaultConstant;
 import ch.skyfy.fk.logic.data.FKGameAllData;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
@@ -71,6 +74,17 @@ public class GameUtils {
         return null;
     }
 
+    public static Optional<FKTeam> getTeamByCoordinate(Vec3d pos){
+        for (var team : TEAMS.config.getTeams())
+            if(Utils.isAPosInsideCube(team.getBase().getCube(), pos))
+                return Optional.of(team);
+        return Optional.empty();
+    }
+
+    public static Optional<Vault> getVaultByTeamName(String teamName){
+        return VaultConstant.VAULTS.config.getVaults().stream().filter(vault -> vault.getTeamId().equals(getFKTeamIdentifierByName(teamName))).findFirst();
+    }
+
     public static Optional<ServerWorld> getServerWorldByIdentifier(MinecraftServer server, String id){
         return StreamSupport.stream(server.getWorlds().spliterator(), false)
                 .filter(serverWorld -> serverWorld.getDimension().getEffects().toString().equals(id))
@@ -121,7 +135,7 @@ public class GameUtils {
             var isBaseOfPlayer = team.getPlayers().stream().anyMatch(fkPlayerName -> player.getName().asString().equals(fkPlayerName));
 
             // If player is inside a base
-            if (Utils.isPlayerInsideCube(baseCube, blockPos)) {
+            if (Utils.isAPosInsideCube(baseCube, blockPos)) {
 
                 // And this base is not his own
                 if (!isBaseOfPlayer)
@@ -132,7 +146,7 @@ public class GameUtils {
             } else {
                 var isPlayerCloseToABase = false;
 
-                if (Utils.isPlayerInsideCube(team.getBase().getProximityCube(), blockPos)) {
+                if (Utils.isAPosInsideCube(team.getBase().getProximityCube(), blockPos)) {
                     if (isBaseOfPlayer) where = Where.CLOSE_TO_HIS_OWN_BASE;
                     else where = Where.CLOSE_TO_AN_ENEMY_BASE;
                 }
@@ -142,6 +156,10 @@ public class GameUtils {
         }
 
         return whereIsThePlayer.impl(where);
+    }
+
+    public static String getFKTeamIdentifierByName(String fkteamName){
+        return fkteamName.replaceAll("[^a-zA-Z\\d]", "");
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")

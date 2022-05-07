@@ -46,7 +46,7 @@ public class Utils {
     /**
      * @return True if the player is in a given cube. False otherwise
      */
-    public static boolean isPlayerInsideCube(Cube cube, Vec3d pos) {
+    public static boolean isAPosInsideCube(Cube cube, Vec3d pos) {
         if ((pos.getX() <= cube.getX() + cube.getSize()) && (pos.getX() >= cube.getX() - cube.getSize()))
             if ((pos.getZ() <= cube.getZ() + cube.getSize()) && (pos.getZ() >= cube.getZ() - cube.getSize()))
                 return (pos.getY() <= cube.getY() + cube.getNumberOfBlocksUp()) && (pos.getY() >= cube.getY() - cube.getNumberOfBlocksDown());

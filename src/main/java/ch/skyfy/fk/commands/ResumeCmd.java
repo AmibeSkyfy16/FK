@@ -19,11 +19,10 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static net.minecraft.util.Util.NIL_UUID;
 
+@SuppressWarnings("ClassCanBeRecord")
 public class ResumeCmd implements Command<ServerCommandSource> {
 
     private final AtomicReference<Optional<FKGame>> optFKGameRef;
-
-    private final FKGameData fkGameData = FKGameAllData.FK_GAME_DATA.config;
 
     public ResumeCmd(final AtomicReference<Optional<FKGame>> optFKGameRef) {
         this.optFKGameRef = optFKGameRef;
@@ -41,7 +40,7 @@ public class ResumeCmd implements Command<ServerCommandSource> {
 //            return 0;
 //        }
 
-        switch (fkGameData.getGameState()) {
+        switch (FKGameAllData.FK_GAME_DATA.config.getGameState()) {
             case NOT_STARTED ->
                     player.sendMessage(new LiteralText("The game cannot be resumed because it is not started !").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
             case RUNNING ->
@@ -49,13 +48,14 @@ public class ResumeCmd implements Command<ServerCommandSource> {
             case PAUSED -> {
 
                 // TODO UNCOMMENT
-                if(GameUtils.getMissingFKPlayer(source.getServer().getPlayerManager().getPlayerList()).size() > 0){
-                    GameUtils.sendMissingPlayersMessage(player, source.getServer().getPlayerManager().getPlayerList());
-                }
+//                if(GameUtils.getMissingFKPlayer(source.getServer().getPlayerManager().getPlayerList()).size() > 0){
+//                    GameUtils.sendMissingPlayersMessage(player, source.getServer().getPlayerManager().getPlayerList());
+//                    return 0;
+//                }
 
                 source.getServer().getPlayerManager().broadcast(new LiteralText("The game has been resumed").setStyle(Style.EMPTY.withColor(Formatting.GREEN)), MessageType.CHAT, NIL_UUID);
 
-                fkGameData.setGameState(FKMod.GameState.RUNNING);
+                FKGameAllData.FK_GAME_DATA.config.setGameState(FKMod.GameState.RUNNING);
                 optFKGameRef.get().ifPresent(FKGame::resume);
             }
         }

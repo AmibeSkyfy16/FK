@@ -46,6 +46,12 @@ public class TestConfigs {
             new Cube((short) 500, 64, 319, 0, 0, 0))
     );
 
-    public static final ChestRoomFeatureConfig CHEST_ROOM_CONFIG = new ChestRoomFeatureConfig(true);
+    public static final ChestRoomFeatureConfig CHEST_ROOM_CONFIG = new ChestRoomFeatureConfig(
+            true,
+            4,
+            2,
+            4,
+            20
+    );
 
 }

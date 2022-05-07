@@ -19,11 +19,10 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static net.minecraft.util.Util.NIL_UUID;
 
+@SuppressWarnings("ClassCanBeRecord")
 public class StartCmd implements Command<ServerCommandSource> {
 
     private final AtomicReference<Optional<FKGame>> optFKGameRef;
-
-    private final FKGameData fkGameData = FKGameAllData.FK_GAME_DATA.config;
 
     public StartCmd(final AtomicReference<Optional<FKGame>> optFKGameRef) {
         this.optFKGameRef = optFKGameRef;
@@ -41,7 +40,7 @@ public class StartCmd implements Command<ServerCommandSource> {
 //            return 0;
 //        }
 
-        switch (fkGameData.getGameState()) {
+        switch (FKGameAllData.FK_GAME_DATA.config.getGameState()) {
             case PAUSED ->
                     player.sendMessage(new LiteralText("The game cannot be started because it is paused !").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
             case RUNNING ->
@@ -55,7 +54,7 @@ public class StartCmd implements Command<ServerCommandSource> {
 
                 source.getServer().getPlayerManager().broadcast(new LiteralText("The game begins !").setStyle(Style.EMPTY.withColor(Formatting.GREEN)), MessageType.CHAT, NIL_UUID);
 
-                fkGameData.setGameState(FKMod.GameState.RUNNING);
+                FKGameAllData.FK_GAME_DATA.config.setGameState(FKMod.GameState.RUNNING);
 
                 optFKGameRef.get().ifPresent(FKGame::start);
             }

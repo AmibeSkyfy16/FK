@@ -5,7 +5,7 @@ import ch.skyfy.fk.exceptions.FKModException;
 
 public class ReflectionUtils {
 
-    public static void loadConfigByReflection(Class<?>[] classesToLoad) {
+    public static void loadClassesByReflection(Class<?>[] classesToLoad) {
         for (var config : classesToLoad) {
             var canonicalName = config.getCanonicalName();
             try {

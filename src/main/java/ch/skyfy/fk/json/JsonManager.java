@@ -19,13 +19,13 @@ public class JsonManager<T extends Validatable> {
 
     private final File file;
 
-    private final T defaultConfig;
+    private final T config;
 
     public JsonManager(Class<T> tClass, Gson gson, File file, T defaultConfig) {
         this.typeToken = TypeToken.of(tClass);
         this.gson = gson;
         this.file = file;
-        this.defaultConfig = defaultConfig;
+        this.config = defaultConfig;
     }
 
     public JsonManager(Class<T> tClass, File file, T defaultConfig) {
@@ -38,8 +38,8 @@ public class JsonManager<T extends Validatable> {
             if (file.exists())
                 config = get();
             else {
-                config = defaultConfig;
-                save(defaultConfig);
+                config = this.config;
+                save(this.config);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

@@ -19,11 +19,10 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static net.minecraft.util.Util.NIL_UUID;
 
+@SuppressWarnings("ClassCanBeRecord")
 public class PauseCmd implements Command<ServerCommandSource> {
 
     private final AtomicReference<Optional<FKGame>> optFKGameRef;
-
-    private final FKGameData fkGameData = FKGameAllData.FK_GAME_DATA.config;
 
     public PauseCmd(final AtomicReference<Optional<FKGame>> optFKGameRef) {
         this.optFKGameRef = optFKGameRef;
@@ -41,7 +40,7 @@ public class PauseCmd implements Command<ServerCommandSource> {
 //            return 0;
 //        }
 
-        switch (fkGameData.getGameState()) {
+        switch (FKGameAllData.FK_GAME_DATA.config.getGameState()) {
             case NOT_STARTED ->
                     player.sendMessage(new LiteralText("The game cannot be paused because it is not started !").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
             case PAUSED ->

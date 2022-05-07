@@ -2,6 +2,8 @@ package ch.skyfy.fk;
 
 
 import ch.skyfy.fk.commands.*;
+import ch.skyfy.fk.commands.featured.CaptureCmd;
+import ch.skyfy.fk.commands.featured.GetMarkerCmd;
 import ch.skyfy.fk.config.Configs;
 import ch.skyfy.fk.logic.FKGame;
 import ch.skyfy.fk.utils.ReflectionUtils;
@@ -40,21 +42,25 @@ public class FKMod implements DedicatedServerModInitializer {
     private final PauseCmd pauseCmd;
     private final ResumeCmd resumeCmd;
 
-    private final SetFKTime setFKTime;
+    private final SetFKTimeCmd setFKTimeCmd;
+    private final GetMarkerCmd getMarkerCmd;
+    private final CaptureCmd captureCmd;
 
     public FKMod() throws Exception {
         // Create a config directory named with the MOD_ID under config folder of the server
         createConfigDirectory();
 
         // Load Configs.class a class that contains all our configuration data class
-        ReflectionUtils.loadConfigByReflection(new Class[]{Configs.class});
+        ReflectionUtils.loadClassesByReflection(new Class[]{Configs.class});
 
         optFKGameRef = new AtomicReference<>(Optional.empty());
 
         startCmd = new StartCmd(optFKGameRef);
         pauseCmd = new PauseCmd(optFKGameRef);
         resumeCmd = new ResumeCmd(optFKGameRef);
-        setFKTime = new SetFKTime(optFKGameRef);
+        setFKTimeCmd = new SetFKTimeCmd(optFKGameRef);
+        getMarkerCmd = new GetMarkerCmd();
+        captureCmd = new CaptureCmd(optFKGameRef);
 
     }
 
@@ -75,7 +81,9 @@ public class FKMod implements DedicatedServerModInitializer {
 
     public void registerCommands() {
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
-            setFKTime.register(dispatcher);
+            setFKTimeCmd.register(dispatcher);
+            getMarkerCmd.register(dispatcher);
+            captureCmd.register(dispatcher);
             dispatcher.register(net.minecraft.server.command.CommandManager.literal("FKStart").executes(startCmd));
             dispatcher.register(net.minecraft.server.command.CommandManager.literal("FKPause").executes(pauseCmd));
             dispatcher.register(net.minecraft.server.command.CommandManager.literal("FKResume").executes(resumeCmd));

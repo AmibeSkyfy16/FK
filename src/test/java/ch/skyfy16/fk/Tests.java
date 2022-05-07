@@ -2,8 +2,11 @@ package ch.skyfy16.fk;
 
 import ch.skyfy.fk.config.data.Cube;
 import ch.skyfy.fk.utils.MathUtils;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -80,6 +83,11 @@ public class Tests {
 //
 //        var result2 = MathUtils.intersect(cube1_proximity, cube2_proximity);
 //        System.out.println(result2);
+    }
+
+    @Test
+    public void mapTest(){
+
     }
 
 }

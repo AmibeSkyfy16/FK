@@ -4,6 +4,7 @@ import ch.skyfy.fk.FKMod;
 import ch.skyfy.fk.config.Configs;
 import ch.skyfy.fk.config.data.FKTeam;
 import ch.skyfy.fk.config.features.ChestRoomFeatureConfig;
+import ch.skyfy.fk.constants.MsgBase;
 import ch.skyfy.fk.constants.Where;
 import ch.skyfy.fk.events.PlayerMoveCallback;
 import ch.skyfy.fk.features.data.BlockPos;
@@ -16,8 +17,10 @@ import ch.skyfy.fk.logic.Utils;
 import ch.skyfy.fk.utils.ReflectionUtils;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.MessageType;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Style;
@@ -39,79 +42,97 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static ch.skyfy.fk.constants.Where.INSIDE_THE_VAULT_OF_AN_ENEMY_BASE;
+import static net.minecraft.util.Formatting.GOLD;
 import static net.minecraft.util.Util.NIL_UUID;
 
 @SuppressWarnings({"unused", "FieldCanBeLocal"})
 public class ChestRoomFeature {
 
+    public static class Msg extends MsgBase {
+        public static final Msg GAME_IS_OVER = new Msg("The game is over ! ", GOLD);
+        public static final Msg WINNER = new Msg("Team %s won by capturing vault of team %s", GOLD);
+        public static final Msg CAPTURE1 = new Msg("The %s player of the %s team has started the capture of your vault", GOLD);
+        public static final Msg CAPTURE2 = new Msg("Player %s has begun the capture of the %s team's vault", GOLD);
+        public static final Msg LEFT = new Msg("You just came out of the vault. As long as there are allies left inside, the capture will not be cancelled", GOLD);
+        public static final Msg CANCELLED = new Msg("\nYou have just come out of the vault, and there is no ally of yours in it. The capture is cancelled", GOLD);
+        public static final Msg ANOTHER_TEAM_ALREADY_CAPTURING_THIS_VAULT = new Msg("Another team is already capturing this vault", GOLD);
+        public static final Msg YOU_ARE_ALREADY_CAPTURING_THIS_VAULT = new Msg("You are already capturing this vault", GOLD);
+        public Msg(String text, Formatting formatting) {
+            super(text, formatting);
+        }
+    }
+
     static {
         ReflectionUtils.loadClassesByReflection(new Class[]{VaultConstant.class});
-        System.out.println("VaultData LOADED WITH NO ERROR");
+        FKMod.LOGGER.info(VaultConstant.class.getCanonicalName() + " loaded successfully");
     }
 
     private final ChestRoomFeatureConfig config = Configs.CHEST_ROOM_CONFIG.config;
-
     private final Vaults vaults = VaultConstant.VAULTS.config;
-
+    private final MinecraftServer server;
     private final Map<FKTeam, Capture> captureMap;
 
-    public ChestRoomFeature() {
-
+    public ChestRoomFeature(MinecraftServer server) {
+        this.server = server;
         captureMap = new HashMap<>();
 
         if (!config.isEnabled()) return;
 
         registerEvents();
-
-        // TODO Chest Room detection, eliminate if none chest room built when assault day is enabled, create chest room
     }
 
     private void registerEvents() {
         UseBlockCallback.EVENT.register(FKGame.FKGameEvents.FIRST, this::updatePlayerVaultDimension);
+        ServerPlayConnectionEvents.DISCONNECT.register((handler, server1) -> {
+            var player = handler.getPlayer();
+            if (whereIsThePlayer(player) == INSIDE_THE_VAULT_OF_AN_ENEMY_BASE) return;
+            manageCapture(player);
+        });
         PlayerMoveCallback.EVENT.register((moveData, player) -> {
             if (whereIsThePlayer(player) == INSIDE_THE_VAULT_OF_AN_ENEMY_BASE) return ActionResult.PASS;
-
-            // Check if player leave a vault while capturing
-            FKTeam toRemove = null;
-            for (Map.Entry<FKTeam, Capture> entry : captureMap.entrySet()) {
-                var fkTeamAttacker = entry.getKey();
-                var capture = entry.getValue();
-
-                if (capture.playerAttackers.contains(player)) {
-                    if (capture.playerAttackers.size() == 1) {
-                        capture.cancel(player);
-                        toRemove = fkTeamAttacker;
-                    } else
-                        capture.leave(player);
-                }
-            }
-
-            if (toRemove != null) {
-                captureMap.remove(toRemove);
-            }
-
+            manageCapture(player);
             return ActionResult.PASS;
         });
     }
 
-    public void addCapture(Vault vault, FKTeam fkTeamVictim, FKTeam fkTeamAttacker, ServerPlayerEntity playerAttacker) {
+    /**
+     * If a player leave or disconnect while in a vault, if he was the last one of her team inside, the capture is cancelled
+     */
+    private void manageCapture(ServerPlayerEntity player) {
+        FKTeam toRemove = null;
+        for (var entry : captureMap.entrySet()) {
+            var fkTeamAttacker = entry.getKey();
+            var capture = entry.getValue();
+            if (capture.playerAttackers.contains(player)) {
+                if (capture.playerAttackers.size() == 1) {
+                    capture.cancel(player);
+                    toRemove = fkTeamAttacker;
+                } else
+                    capture.leave(player);
+            }
+        }
+        if (toRemove != null)
+            captureMap.remove(toRemove);
+    }
 
+    public void addCapture(Vault vault, FKTeam fkTeamVictim, FKTeam fkTeamAttacker, ServerPlayerEntity playerAttacker) {
         for (var entry : captureMap.entrySet()) {
             var fkTeamAttacker2 = entry.getKey();
             var capture = entry.getValue();
             if (capture.started.get()) {
                 if (fkTeamAttacker2 != fkTeamAttacker) {
-                    playerAttacker.sendMessage(new LiteralText("Another is already capturing this vault").setStyle(Style.EMPTY.withColor(Formatting.GOLD)), false);
+                    Msg.ANOTHER_TEAM_ALREADY_CAPTURING_THIS_VAULT.send(playerAttacker);
                 } else {
                     if (!capture.playerAttackers.contains(playerAttacker))
                         capture.playerAttackers.add(playerAttacker);
                     else
-                        playerAttacker.sendMessage(new LiteralText("You are already capturing this vault").setStyle(Style.EMPTY.withColor(Formatting.GOLD)), false);
+                        Msg.YOU_ARE_ALREADY_CAPTURING_THIS_VAULT.send(playerAttacker);
                 }
             }
 
         }
-        captureMap.putIfAbsent(fkTeamAttacker, new Capture(vault, fkTeamVictim, playerAttacker, System.currentTimeMillis()));
+        // Here we start a new capture
+        captureMap.putIfAbsent(fkTeamAttacker, new Capture(vault, fkTeamVictim, playerAttacker));
     }
 
     public Where whereIsThePlayer(ServerPlayerEntity player) {
@@ -140,7 +161,7 @@ public class ChestRoomFeature {
         var itemInHand = player.getStackInHand(hand);
 
         if (!GameUtils.isFKPlayer(player.getName().asString())) {
-            player.sendMessage(new LiteralText("You cannot use this feature, because you're not a FKPlayer").setStyle(Style.EMPTY.withColor(Formatting.GOLD)), false);
+            player.sendMessage(new LiteralText("You cannot use this feature, because you're not a FKPlayer").setStyle(Style.EMPTY.withColor(GOLD)), false);
             return ActionResult.PASS;
         }
 
@@ -228,59 +249,57 @@ public class ChestRoomFeature {
             player.sendMessage(new LiteralText("Height is too small").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
         }
 
-        return true;
+        return valid;
     }
 
-    public static class Capture {
+    public class Capture {
 
         private final Vault vault;
-        private final FKTeam fkTeamVictim;
+        private final FKTeam fkTeamVictim, fkTeamAttacker;
         private final List<ServerPlayerEntity> playerAttackers;
-
-        private final Long startTime;
-
         private final AtomicBoolean started = new AtomicBoolean(false);
-
         private final AtomicBoolean cancelled = new AtomicBoolean(false);
         private final AtomicBoolean win = new AtomicBoolean(false);
-
         private final AtomicInteger captureTime = new AtomicInteger(0);
 
-
-        public Capture(Vault vault, FKTeam fkTeamVictim, ServerPlayerEntity playerAttacker, Long startTime) {
+        public Capture(Vault vault, FKTeam fkTeamVictim, ServerPlayerEntity playerAttacker) {
             this.vault = vault;
             this.fkTeamVictim = fkTeamVictim;
-            this.startTime = startTime;
 
-            playerAttackers = new ArrayList<>();
-            playerAttackers.add(playerAttacker);
+            playerAttackers = new ArrayList<>(List.of(playerAttacker));
+            fkTeamAttacker = GameUtils.getFKTeamOfPlayerByName(playerAttacker.getName().asString());
 
-            playerAttacker.sendMessage(new LiteralText("Capture begin ...").setStyle(Style.EMPTY.withColor(Formatting.GOLD)), false);
-            startCapture();
+            startCapture(playerAttacker);
         }
 
-        public void startCapture() {
+        public void startCapture(ServerPlayerEntity playerAttacker) {
             started.set(true);
 
+            // Send a message to all victims to tell them that their base is being captured
+            GameUtils.getPlayersFromNames(server.getPlayerManager(), fkTeamVictim.getPlayers()).forEach(player -> Msg.CAPTURE1.formatted(playerAttacker.getName().asString(), fkTeamAttacker.getName()).send(player));
+            // Send a message to all allies of the attacker to tell them that the attacker is capturing a vault
+            GameUtils.getPlayersFromNames(server.getPlayerManager(), fkTeamAttacker.getPlayers()).forEach(player -> Msg.CAPTURE2.formatted(playerAttacker.getName().asString(), fkTeamVictim.getName()));
+
             ServerTickEvents.END_SERVER_TICK.register(server -> {
-                if(cancelled.get() || win.get())return;
-                if(captureTime.get() >= 1200){
-                    server.getPlayerManager().broadcast(new LiteralText("The Game Is End").setStyle(Style.EMPTY.withColor(Formatting.GREEN)), MessageType.CHAT, NIL_UUID);
-                    server.getPlayerManager().broadcast(new LiteralText(fkTeamVictim.getName() + " has lost").setStyle(Style.EMPTY.withColor(Formatting.GREEN)), MessageType.CHAT, NIL_UUID);
-                    win.set(true);
-                }
+                if (cancelled.get() || win.get()) return;
+                if (captureTime.get() >= 1200) win(server);
                 captureTime.getAndIncrement();
             });
         }
 
         public void cancel(ServerPlayerEntity player) {
             cancelled.set(true);
-            player.sendMessage(new LiteralText("You was the last one to trying to capture the vault, but you go outside").setStyle(Style.EMPTY.withColor(Formatting.GOLD)), false);
+            Msg.CANCELLED.send(player);
         }
 
-        public void leave(ServerPlayerEntity player) {
-            player.sendMessage(new LiteralText("You gone outside the vault, but some of your teammate still inside, so").setStyle(Style.EMPTY.withColor(Formatting.GOLD)), false);
+        private void leave(ServerPlayerEntity player) {
+            Msg.LEFT.send(player);
+        }
 
+        private void win(MinecraftServer server) {
+            win.set(true);
+            server.getPlayerManager().broadcast(Msg.GAME_IS_OVER.text(), MessageType.CHAT, NIL_UUID);
+            server.getPlayerManager().broadcast(Msg.WINNER.formatted(fkTeamAttacker.getName()).text(), MessageType.CHAT, NIL_UUID);
         }
 
     }

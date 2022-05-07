@@ -2,7 +2,6 @@ package ch.skyfy.fk.logic;
 
 import ch.skyfy.fk.FKMod;
 import ch.skyfy.fk.config.Configs;
-import ch.skyfy.fk.config.data.Base;
 import ch.skyfy.fk.config.data.FKTeam;
 import ch.skyfy.fk.constants.Where;
 import ch.skyfy.fk.features.data.Vault;
@@ -10,6 +9,7 @@ import ch.skyfy.fk.features.data.VaultConstant;
 import ch.skyfy.fk.logic.data.FKGameAllData;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
@@ -18,6 +18,7 @@ import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
@@ -66,6 +67,13 @@ public class GameUtils {
                 .toList();
     }
 
+    public static List<ServerPlayerEntity> getPlayersFromNames(PlayerManager playerManager, List<String> names) {
+        var list = new ArrayList<ServerPlayerEntity>();
+        for (ServerPlayerEntity serverPlayerEntity : playerManager.getPlayerList())
+            if (names.contains(serverPlayerEntity.getName().asString())) list.add(serverPlayerEntity);
+        return list;
+    }
+
     @Nullable
     public static BlockPos getBaseCoordinateByPlayer(String name) {
         for (var fkTeam : TEAMS.config.getTeams())
@@ -74,24 +82,23 @@ public class GameUtils {
         return null;
     }
 
-    public static Optional<FKTeam> getTeamByCoordinate(Vec3d pos){
+    public static Optional<FKTeam> getTeamByCoordinate(Vec3d pos) {
         for (var team : TEAMS.config.getTeams())
-            if(Utils.isAPosInsideCube(team.getBase().getCube(), pos))
+            if (Utils.isAPosInsideCube(team.getBase().getCube(), pos))
                 return Optional.of(team);
         return Optional.empty();
     }
 
-    public static Optional<Vault> getVaultByTeamName(String teamName){
+    public static Optional<Vault> getVaultByTeamName(String teamName) {
         return VaultConstant.VAULTS.config.getVaults().stream().filter(vault -> vault.getTeamId().equals(getFKTeamIdentifierByName(teamName))).findFirst();
     }
 
-    public static Optional<ServerWorld> getServerWorldByIdentifier(MinecraftServer server, String id){
+    public static Optional<ServerWorld> getServerWorldByIdentifier(MinecraftServer server, String id) {
         return StreamSupport.stream(server.getWorlds().spliterator(), false)
                 .filter(serverWorld -> serverWorld.getDimension().getEffects().toString().equals(id))
                 .findFirst();
     }
 
-    @Nullable
     public static FKTeam getFKTeamOfPlayerByName(String name) {
         for (var fkTeam : TEAMS.config.getTeams())
             if (fkTeam.getPlayers().stream().anyMatch(name::equals)) return fkTeam;
@@ -140,7 +147,7 @@ public class GameUtils {
                 // And this base is not his own
                 if (!isBaseOfPlayer)
                     where = Where.INSIDE_AN_ENEMY_BASE;
-                 else
+                else
                     where = Where.INSIDE_HIS_OWN_BASE;
 
             } else {
@@ -152,13 +159,13 @@ public class GameUtils {
                 }
             }
 
-            if(where == null) where = Where.IN_THE_WILD;
+            if (where == null) where = Where.IN_THE_WILD;
         }
 
         return whereIsThePlayer.impl(where);
     }
 
-    public static String getFKTeamIdentifierByName(String fkteamName){
+    public static String getFKTeamIdentifierByName(String fkteamName) {
         return fkteamName.replaceAll("[^a-zA-Z\\d]", "");
     }
 

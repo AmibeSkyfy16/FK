@@ -59,7 +59,7 @@ public class FKGame {
 
     static {
         ReflectionUtils.loadClassesByReflection(new Class[]{FKGameAllData.class});
-        System.out.println("FKGame DATA LOADED WITH NO ERROR");
+        FKMod.LOGGER.info(FKGameAllData.class.getCanonicalName() +  " loaded successfully");
     }
 
     public FKGame(MinecraftServer server, ServerPlayerEntity firstPlayerToJoin) {
@@ -68,7 +68,7 @@ public class FKGame {
         pauseEvents = new PauseEvents();
         fkGameEvents = new FKGameEvents();
 
-        chestRoomFeature = new ChestRoomFeature();
+        chestRoomFeature = new ChestRoomFeature(server);
 
         initialize(firstPlayerToJoin);
 

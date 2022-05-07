@@ -1,7 +1,6 @@
 package ch.skyfy.fk.commands.featured;
 
 import ch.skyfy.fk.config.Configs;
-import ch.skyfy.fk.features.data.BlockPos;
 import ch.skyfy.fk.logic.FKGame;
 import ch.skyfy.fk.logic.GameUtils;
 import com.mojang.brigadier.Command;
@@ -29,9 +28,7 @@ public class CaptureCmd implements Command<ServerCommandSource> {
     }
 
     public void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        dispatcher.register(CommandManager.literal("capture")
-                .executes(this)
-        );
+        dispatcher.register(CommandManager.literal("capture").executes(this));
     }
 
     @SuppressWarnings("RedundantLabeledSwitchRuleCodeBlock")
@@ -98,35 +95,6 @@ public class CaptureCmd implements Command<ServerCommandSource> {
                 chestRoomFeature.addCapture(vault, fkTeamVictim, GameUtils.getFKTeamOfPlayerByName(playerAttacker.getName().asString()), playerAttacker);
             }
         }
-
-//        var whereIsThePlayer = (GameUtils.WhereIsThePlayer<Void>) (where) -> {
-//            var box = BlockPos.toBox(vault.getBlockPos());
-//            switch (where) {
-//                case INSIDE_HIS_OWN_BASE -> {
-//                    if (!box.contains(playerPos)) {
-//                        playerAttacker.sendMessage(new LiteralText("You are inside your own base, but not inside your vault").setStyle(Style.EMPTY.withColor(Formatting.GOLD)), false);
-//                        return null;
-//                    }
-//                    playerAttacker.sendMessage(new LiteralText("You cannot capture your own vault").setStyle(Style.EMPTY.withColor(Formatting.GOLD)), false);
-//                    return null;
-//                }
-//                case INSIDE_AN_ENEMY_BASE -> {
-//                    if (!box.contains(playerPos)) {
-//                        playerAttacker.sendMessage(new LiteralText("You are inside an enemy base, but not inside the vault").setStyle(Style.EMPTY.withColor(Formatting.GOLD)), false);
-//                        return null;
-//                    }
-//
-//                    chestRoomFeature.addCapture(vault, fkTeamVictim, GameUtils.getFKTeamOfPlayerByName(playerAttacker.getName().asString()), playerAttacker);
-//                    return null;
-//                }
-//            }
-//
-//
-//            return null;
-//        };
-//
-//        GameUtils.whereIsThePlayer(playerAttacker, playerPos, whereIsThePlayer);
-
         return 0;
     }
 

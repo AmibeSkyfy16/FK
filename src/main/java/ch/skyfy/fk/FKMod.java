@@ -5,6 +5,7 @@ import ch.skyfy.fk.commands.*;
 import ch.skyfy.fk.commands.featured.CaptureCmd;
 import ch.skyfy.fk.commands.featured.GetMarkerCmd;
 import ch.skyfy.fk.config.Configs;
+import ch.skyfy.fk.exceptions.FKModException;
 import ch.skyfy.fk.logic.FKGame;
 import ch.skyfy.fk.utils.ReflectionUtils;
 import me.bymartrixx.playerevents.api.event.PlayerJoinCallback;
@@ -41,7 +42,7 @@ public class FKMod implements DedicatedServerModInitializer {
     private final StartCmd startCmd;
     private final PauseCmd pauseCmd;
     private final ResumeCmd resumeCmd;
-
+    private final WhereIAmCmd whereIAmCmd;
     private final SetFKTimeCmd setFKTimeCmd;
     private final GetMarkerCmd getMarkerCmd;
     private final CaptureCmd captureCmd;
@@ -58,10 +59,10 @@ public class FKMod implements DedicatedServerModInitializer {
         startCmd = new StartCmd(optFKGameRef);
         pauseCmd = new PauseCmd(optFKGameRef);
         resumeCmd = new ResumeCmd(optFKGameRef);
+        whereIAmCmd = new WhereIAmCmd();
         setFKTimeCmd = new SetFKTimeCmd(optFKGameRef);
         getMarkerCmd = new GetMarkerCmd();
         captureCmd = new CaptureCmd(optFKGameRef);
-
     }
 
     @Override
@@ -81,14 +82,13 @@ public class FKMod implements DedicatedServerModInitializer {
 
     public void registerCommands() {
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
+            startCmd.register(dispatcher);
+            pauseCmd.register(dispatcher);
+            resumeCmd.register(dispatcher);
             setFKTimeCmd.register(dispatcher);
             getMarkerCmd.register(dispatcher);
             captureCmd.register(dispatcher);
-            dispatcher.register(net.minecraft.server.command.CommandManager.literal("FKStart").executes(startCmd));
-            dispatcher.register(net.minecraft.server.command.CommandManager.literal("FKPause").executes(pauseCmd));
-            dispatcher.register(net.minecraft.server.command.CommandManager.literal("FKResume").executes(resumeCmd));
-
-            dispatcher.register(net.minecraft.server.command.CommandManager.literal("WhereIAm").executes(new WhereIAmCmd()));
+            whereIAmCmd.register(dispatcher);
         });
     }
 
@@ -98,7 +98,8 @@ public class FKMod implements DedicatedServerModInitializer {
             var file = CONFIG_DIRECTORY.toFile();
             if (!file.exists()) file.mkdir();
         } catch (UnsupportedOperationException | SecurityException e) {
-            throw new RuntimeException(e);
+            FKMod.LOGGER.fatal("Could not create the root folder that should contain the configuration files");
+            throw new FKModException(e);
         }
     }
 

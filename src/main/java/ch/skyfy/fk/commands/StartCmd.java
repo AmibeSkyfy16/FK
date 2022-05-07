@@ -4,11 +4,12 @@ import ch.skyfy.fk.FKMod;
 import ch.skyfy.fk.logic.FKGame;
 import ch.skyfy.fk.logic.GameUtils;
 import ch.skyfy.fk.logic.data.FKGameAllData;
-import ch.skyfy.fk.logic.data.FKGameData;
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.network.MessageType;
+import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Style;
@@ -19,13 +20,17 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static net.minecraft.util.Util.NIL_UUID;
 
-@SuppressWarnings("ClassCanBeRecord")
+@SuppressWarnings({"ClassCanBeRecord", "CommentedOutCode"})
 public class StartCmd implements Command<ServerCommandSource> {
 
     private final AtomicReference<Optional<FKGame>> optFKGameRef;
 
     public StartCmd(final AtomicReference<Optional<FKGame>> optFKGameRef) {
         this.optFKGameRef = optFKGameRef;
+    }
+
+    public void register(CommandDispatcher<ServerCommandSource> dispatcher) {
+        dispatcher.register(CommandManager.literal("FKStart").executes(this));
     }
 
     @Override
@@ -48,7 +53,7 @@ public class StartCmd implements Command<ServerCommandSource> {
             case NOT_STARTED -> {
 
                 // TODO UNCOMMENT
-                if(GameUtils.getMissingFKPlayer(source.getServer().getPlayerManager().getPlayerList()).size() > 0){
+                if (GameUtils.getMissingFKPlayer(source.getServer().getPlayerManager().getPlayerList()).size() > 0) {
                     GameUtils.sendMissingPlayersMessage(player, source.getServer().getPlayerManager().getPlayerList());
                 }
 

@@ -56,7 +56,6 @@ public class FKGame {
         public static Msg GAME_HAS_BEEN_PAUSED = new Msg("The game has been paused", Formatting.GOLD);
         public static Msg GAME_HAS_BEEN_RESUMED = new Msg("The game has been resumed", Formatting.GOLD);
 
-
         protected Msg(String text, Formatting formatting) {
             super(text, formatting);
         }
@@ -231,10 +230,8 @@ public class FKGame {
                 return switch (where) {
                     case INSIDE_HIS_OWN_BASE -> true;
                     case CLOSE_TO_HIS_OWN_BASE -> true;
-                    case INSIDE_AN_ENEMY_BASE ->
-                            block != Blocks.TNT || block != Blocks.REDSTONE_TORCH || block != Blocks.LEVER;
-                    case CLOSE_TO_AN_ENEMY_BASE ->
-                            block != Blocks.TNT || block != Blocks.REDSTONE_TORCH || block != Blocks.LEVER;
+                    case INSIDE_AN_ENEMY_BASE, CLOSE_TO_AN_ENEMY_BASE ->
+                            block == Blocks.TNT || block == Blocks.REDSTONE_TORCH || block == Blocks.LEVER;
                     case IN_THE_WILD -> true;
                     default -> true;
                 };
@@ -257,17 +254,10 @@ public class FKGame {
                 return switch (where) {
                     case INSIDE_HIS_OWN_BASE -> ActionResult.PASS;
                     case CLOSE_TO_HIS_OWN_BASE -> ActionResult.FAIL;
-                    case INSIDE_AN_ENEMY_BASE -> {
-                        if (!itemInHand.isOf(Items.TNT))
-                            yield ActionResult.FAIL;
+                    case INSIDE_AN_ENEMY_BASE, CLOSE_TO_AN_ENEMY_BASE -> {
                         if (!GameUtils.areAssaultEnabled(timeline.getTimelineData().getDay()))
                             yield ActionResult.FAIL;
-                        yield ActionResult.PASS;
-                    }
-                    case CLOSE_TO_AN_ENEMY_BASE -> {
-                        if (!itemInHand.isOf(Items.TNT))
-                            yield ActionResult.FAIL;
-                        if (!GameUtils.areAssaultEnabled(timeline.getTimelineData().getDay()))
+                        if (!itemInHand.isOf(Items.TNT) && !itemInHand.isOf(Items.LEVER) && !itemInHand.isOf(Items.REDSTONE_TORCH))
                             yield ActionResult.FAIL;
                         yield ActionResult.PASS;
                     }

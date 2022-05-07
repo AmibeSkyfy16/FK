@@ -31,8 +31,6 @@ public class CaptureCmd implements Command<ServerCommandSource> {
         public static Msg IN_YOUR_BASE_IN_YOUR_VAULT = new Msg("You cannot capture your own vault", Formatting.GOLD);
         public static Msg IN_AN_ENEMY_BASE_BUT_NO_IN_VAULT = new Msg("You are inside an enemy base, but not inside the vault", Formatting.GOLD);
 
-
-
         protected Msg(String text, Formatting formatting) {
             super(text, formatting);
         }

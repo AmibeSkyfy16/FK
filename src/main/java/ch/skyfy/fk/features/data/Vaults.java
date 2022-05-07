@@ -23,4 +23,9 @@ public class Vaults implements Validatable {
         confirmValidate(errors);
     }
 
+    @Override
+    public void validatePrimitivesType(List<String> errors) {
+        // Nothing to do here
+    }
+
 }

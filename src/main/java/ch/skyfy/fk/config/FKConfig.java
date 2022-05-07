@@ -9,6 +9,7 @@ import lombok.Getter;
 import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings("ClassCanBeRecord")
 public class FKConfig implements Validatable {
@@ -46,6 +47,21 @@ public class FKConfig implements Validatable {
     public void validate() {
         var errors = new ArrayList<String>();
 
+        validateNonNull(errors);
+        validatePrimitivesType(errors);
+
+        if (!Identifier.isValid(waitingRoom.getSpawnLocation().getDimensionName()))
+            errors.add("dimensionName " + waitingRoom.getSpawnLocation().getDimensionName() + " is not a valid dimension name");
+
+        var worldBorderCube = Configs.WORLD_CONFIG.data.getWorldBorderData().getCube();
+        if (!MathUtils.isInside(worldBorderCube, waitingRoom.getCube()))
+            errors.add("the waiting room is not inside the world border !");
+
+        confirmValidate(errors);
+    }
+
+    @Override
+    public void validatePrimitivesType(List<String> errors) {
         if (dayOfAuthorizationOfTheAssaults < 0)
             errors.add("dayOfAuthorizationOfTheAssaults value is currently " + dayOfAuthorizationOfTheAssaults + " it should not be smaller than 0");
         if (dayOfAuthorizationOfTheEntryInTheNether < 0)
@@ -56,17 +72,6 @@ public class FKConfig implements Validatable {
             errors.add("dayOfAuthorizationOfThePvP value is currently " + dayOfAuthorizationOfThePvP + " it should not be smaller than 0");
 
         ValidateUtils.checkForNegativeValueInCubeClass(waitingRoom.getCube(), errors);
-
-        if (!Identifier.isValid(waitingRoom.getSpawnLocation().getDimensionName())) {
-            errors.add("dimensionName " + waitingRoom.getSpawnLocation().getDimensionName() + " is not a valid dimension name");
-        }
-
-//         Check if the waiting room is inside the world border
-        var worldBorderCube = Configs.WORLD_CONFIG.data.getWorldBorderData().getCube();
-        if(!MathUtils.isInside(worldBorderCube, waitingRoom.getCube())){
-            errors.add("the waiting room is not inside the world border !");
-        }
-
-        confirmValidate(errors);
     }
+
 }

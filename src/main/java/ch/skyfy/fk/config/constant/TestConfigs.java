@@ -49,8 +49,8 @@ public class TestConfigs {
     public static final ChestRoomFeatureConfig CHEST_ROOM_CONFIG = new ChestRoomFeatureConfig(
             true,
             4,
-            2,
             4,
+            2,
             20
     );
 

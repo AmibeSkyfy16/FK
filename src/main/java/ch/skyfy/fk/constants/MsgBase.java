@@ -1,6 +1,6 @@
 package ch.skyfy.fk.constants;
 
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -21,7 +21,7 @@ public abstract class MsgBase {
         return this;
     }
 
-    public void send(ServerPlayerEntity player) {
+    public void send(PlayerEntity player) {
         player.sendMessage(text(), false);
     }
 

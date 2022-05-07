@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class FKGameData implements Validatable {
 
@@ -24,7 +25,12 @@ public class FKGameData implements Validatable {
     @Override
     public void validate() {
         var errors = new ArrayList<String>();
-
+        validateNonNull(errors);
         confirmValidate(errors);
+    }
+
+    @Override
+    public void validatePrimitivesType(List<String> errors) {
+
     }
 }

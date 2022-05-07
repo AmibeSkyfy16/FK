@@ -42,21 +42,34 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static ch.skyfy.fk.constants.Where.INSIDE_THE_VAULT_OF_AN_ENEMY_BASE;
-import static net.minecraft.util.Formatting.GOLD;
+import static net.minecraft.util.Formatting.*;
 import static net.minecraft.util.Util.NIL_UUID;
 
 @SuppressWarnings({"unused", "FieldCanBeLocal"})
 public class ChestRoomFeature {
 
     private static class Msg extends MsgBase {
-        public static final Msg GAME_IS_OVER = new Msg("The game is over ! ", GOLD);
-        public static final Msg WINNER = new Msg("Team %s won by capturing vault of team %s", GOLD);
-        public static final Msg CAPTURE1 = new Msg("The %s player of the %s team has started the capture of your vault", GOLD);
-        public static final Msg CAPTURE2 = new Msg("Player %s has begun the capture of the %s team's vault", GOLD);
-        public static final Msg LEFT = new Msg("You just came out of the vault. As long as there are allies left inside, the capture will not be cancelled", GOLD);
-        public static final Msg CANCELLED = new Msg("\nYou have just come out of the vault, and there is no ally of yours in it. The capture is cancelled", GOLD);
-        public static final Msg ANOTHER_TEAM_ALREADY_CAPTURING_THIS_VAULT = new Msg("Another team is already capturing this vault", GOLD);
-        public static final Msg YOU_ARE_ALREADY_CAPTURING_THIS_VAULT = new Msg("You are already capturing this vault", GOLD);
+        private static final Msg GAME_IS_OVER = new Msg("The game is over ! ", GOLD);
+        private static final Msg WINNER = new Msg("Team %s won by capturing vault of team %s", GOLD);
+        private static final Msg CAPTURE1 = new Msg("The %s player of the %s team has started the capture of your vault", GOLD);
+        private static final Msg CAPTURE2 = new Msg("Player %s has begun the capture of the %s team's vault", GOLD);
+        private static final Msg LEFT = new Msg("You just came out of the vault. As long as there are allies left inside, the capture will not be cancelled", GOLD);
+        private static final Msg CANCELLED = new Msg("\nYou have just come out of the vault, and there is no ally of yours in it. The capture is cancelled", GOLD);
+        private static final Msg ANOTHER_TEAM_ALREADY_CAPTURING_THIS_VAULT = new Msg("Another team is already capturing this vault", GOLD);
+        private static final Msg YOU_ARE_ALREADY_CAPTURING_THIS_VAULT = new Msg("You are already capturing this vault", GOLD);
+        private static final Msg VAULT_SET = new Msg("Your vault has been set successfully", GREEN);
+        private static final Msg CANNOT_SET_VAULT_OUTSIDE_BASE = new Msg("You cannot create a vault outside your base", RED);
+        private static final Msg VAULT_IS_TOO_DEEP = new Msg("""
+                Your room is too deep
+                According to the rules, your vault must be located no more
+                than %d blocks below the center point (x:%d y:%d z:%d) of your base
+                """, RED);
+
+        private static final Msg VAULT_WIDTH_TOO_SMALL = new Msg("The width of the vault must be at least %d blocks", RED);
+        private static final Msg VAULT_LENGTH_TOO_SMALL = new Msg("The length of the vault must be at least %d blocks", RED);
+        private static final Msg VAULT_HEIGHT_TOO_SMALL = new Msg("The height of the vault must be at least %d blocks", RED);
+
+
         public Msg(String text, Formatting formatting) {
             super(text, formatting);
         }
@@ -219,35 +232,28 @@ public class ChestRoomFeature {
 
         if (Utils.isAPosInsideCube(base.getCube(), new Vec3d(pos1.getX(), pos1.getY(), pos1.getZ())) && Utils.isAPosInsideCube(base.getCube(), new Vec3d(pos2.getX(), pos2.getY(), pos2.getZ()))) {
             if (minY < minYRules) {
-                var centerPoint = "x: " + base.getCube().getX() + " y: " + base.getCube().getY() + " z: " + base.getCube().getZ();
-                var str = """
-                        According to the rules, your vault must be located no more than %s blocks below the center point (%s) of your base
-                        """.formatted(config.getMaximumNumberOfBlocksDown(), centerPoint);
-                player.sendMessage(new LiteralText("Your vault doesn't respect rules").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
-                player.sendMessage(new LiteralText(str).setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
+                Msg.VAULT_IS_TOO_DEEP.formatted(config.getMaximumNumberOfBlocksDown(), base.getCube().getX(), base.getCube().getY() ,base.getCube().getZ()).send(player);
             } else {
-                player.sendMessage(new LiteralText("Your vault has been set").setStyle(Style.EMPTY.withColor(Formatting.GREEN)), false);
+                Msg.VAULT_SET.send(player);
                 valid = true;
             }
         } else {
-            player.sendMessage(new LiteralText("Your vault is outside your base").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
+            Msg.CANNOT_SET_VAULT_OUTSIDE_BASE.send(player);
         }
+
 
         var width = Math.min(box.maxX - box.minX, box.maxZ - box.minZ);
         var length = Math.max(box.maxX - box.minX, box.maxZ - box.minZ);
         var height = box.maxY - box.minY;
 
-        if (width < config.getMinWidth()) {
-            player.sendMessage(new LiteralText("Width is too small").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
-        }
+        if (width < config.getMinWidth())
+            Msg.VAULT_WIDTH_TOO_SMALL.formatted(config.getMinWidth()).send(player);
 
-        if (length < config.getMinLength()) {
-            player.sendMessage(new LiteralText("Length is too small").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
-        }
+        if (length < config.getMinLength())
+            Msg.VAULT_LENGTH_TOO_SMALL.formatted(config.getMinLength()).send(player);
 
-        if (height < config.getMinHeight()) {
-            player.sendMessage(new LiteralText("Height is too small").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
-        }
+        if (height < config.getMinHeight())
+            Msg.VAULT_HEIGHT_TOO_SMALL.formatted(config.getMinHeight()).send(player);
 
         return valid;
     }

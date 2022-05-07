@@ -31,7 +31,7 @@ public class FKMod implements DedicatedServerModInitializer {
 
     public static final String MOD_ID = "fk";
 
-    public static final Logger LOGGER = LogManager.getLogger();
+    public static final Logger LOGGER = LogManager.getLogger(MOD_ID.toUpperCase());
 
     public static final Path CONFIG_DIRECTORY = FabricLoader.getInstance().getConfigDir().resolve(MOD_ID);
 

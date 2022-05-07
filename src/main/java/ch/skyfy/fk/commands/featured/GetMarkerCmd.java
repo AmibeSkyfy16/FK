@@ -1,5 +1,6 @@
 package ch.skyfy.fk.commands.featured;
 
+import ch.skyfy.fk.constants.MsgBase;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
@@ -12,9 +13,19 @@ import net.minecraft.text.Style;
 import net.minecraft.util.Formatting;
 
 /**
- * Allows a player to collect a special item that will be used to determine the area of the vault
+ * Allows a player to collect a special item that will be used to determine the dimension of the vault
  */
 public class GetMarkerCmd implements Command<ServerCommandSource> {
+
+    private static class Msg extends MsgBase {
+        private static final Msg MESSAGE = new Msg("""
+                You have received an item allowing you to define the dimensions of your vault,
+                (like in WorldEdit). This will allow the server to automatically detect the vault rooms
+                """, Formatting.GREEN);
+        protected Msg(String text, Formatting formatting) {
+            super(text, formatting);
+        }
+    }
 
     public void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(CommandManager.literal("getMarker").executes(this));
@@ -25,16 +36,8 @@ public class GetMarkerCmd implements Command<ServerCommandSource> {
         var markerItem = Items.WOODEN_AXE.getDefaultStack();
         markerItem.setCustomName(new LiteralText("marker").setStyle(Style.EMPTY.withColor(Formatting.GREEN)));
         markerItem.setDamage(0);
-
-        var strMessage = """
-                You have received an item allowing you to define the dimensions of your vault,
-                (like in WorldEdit). This will allow the server to automatically detect the vault rooms
-                """;
-        var message = new LiteralText(strMessage).setStyle(Style.EMPTY.withColor(Formatting.GREEN));
-
         context.getSource().getPlayer().dropItem(markerItem, false);
-        context.getSource().getPlayer().sendMessage(message, false);
-
+        Msg.MESSAGE.send(context.getSource().getPlayer());
         return 0;
     }
 }

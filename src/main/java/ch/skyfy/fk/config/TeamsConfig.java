@@ -11,6 +11,7 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @SuppressWarnings("ClassCanBeRecord")
@@ -27,7 +28,16 @@ public class TeamsConfig implements Validatable {
     public void validate() {
         var errors = new ArrayList<String>();
 
-        // TODO two teams cannot have the same name of the same color
+        validateNonNull(errors);
+        validatePrimitivesType(errors);
+
+        var teamNames = teams.stream().map(FKTeam::getPlayers).toList();
+        if (!teamNames.stream().filter(name -> Collections.frequency(teamNames, name) > 1).toList().isEmpty())
+            errors.add("There are two or more teams with the same name !");
+
+        var teamColors = teams.stream().map(FKTeam::getColor).toList();
+        if (!teamColors.stream().filter(name -> Collections.frequency(teamColors, name) > 1).toList().isEmpty())
+            errors.add("There are two or more teams with the same color !");
 
         // Check if a team name is empty
         teams.forEach(fkTeam -> {
@@ -59,13 +69,6 @@ public class TeamsConfig implements Validatable {
                 errors.add("color " + color + " is not a valid colors ! pls refer to the documentation !");
             }
         });
-
-        // check for negative value
-        teams.stream().map(FKTeam::getBase).forEach(base -> {
-            ValidateUtils.checkForNegativeValueInCubeClass(base.getCube(), errors);
-            ValidateUtils.checkForNegativeValueInCubeClass(base.getProximityCube(), errors);
-        });
-
 
         /*
          * A base with coordinates close to another one could break the game.
@@ -102,10 +105,10 @@ public class TeamsConfig implements Validatable {
                 }
 
                 var waitingRoom = Configs.FK_CONFIG.data.getWaitingRoom();
-                if(MathUtils.intersect(base1.getCube(), waitingRoom.getCube())){
+                if (MathUtils.intersect(base1.getCube(), waitingRoom.getCube())) {
                     errors.add("Base " + base1.getName() + " intersect waiting room ");
                 }
-                if(MathUtils.isInside(base1.getCube(), waitingRoom.getCube())){
+                if (MathUtils.isInside(base1.getCube(), waitingRoom.getCube())) {
                     errors.add("Base " + base1.getName() + " is inside waiting room ");
                 }
             }
@@ -118,5 +121,14 @@ public class TeamsConfig implements Validatable {
                 errors.add("the base " + team.getBase().getName() + " is not inside the world border !");
 
         confirmValidate(errors);
+    }
+
+    @Override
+    public void validatePrimitivesType(List<String> errors) {
+        // check for negative value
+        teams.stream().map(FKTeam::getBase).forEach(base -> {
+            ValidateUtils.checkForNegativeValueInCubeClass(base.getCube(), errors);
+            ValidateUtils.checkForNegativeValueInCubeClass(base.getProximityCube(), errors);
+        });
     }
 }

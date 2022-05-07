@@ -8,6 +8,7 @@ import lombok.Getter;
 import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings("ClassCanBeRecord")
 public class WorldBorderConfig implements Validatable {
@@ -23,12 +24,17 @@ public class WorldBorderConfig implements Validatable {
     public void validate() {
         var errors = new ArrayList<String>();
 
-        if(!Identifier.isValid(worldBorderData.getDimensionName())){
-            errors.add("dimensionName " + worldBorderData.getDimensionName() + " is not a valid dimension name");
-        }
+        validateNonNull(errors);
+        validatePrimitivesType(errors);
 
-        ValidateUtils.checkForNegativeValueInCubeClass(worldBorderData.getCube(), errors);
+        if(!Identifier.isValid(worldBorderData.getDimensionName()))
+            errors.add("dimensionName " + worldBorderData.getDimensionName() + " is not a valid dimension name");
 
         confirmValidate(errors);
+    }
+
+    @Override
+    public void validatePrimitivesType(List<String> errors) {
+        ValidateUtils.checkForNegativeValueInCubeClass(worldBorderData.getCube(), errors);
     }
 }

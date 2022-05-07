@@ -42,17 +42,25 @@ LES ETATS DU JEU EN DETAILS
 
     NOT_STARTED
 
-        Les choses qui se produisent lorsque le jeu est dans cet état :
+        Les choses qui sont appliquées lorsque le jeu est dans cet état :
 
-            1. Lorsqu'un joueur se connecte, il est téléporté dans se que l'on appelle, la waitingRoom.
-               Temps que le jeu n'a pas démarré, les joueurs ne peuvent pas sortir de la waitingRoom.
-            2. Les joueurs ne peuvent pas subir de dégâts.
-            3. Les joueurs ne perdent pas de nourritures
-            4. Le PvP est désactivé
+            1. Lorsqu'un joueur se connecte, il se passe les choses suivantes :
+               1.1 Le joueur est téléporté dans ce que l'on appelle, la waitingRoom.
+               1.2 Si le joueur n'est pas OP (level 4), il est mis en gamemode survival
+            2. Les joueurs ne peuvent pas sortir de la waitingRoom.
+            3. Les joueurs ne peuvent pas subir de dégâts.
+            4. Les joueurs ne perdent pas de nourritures
+            5. Les joueurs ne peuvent pas casser/détruire de block
+            6. Les joueurs ne peuvent pas vider/poser un seau d'eau ou de lave
+            7. Le PvP est désactivé
+            8. Les joueurs ne peuvent pas entrer dans un portail du nether ou de l'end
+            9. Les joueurs ne peuvent pas activer de TNT
 
     RUNNING
 
-        Les choses qui se produisent lorsque le jeu est dans cet état :
+        Les choses qui sont appliquées lorsque le jeu est dans cet état :
+            1. Certaines règles sont gérées par le mod et s'appliquent automatiquement
+                Ex : les joueurs ne pourront pas poser de bloc dans la base des enemies
 
             1. Les joueurs recevront un message leur disant ou se trouve leur base respective.
             2. Le comptage du temps démarre. On commence au jour 1 à la minute 0 et à la seconde 0.
@@ -60,14 +68,30 @@ LES ETATS DU JEU EN DETAILS
 
     PAUSED
 
-        Les choses suivantes se produisent lorsque le jeu est en pause :
+        Les choses qui sont appliquées lorsque le jeu est en pause :
 
             1. Les joueurs ne peuvent pas bouger, excepté les joueurs OP.
-            2. Les entités ne peuvent pas se déplacer.
-            3. Le temps est arrêté.
-            4. Les items ne peuvent pas despawn
-            5. Les joueurs ne peuvent pas subir de dégâts.
-            6. Les joueurs ne perdent pas de nourritures
+            2. Les mobs ne peuvent pas se déplacer.
+            3. Les mobs ne peuvent pas spawner
+            4. Le temps est arrêté.
+            5. Les items ne peuvent pas despawn
+            6. Les joueurs ne peuvent pas subir de dégâts.
+            7. Les joueurs ne perdent pas de nourritures
+            8. Les joueurs ne peuvent pas casser/détruire de block
+            9. Les joueurs ne peuvent pas vider/poser un seau d'eau ou de lave
+           10. Le PvP est désactivé
+           11. Les joueurs ne peuvent pas entrer dans un portail du nether ou de l'end
+           12. Les joueurs ne peuvent pas activer de TNT
+
+
+    Les choses qui se passent lorsqu'un état change
+
+        NOT_STARTED -> RUNNING
+            1. Soit les joueurs seront téléportés à leur base respective,
+               soit il recevront un message leur disant ou se trouve leur base respective.
+               Cela en fonction de la règle <<shouldTeleportPlayersToTheirOwnBaseWhenGameIsStarted>>
+               dans le fichier de configuration <<fkconfig.json5>>
+            2. L'inventaire des joueurs est vidé
 
 Les règles du FK
 

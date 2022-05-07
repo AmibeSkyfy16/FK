@@ -75,8 +75,7 @@ public class FKMod implements DedicatedServerModInitializer {
         if (firstJoin) return;
         if (server.getPlayerManager().getPlayerList().size() == 1) {
             firstJoin = true;
-            final var fkGame = new FKGame(server, player);
-            optFKGameRef.set(Optional.of(fkGame));
+            optFKGameRef.set(Optional.of(new FKGame(server, player)));
         }
     }
 

@@ -40,6 +40,7 @@ import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.world.GameMode;
 import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 import org.jetbrains.annotations.Nullable;
@@ -78,7 +79,6 @@ public class FKGame {
     @Getter
     private final ChestRoomFeature chestRoomFeature;
 
-
     public FKGame(MinecraftServer server, ServerPlayerEntity firstPlayerToJoin) {
         this.server = server;
         this.timeline = new Timeline();
@@ -87,17 +87,14 @@ public class FKGame {
 
         chestRoomFeature = new ChestRoomFeature(server);
 
-        initialize(firstPlayerToJoin);
+        fkGameEvents.onPlayerJoin(firstPlayerToJoin, server); // Remind: when constructor is called, it's from a PlayerJoinCallback
 
-        setWorldSpawn();
+        initialize();
         registerEvents();
     }
 
-    private void initialize(ServerPlayerEntity firstPlayerToJoin) {
-        if (GameUtils.isGameState_RUNNING())
-            FKGameAllData.FK_GAME_DATA.data.setGameState(FKMod.GameState.PAUSED);
-        update(firstPlayerToJoin);
-        teleportPlayerToWaitingRoom(firstPlayerToJoin);
+    private void initialize() {
+        setWorldSpawn();
         setupWorldBorder();
     }
 
@@ -111,6 +108,7 @@ public class FKGame {
         for (var fkPlayer : GameUtils.getAllConnectedFKPlayers(server.getPlayerManager().getPlayerList())) {
             var fkTeam = GameUtils.getFKTeamOfPlayerByName(fkPlayer.getName().asString());
             var base = fkTeam.getBase();
+            fkPlayer.getInventory().clear();
             if (Configs.FK_CONFIG.data.isShouldTeleportPlayersToTheirOwnBaseWhenGameIsStarted()) {
                 var spawnLoc = base.getSpawnLocation();
                 var optServerWorld = GameUtils.getServerWorldByIdentifier(server, spawnLoc.getDimensionName());
@@ -134,9 +132,8 @@ public class FKGame {
     }
 
     private void update(ServerPlayerEntity player) {
-        if (GameUtils.isFKPlayer(player.getName().asString())) {
+        if (GameUtils.isFKPlayer(player.getName().asString()))
             updateTeam(player);
-        }
         updateSidebar(player);
     }
 
@@ -419,19 +416,14 @@ public class FKGame {
         }
 
         private ActionResult onPlayerDamage(ServerPlayerEntity player, DamageSource source, float amount) {
-            if (player.hasPermissionLevel(4)) return ActionResult.PASS;
-
             if (GameUtils.isGameState_PAUSED() || GameUtils.isGameState_NOT_STARTED())
                 return ActionResult.FAIL;
             return ActionResult.PASS;
         }
 
         private ActionResult onPlayerHungerUpdate(PlayerEntity player) {
-            if (player.hasPermissionLevel(4)) return ActionResult.PASS;
-
-            if (GameUtils.isGameState_NOT_STARTED() || GameUtils.isGameState_PAUSED()) {
+            if (GameUtils.isGameState_NOT_STARTED() || GameUtils.isGameState_PAUSED())
                 return ActionResult.FAIL;
-            }
             return ActionResult.PASS;
         }
 
@@ -447,6 +439,12 @@ public class FKGame {
         }
 
         private void onPlayerJoin(ServerPlayerEntity player, MinecraftServer server) {
+            if (GameUtils.isGameState_RUNNING())
+                FKGameAllData.FK_GAME_DATA.data.setGameState(FKMod.GameState.PAUSED);
+
+            if(!player.hasPermissionLevel(4))
+                player.changeGameMode(GameMode.SURVIVAL);
+
             teleportPlayerToWaitingRoom(player);
             update(player);
         }

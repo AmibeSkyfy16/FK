@@ -32,7 +32,7 @@ public class GetMarkerCmd implements Command<ServerCommandSource> {
                 You have received an item allowing you to define the dimensions of your vault,
                 (like in WorldEdit). This will allow the server to automatically detect the vault rooms
                 """;
-        var message = new LiteralText("strMessage").setStyle(Style.EMPTY.withColor(Formatting.GREEN));
+        var message = new LiteralText(strMessage).setStyle(Style.EMPTY.withColor(Formatting.GREEN));
 
         context.getSource().getPlayer().dropItem(markerItem, false);
         context.getSource().getPlayer().sendMessage(message, false);

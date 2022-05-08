@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static ch.skyfy.fk.constants.Where.INSIDE_AN_ENEMY_BASE;
 import static ch.skyfy.fk.constants.Where.INSIDE_THE_VAULT_OF_AN_ENEMY_BASE;
 import static net.minecraft.util.Formatting.*;
 import static net.minecraft.util.Util.NIL_UUID;
@@ -150,22 +151,8 @@ public class VaultFeature {
 
     public Where whereIsThePlayer(ServerPlayerEntity player) {
         var where = GameUtils.whereIsThePlayer(player, new Vec3d(player.getX(), player.getY(), player.getZ()), w -> w);
-        var playerPos = new Vec3d(player.getX(), player.getY(), player.getZ());
-        Box box;
-        for (var vault : VaultConstant.VAULTS.data.getVaults()) {
-            if (vault.getBlockPos()[0] == null || vault.getBlockPos()[1] == null) continue;
-            box = BlockPos.toBox(vault.getBlockPos());
-            switch (where) {
-                case INSIDE_HIS_OWN_BASE -> {
-                    if (box.contains(playerPos))
-                        return Where.INSIDE_THE_VAULT_OF_HIS_OWN_BASE;
-                }
-                case INSIDE_AN_ENEMY_BASE -> {
-                    if (box.contains(playerPos))
-                        return INSIDE_THE_VAULT_OF_AN_ENEMY_BASE;
-                }
-            }
-        }
+        if (where == INSIDE_AN_ENEMY_BASE && where.getNested() != null && where.getNested() == INSIDE_THE_VAULT_OF_AN_ENEMY_BASE)
+            return where.getNested();
         return where;
     }
 
@@ -232,7 +219,7 @@ public class VaultFeature {
 
         if (Utils.isAPosInsideCube(base.getCube(), new Vec3d(pos1.getX(), pos1.getY(), pos1.getZ())) && Utils.isAPosInsideCube(base.getCube(), new Vec3d(pos2.getX(), pos2.getY(), pos2.getZ()))) {
             if (minY < minYRules) {
-                Msg.VAULT_IS_TOO_DEEP.formatted(config.getMaximumNumberOfBlocksDown(), base.getCube().getX(), base.getCube().getY() ,base.getCube().getZ()).send(player);
+                Msg.VAULT_IS_TOO_DEEP.formatted(config.getMaximumNumberOfBlocksDown(), base.getCube().getX(), base.getCube().getY(), base.getCube().getZ()).send(player);
             } else {
                 Msg.VAULT_SET.send(player);
                 valid = true;

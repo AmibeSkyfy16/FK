@@ -1,5 +1,6 @@
 package ch.skyfy.fk.commands;
 
+import ch.skyfy.fk.constants.Where;
 import ch.skyfy.fk.constants.WhereMsg;
 import ch.skyfy.fk.logic.GameUtils;
 import com.mojang.brigadier.Command;
@@ -21,9 +22,19 @@ public class WhereIAmCmd implements Command<ServerCommandSource> {
 
         var whereIsThePlayer = (GameUtils.WhereIsThePlayer<Void>) (where) -> {
             switch (where) {
-                case INSIDE_HIS_OWN_BASE -> WhereMsg.IN_YOUR_OWN_BASE.send(player);
+                case INSIDE_HIS_OWN_BASE -> {
+                    if (where.getNested() != null && where.getNested() == Where.INSIDE_THE_VAULT_OF_HIS_OWN_BASE)
+                        WhereMsg.IN_THE_VAULT_OF_YOUR_OWN_BASE.send(player);
+                    else
+                        WhereMsg.IN_YOUR_OWN_BASE.send(player);
+                }
                 case CLOSE_TO_HIS_OWN_BASE -> WhereMsg.CLOSE_TO_YOUR_OWN_BASE.send(player);
-                case INSIDE_AN_ENEMY_BASE -> WhereMsg.IN_AN_ENEMY_BASE.send(player);
+                case INSIDE_AN_ENEMY_BASE -> {
+                    if (where.getNested() != null && where.getNested() == Where.INSIDE_THE_VAULT_OF_AN_ENEMY_BASE)
+                        WhereMsg.IN_VAULT_OF_ENEMY_BASE.send(player);
+                    else
+                        WhereMsg.IN_AN_ENEMY_BASE.send(player);
+                }
                 case CLOSE_TO_AN_ENEMY_BASE -> WhereMsg.CLOSE_TO_AN_ENEMY_BASE.send(player);
                 case IN_THE_WILD -> WhereMsg.IN_THE_WILD.send(player);
                 default -> WhereMsg.UNKNOWN_LOCATION.send(player);

@@ -14,6 +14,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
@@ -120,7 +121,7 @@ public class GameUtils {
         }
     }
 
-    public static <T> T whereIsThePlayer(PlayerEntity player, Vec3d blockPos, WhereIsThePlayer<T> whereIsThePlayer) {
+    public static <T> T whereIsThePlayer(PlayerEntity player, Vec3d pos, WhereIsThePlayer<T> whereIsThePlayer) {
 
         Where where = null;
 
@@ -131,16 +132,16 @@ public class GameUtils {
             var isBaseOfPlayer = team.getPlayers().stream().anyMatch(fkPlayerName -> player.getName().asString().equals(fkPlayerName));
 
             // If player is inside a base
-            if (Utils.isAPosInsideCube(baseCube, blockPos)) {
+            if (Utils.isAPosInsideCube(baseCube, pos)) {
 
                 // And this base is not his own
                 if (!isBaseOfPlayer)
                     where = Where.INSIDE_AN_ENEMY_BASE;
                 else
                     where = Where.INSIDE_HIS_OWN_BASE;
-
+                nestsVault(where, pos);
             } else {
-                if (Utils.isAPosInsideCube(team.getBase().getProximityCube(), blockPos)) {
+                if (Utils.isAPosInsideCube(team.getBase().getProximityCube(), pos)) {
                     if (isBaseOfPlayer) where = Where.CLOSE_TO_HIS_OWN_BASE;
                     else where = Where.CLOSE_TO_AN_ENEMY_BASE;
                 }
@@ -150,6 +151,25 @@ public class GameUtils {
         }
 
         return whereIsThePlayer.impl(where);
+    }
+
+    private static void nestsVault(Where where, Vec3d pos){
+        if(!Configs.VAULT_CONFIG.data.isEnabled())return;
+        Box box;
+        for (var vault : VaultConstant.VAULTS.data.getVaults()) {
+            if (vault.getBlockPos()[0] == null || vault.getBlockPos()[1] == null) continue;
+            box = ch.skyfy.fk.features.data.BlockPos.toBox(vault.getBlockPos());
+            switch (where) {
+                case INSIDE_HIS_OWN_BASE -> {
+                    if (box.contains(pos))
+                        where.withNested(Where.INSIDE_THE_VAULT_OF_HIS_OWN_BASE);
+                }
+                case INSIDE_AN_ENEMY_BASE -> {
+                    if (box.contains(pos))
+                        where.withNested(Where.INSIDE_THE_VAULT_OF_AN_ENEMY_BASE);
+                }
+            }
+        }
     }
 
     public static String getFKTeamIdentifierByName(String fkteamName) {

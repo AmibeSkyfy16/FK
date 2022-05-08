@@ -2,13 +2,11 @@ package ch.skyfy.fk.commands;
 
 import ch.skyfy.fk.FKMod;
 import ch.skyfy.fk.logic.FKGame;
-import ch.skyfy.fk.logic.GameUtils;
 import ch.skyfy.fk.logic.data.FKGameAllData;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.network.MessageType;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
@@ -17,8 +15,6 @@ import net.minecraft.util.Formatting;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static net.minecraft.util.Util.NIL_UUID;
 
 @SuppressWarnings({"ClassCanBeRecord", "CommentedOutCode"})
 public class StartCmd implements Command<ServerCommandSource> {

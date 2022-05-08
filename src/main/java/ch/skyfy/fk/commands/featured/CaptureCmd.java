@@ -2,6 +2,7 @@ package ch.skyfy.fk.commands.featured;
 
 import ch.skyfy.fk.config.Configs;
 import ch.skyfy.fk.constants.MsgBase;
+import ch.skyfy.fk.constants.Where;
 import ch.skyfy.fk.logic.FKGame;
 import ch.skyfy.fk.logic.GameUtils;
 import com.mojang.brigadier.Command;
@@ -27,9 +28,6 @@ public class CaptureCmd implements Command<ServerCommandSource> {
         public static Msg NO_BASE_HERE = new Msg("There is no base where you are", Formatting.GOLD);
         public static Msg NO_BASE_FOUND_IN_BASE = new Msg("No vault found inside the %s team base", Formatting.GOLD);
         public static Msg VAULT_IS_NOT_VALID = new Msg("The vault found inside the %s team base is not valid", Formatting.GOLD);
-        public static Msg IN_YOUR_BASE_BUT_NO_IN_YOUR_VAULT = new Msg("You are inside your own base, but not inside your vault", Formatting.GOLD);
-        public static Msg IN_YOUR_BASE_IN_YOUR_VAULT = new Msg("You cannot capture your own vault", Formatting.GOLD);
-        public static Msg IN_AN_ENEMY_BASE_BUT_NO_IN_VAULT = new Msg("You are inside an enemy base, but not inside the vault", Formatting.GOLD);
 
         protected Msg(String text, Formatting formatting) {
             super(text, formatting);
@@ -37,7 +35,6 @@ public class CaptureCmd implements Command<ServerCommandSource> {
     }
 
     private final AtomicReference<Optional<FKGame>> optFKGameRef;
-
 
     public CaptureCmd(final AtomicReference<Optional<FKGame>> optFKGameRef) {
         this.optFKGameRef = optFKGameRef;
@@ -47,7 +44,6 @@ public class CaptureCmd implements Command<ServerCommandSource> {
         dispatcher.register(CommandManager.literal("capture").executes(this));
     }
 
-    @SuppressWarnings("RedundantLabeledSwitchRuleCodeBlock")
     @Override
     public int run(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         if (optFKGameRef.get().isEmpty()) return 0;
@@ -97,20 +93,9 @@ public class CaptureCmd implements Command<ServerCommandSource> {
         }
 
         var chestRoomFeature = fkGame.getVaultFeature();
-        switch (chestRoomFeature.whereIsThePlayer(playerAttacker)) {
-            case INSIDE_HIS_OWN_BASE -> {
-                Msg.IN_YOUR_BASE_BUT_NO_IN_YOUR_VAULT.send(playerAttacker);
-            }
-            case INSIDE_THE_VAULT_OF_HIS_OWN_BASE -> {
-                Msg.IN_YOUR_BASE_IN_YOUR_VAULT.send(playerAttacker);
-            }
-            case INSIDE_AN_ENEMY_BASE -> {
-                Msg.IN_AN_ENEMY_BASE_BUT_NO_IN_VAULT.send(playerAttacker);
-            }
-            case INSIDE_THE_VAULT_OF_AN_ENEMY_BASE -> {
-                chestRoomFeature.addCapture(vault, fkTeamVictim, GameUtils.getFKTeamOfPlayerByName(playerAttacker.getName().asString()), playerAttacker);
-            }
-        }
+        if(chestRoomFeature.whereIsThePlayer(playerAttacker) == Where.INSIDE_THE_VAULT_OF_AN_ENEMY_BASE)
+            chestRoomFeature.addCapture(vault, fkTeamVictim, GameUtils.getFKTeamOfPlayerByName(playerAttacker.getName().asString()), playerAttacker);
+
         return 0;
     }
 

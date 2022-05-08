@@ -30,6 +30,7 @@ import net.minecraft.item.BucketItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.MessageType;
+import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
@@ -91,7 +92,6 @@ public class FKGame {
 
         initialize();
         registerEvents();
-
     }
 
     private void initialize() {
@@ -448,6 +448,12 @@ public class FKGame {
         }
 
         private void onPlayerJoin(ServerPlayerEntity player, MinecraftServer server) {
+
+            // TODO this is a temporary test, will be deleted
+            System.out.println("joined");
+            server.getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.UPDATE_DISPLAY_NAME, player));
+
+
             if (GameUtils.isGameState_RUNNING())
                 FKGameAllData.FK_GAME_DATA.data.setGameState(FKMod.GameState.PAUSED);
 

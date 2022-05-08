@@ -2,14 +2,10 @@ package ch.skyfy16.fk;
 
 import ch.skyfy.fk.config.data.Cube;
 import ch.skyfy.fk.utils.MathUtils;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 public class Tests {
 
@@ -67,10 +63,10 @@ public class Tests {
         for (Map.Entry<CubeTest, Boolean> cubeTestBooleanEntry : map.entrySet()) {
             var cubeTest = cubeTestBooleanEntry.getKey();
             var expected = cubeTestBooleanEntry.getValue();
-            if(MathUtils.isInside(cubeTest.cube1, cubeTest.cube2)){
+            if (MathUtils.isInside(cubeTest.cube1, cubeTest.cube2)) {
                 System.out.println("cube2 is inside cube1");
             }
-            if(MathUtils.intersect(cubeTest.cube1, cubeTest.cube2)){
+            if (MathUtils.intersect(cubeTest.cube1, cubeTest.cube2)) {
                 System.out.println("intersect");
             }
         }
@@ -87,8 +83,9 @@ public class Tests {
     }
 
     @Test
-    public void mapTest(){
-
+    public void mapTest() {
+//        var s = new String("Here are the coordinates of your base : X:%d Y:%d Z:%d").formatted(20.0d, 43.0d, 43.0d);
+//        System.out.println(s);
 
     }
 

@@ -113,8 +113,9 @@ public class FKGame {
                 var spawnLoc = base.getSpawnLocation();
                 var optServerWorld = GameUtils.getServerWorldByIdentifier(server, spawnLoc.getDimensionName());
                 optServerWorld.ifPresent(serverWorld -> fkPlayer.teleport(serverWorld, spawnLoc.getX(), spawnLoc.getY(), spawnLoc.getZ(), spawnLoc.getYaw(), spawnLoc.getPitch()));
-            } else
-                Msg.BASE_COORDINATES.formatted(base.getCube().getX(), base.getCube().getY(), base.getCube().getZ()).send(fkPlayer);
+            } else {
+                Msg.BASE_COORDINATES.formatted((int)base.getCube().getX(), (int)base.getCube().getY(), (int)base.getCube().getZ()).send(fkPlayer);
+            }
         }
     }
 

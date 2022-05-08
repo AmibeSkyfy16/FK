@@ -114,7 +114,7 @@ public class FKGame {
                 var optServerWorld = GameUtils.getServerWorldByIdentifier(server, spawnLoc.getDimensionName());
                 optServerWorld.ifPresent(serverWorld -> fkPlayer.teleport(serverWorld, spawnLoc.getX(), spawnLoc.getY(), spawnLoc.getZ(), spawnLoc.getYaw(), spawnLoc.getPitch()));
             } else {
-                Msg.BASE_COORDINATES.formatted((int)base.getCube().getX(), (int)base.getCube().getY(), (int)base.getCube().getZ()).send(fkPlayer);
+                Msg.BASE_COORDINATES.formatted((int) base.getCube().getX(), (int) base.getCube().getY(), (int) base.getCube().getZ()).send(fkPlayer);
             }
         }
     }
@@ -146,7 +146,7 @@ public class FKGame {
         var fkTeam = GameUtils.getFKTeamOfPlayerByName(playerName);
         if (fkTeam == null) return;
 
-        var team = serverScoreboard.getTeam(fkTeam.getName());
+        var team = serverScoreboard.getTeam(GameUtils.getFKTeamIdentifierByName(fkTeam.getName()));
         if (team == null) {
             team = serverScoreboard.addTeam(GameUtils.getFKTeamIdentifierByName(fkTeam.getName())); // minecraft internal team name can't have space or special char
             team.setDisplayName(new LiteralText(fkTeam.getName()).setStyle(Style.EMPTY.withColor(Formatting.byName(fkTeam.getColor()))));
@@ -195,14 +195,14 @@ public class FKGame {
         AttackEntityCallback.EVENT.register(fkGameEvents::cancelPlayerPvP);
         PlayerEnterPortalCallback.EVENT.register(fkGameEvents::cancelPlayerFromEnteringInPortal);
         PlayerMoveCallback.EVENT.register(fkGameEvents::onPlayerMove);
+        EntityMoveCallback.EVENT.register(fkGameEvents::onEntityMove);
         PlayerDamageCallback.EVENT.register(fkGameEvents::onPlayerDamage);
         PlayerHungerCallback.EVENT.register(fkGameEvents::onPlayerHungerUpdate);
         PlayerJoinCallback.EVENT.register(fkGameEvents::onPlayerJoin);
         EntitySpawnCallback.EVENT.register(fkGameEvents::onEntitySpawn);
         ItemDespawnCallback.EVENT.register(fkGameEvents::onItemDespawn);
-
-        // Event use when the game state is "pause"
-        EntityMoveCallback.EVENT.register(pauseEvents::stopEntitiesFromMoving);
+//
+//        // Event use when the game state is "pause"
         TimeOfDayUpdatedCallback.EVENT.register(pauseEvents::cancelTimeOfDayToBeingUpdated);
     }
 
@@ -416,6 +416,13 @@ public class FKGame {
             return ActionResult.PASS;
         }
 
+        private ActionResult onEntityMove(Entity entity, MovementType movementType, Vec3d movement) {
+            if (GameUtils.isGameState_PAUSED())
+                if (entity instanceof MobEntity)
+                    return ActionResult.FAIL;
+            return ActionResult.PASS;
+        }
+
         private ActionResult onPlayerDamage(ServerPlayerEntity player, DamageSource source, float amount) {
             if (GameUtils.isGameState_PAUSED() || GameUtils.isGameState_NOT_STARTED())
                 return ActionResult.FAIL;
@@ -443,7 +450,7 @@ public class FKGame {
             if (GameUtils.isGameState_RUNNING())
                 FKGameAllData.FK_GAME_DATA.data.setGameState(FKMod.GameState.PAUSED);
 
-            if(!player.hasPermissionLevel(4))
+            if (!player.hasPermissionLevel(4))
                 player.changeGameMode(GameMode.SURVIVAL);
 
             teleportPlayerToWaitingRoom(player);
@@ -453,11 +460,6 @@ public class FKGame {
     }
 
     static class PauseEvents {
-
-        private ActionResult stopEntitiesFromMoving(Entity entity, MovementType movementType, Vec3d movement) {
-            if (!GameUtils.isGameState_PAUSED()) return ActionResult.PASS;
-            return ActionResult.FAIL;
-        }
 
         private ActionResult cancelTimeOfDayToBeingUpdated(long time) {
             if (!GameUtils.isGameState_PAUSED()) return ActionResult.PASS;

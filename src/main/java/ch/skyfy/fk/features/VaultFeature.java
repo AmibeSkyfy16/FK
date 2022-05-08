@@ -102,6 +102,7 @@ public class VaultFeature {
             if (whereIsThePlayer(player) == INSIDE_THE_VAULT_OF_AN_ENEMY_BASE) return;
             manageCapture(player);
         });
+        if(0 == 0)return;
         PlayerMoveCallback.EVENT.register((moveData, player) -> {
             if (whereIsThePlayer(player) == INSIDE_THE_VAULT_OF_AN_ENEMY_BASE) return ActionResult.PASS;
             manageCapture(player);

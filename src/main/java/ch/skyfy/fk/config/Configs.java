@@ -1,7 +1,7 @@
 package ch.skyfy.fk.config;
 
 import ch.skyfy.fk.FKMod;
-import ch.skyfy.fk.config.constant.TestConfigs;
+import ch.skyfy.fk.config.constant.FallenKingRun12Config;
 import ch.skyfy.fk.config.features.VaultFeatureConfig;
 import ch.skyfy.fk.json.JsonDataClass;
 
@@ -21,22 +21,27 @@ public class Configs {
     static {
 
         // Test configs
-        WORLD_CONFIG = new JsonDataClass<>("worldBorderConfig.json5", WorldBorderConfig.class, TestConfigs.TEST_WORLD_INFO_CONFIG);
-        FK_CONFIG = new JsonDataClass<>("fkconfig.json5", FKConfig.class, TestConfigs.TEST_FKCONFIG);
-        TEAMS = new JsonDataClass<>("teams.json5", TeamsConfig.class, TestConfigs.TEST_TEAMS_CONFIG);
+//        WORLD_CONFIG = new JsonDataClass<>("worldBorderConfig.json5", WorldBorderConfig.class, TestConfigs.TEST_WORLD_INFO_CONFIG);
+//        FK_CONFIG = new JsonDataClass<>("fkconfig.json5", FKConfig.class, TestConfigs.TEST_FKCONFIG);
+//        TEAMS = new JsonDataClass<>("teams.json5", TeamsConfig.class, TestConfigs.TEST_TEAMS_CONFIG);
 
-        VAULT_CONFIG = new JsonDataClass<>("features\\vault.json5", VaultFeatureConfig.class, TestConfigs.CHEST_ROOM_CONFIG);
-
-        WORLD_CONFIG.data.validate();
-        FK_CONFIG.data.validate();
-        TEAMS.data.validate();
-        VAULT_CONFIG.data.validate();
-
+        // FallenKingRun12
+        WORLD_CONFIG = new JsonDataClass<>("worldBorderConfig.json5", WorldBorderConfig.class, FallenKingRun12Config.WORLD_BORDER_CONFIG);
+        FK_CONFIG = new JsonDataClass<>("fkconfig.json5", FKConfig.class, FallenKingRun12Config.FKCONFIG);
+        TEAMS = new JsonDataClass<>("teams.json5", TeamsConfig.class, FallenKingRun12Config.TEAMS);
+        VAULT_CONFIG = new JsonDataClass<>("features\\vault.json5", VaultFeatureConfig.class, FallenKingRun12Config.CHEST_ROOM_CONFIG);
 
         // The default config
 //        WORLD_CONFIG = new JsonDataClass<>("worldBorderConfig.json5", WorldBorderConfig.class, DefaultConfigs.DEFAULT_WORLD_INFO_CONFIG);
 //        FK_CONFIG = new JsonDataClass<>("fkconfig.json5", FKConfig.class,  DefaultConfigs.DEFAULT_FKCONFIG);
 //        TEAMS = new JsonDataClass<>("teams.json5", TeamsConfig.class, DefaultConfigs.DEFAULT_TEAMS_CONFIG);
+//        VAULT_CONFIG = new JsonDataClass<>("features\\vault.json5", VaultFeatureConfig.class, TestConfigs.CHEST_ROOM_CONFIG);
+
+
+        WORLD_CONFIG.data.validate();
+        FK_CONFIG.data.validate();
+        TEAMS.data.validate();
+        VAULT_CONFIG.data.validate();
 
         FKMod.LOGGER.info(Configs.class.getName() + " has been loaded");
     }

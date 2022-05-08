@@ -6,18 +6,18 @@
   "mixins": [
   ],
   "server": [
-    "BucketMixin",
-    "EndPortalBlockMixin",
-    "EntityMixin",
-    "ItemInvoker",
-    "LivingEntityMixin",
-    "NetherPortalBlockMixin",
-    "PlayerEntityMixin",
-    "ServerPlayerEntityMixin",
-    "ServerPlayNetworkHandlerMixin",
-    "ServerWorldMixin",
-    "HungerManagerMixin",
-    "ItemEntityMixin"
+      "BucketMixin",
+      "EndPortalBlockMixin",
+      "EntityMixin",
+      "ItemInvoker",
+      "LivingEntityMixin",
+      "NetherPortalBlockMixin",
+      "PlayerEntityMixin",
+      "ServerPlayerEntityMixin",
+      "ServerPlayNetworkHandlerMixin",
+      "ServerWorldMixin",
+      "HungerManagerMixin",
+      "ItemEntityMixin"
   ],
   "client": [
   ],

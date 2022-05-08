@@ -4,20 +4,22 @@
   "package": "ch.skyfy.fk.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+
   ],
   "server": [
-      "BucketMixin",
-      "EndPortalBlockMixin",
-      "EntityMixin",
-      "ItemInvoker",
-      "LivingEntityMixin",
-      "NetherPortalBlockMixin",
-      "PlayerEntityMixin",
-      "ServerPlayerEntityMixin",
-      "ServerPlayNetworkHandlerMixin",
-      "ServerWorldMixin",
-      "HungerManagerMixin",
-      "ItemEntityMixin"
+    "BucketMixin",
+    "EndPortalBlockMixin",
+    "EntityMixin",
+    "HungerManagerMixin",
+    "ItemEntityMixin",
+    "ItemInvoker",
+    "LivingEntityMixin",
+    "NetherPortalBlockMixin",
+    "ServerPlayerEntityMixin",
+    "ServerPlayNetworkHandlerMixin",
+    "ServerWorldMixin",
+    "AbstractTeamMixin",
+    "PlayerEntityMixin"
   ],
   "client": [
   ],

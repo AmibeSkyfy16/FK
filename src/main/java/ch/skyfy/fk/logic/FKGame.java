@@ -30,6 +30,7 @@ import net.minecraft.item.BucketItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.MessageType;
+import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
@@ -44,6 +45,8 @@ import net.minecraft.world.GameMode;
 import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static net.minecraft.util.Util.NIL_UUID;
 
@@ -62,9 +65,12 @@ public class FKGame {
         }
     }
 
+    public static AtomicBoolean configLoaded;
+
     static {
         ReflectionUtils.loadClassesByReflection(new Class[]{FKGameAllData.class});
         FKMod.LOGGER.info(FKGameAllData.class.getCanonicalName() + " loaded successfully");
+        configLoaded = new AtomicBoolean(false); // set to true in the end of the constructor
     }
 
     private final MinecraftServer server;
@@ -91,6 +97,8 @@ public class FKGame {
 
         initialize();
         registerEvents();
+
+        configLoaded.set(true);
     }
 
     private void initialize() {
@@ -151,11 +159,15 @@ public class FKGame {
             team = serverScoreboard.addTeam(GameUtils.getFKTeamIdentifierByName(fkTeam.getName())); // minecraft internal team name can't have space or special char
             team.setDisplayName(new LiteralText(fkTeam.getName()).setStyle(Style.EMPTY.withColor(Formatting.byName(fkTeam.getColor()))));
             team.setColor(Formatting.byName(fkTeam.getColor()));
+//            team.setPrefix(new LiteralText("["+team.getColor().getName().replace("_", "")+"]").setStyle(Style.EMPTY.withColor(team.getColor())));
+            team.setNameTagVisibilityRule(AbstractTeam.VisibilityRule.ALWAYS);
         }
+
 
         var playerTeam = serverScoreboard.getPlayerTeam(playerName);
         if (playerTeam == null)
             serverScoreboard.addPlayerToTeam(playerName, team);
+
 
         serverScoreboard.updateScoreboardTeamAndPlayers(team);
         serverScoreboard.updateScoreboardTeam(team);

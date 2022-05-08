@@ -124,16 +124,6 @@ public class GameUtils {
 
         Where where = null;
 
-        var isPlayerInHisOwnBase = false;
-
-        var isPlayerInAnEnemyBase = false;
-
-        // Is the player close to his own base, but not inside
-        var isPlayerCloseToHisOwnBase = false;
-
-        // Is the player close to an enemy base, but not inside
-        var isPlayerCloseToAnEnemyBase = false;
-
         for (var team : TEAMS.data.getTeams()) {
             var baseCube = team.getBase().getCube();
 
@@ -150,8 +140,6 @@ public class GameUtils {
                     where = Where.INSIDE_HIS_OWN_BASE;
 
             } else {
-                var isPlayerCloseToABase = false;
-
                 if (Utils.isAPosInsideCube(team.getBase().getProximityCube(), blockPos)) {
                     if (isBaseOfPlayer) where = Where.CLOSE_TO_HIS_OWN_BASE;
                     else where = Where.CLOSE_TO_AN_ENEMY_BASE;

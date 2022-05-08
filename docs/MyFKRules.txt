@@ -161,6 +161,9 @@ Les règles du FK
             1. La salle des coffres doit être construite et répondre aux règles la concernant
                 1.1 // TODO Ajouter une option configurable permettant d'éliminer une team, si aucune salle des coffres n'a été construite
             2. Il ne doit plus y avoir des coffres qui ne sont pas dans la salle des coffres
+        4. Interdiction d'entrer dans une base enemies en utilisant la technique des escaliers en TNT
+        5. Interdiction d'entrer dans une base enemies en utilisant des chorus
+        6. Interdiction d'entrer dans une base enemies à l'aide d'enderpearl
 
     REGLES CONCERNANT LA SALLE DES COFFRES
         1. La salle des coffres doit être accessible sans casser de blocs

@@ -54,8 +54,6 @@ public class ResumeCmd implements Command<ServerCommandSource> {
 //                    GameUtils.sendMissingPlayersMessage(player, source.getServer().getPlayerManager().getPlayerList());
 //                    return 0;
 //                }
-
-                FKGameAllData.FK_GAME_DATA.data.setGameState(FKMod.GameState.RUNNING);
                 optFKGameRef.get().ifPresent(FKGame::resume);
             }
         }

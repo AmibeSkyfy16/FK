@@ -16,7 +16,9 @@ import me.bymartrixx.playerevents.api.event.PlayerJoinCallback;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
-import net.minecraft.block.*;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.TntBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
@@ -123,14 +125,18 @@ public class FKGame {
     public void pause() {
         FKGameAllData.FK_GAME_DATA.data.setGameState(FKMod.GameState.PAUSED);
         server.getPlayerManager().broadcast(Msg.GAME_HAS_BEEN_PAUSED.text(), MessageType.CHAT, NIL_UUID);
+        GameUtils.getAllConnectedFKPlayers(server.getPlayerManager().getPlayerList()).forEach(this::updateSidebar);
     }
 
     public void resume() {
+        FKGameAllData.FK_GAME_DATA.data.setGameState(FKMod.GameState.RUNNING);
         server.getPlayerManager().broadcast(Msg.GAME_HAS_BEEN_RESUMED.text(), MessageType.CHAT, NIL_UUID);
 
         // If the timeline wasn't started (in the case of a server restart with gamestate at PAUSE OR RUNNING)
         if (!timeline.getIsTimerStartedRef().get())
             timeline.startTimer();
+
+        GameUtils.getAllConnectedFKPlayers(server.getPlayerManager().getPlayerList()).forEach(this::updateSidebar);
     }
 
     private void update(ServerPlayerEntity player) {
@@ -201,7 +207,7 @@ public class FKGame {
         PlayerJoinCallback.EVENT.register(fkGameEvents::onPlayerJoin);
         EntitySpawnCallback.EVENT.register(fkGameEvents::onEntitySpawn);
         ItemDespawnCallback.EVENT.register(fkGameEvents::onItemDespawn);
-//
+
 //        // Event use when the game state is "pause"
         TimeOfDayUpdatedCallback.EVENT.register(pauseEvents::cancelTimeOfDayToBeingUpdated);
     }
@@ -227,24 +233,11 @@ public class FKGame {
                 var currentDimId = player.getWorld().getDimension().getEffects().toString();
                 var block = world.getBlockState(pos).getBlock();
                 return playerActionImpl(block.getTranslationKey(), currentDimId, where, true, false, PlayerActionsConfigs.BREAKING_BLOCKS_CONFIG.data);
-
-//                return switch (where) {
-//                    case INSIDE_HIS_OWN_BASE -> true;
-//                    case CLOSE_TO_HIS_OWN_BASE -> true;
-//                    case INSIDE_AN_ENEMY_BASE, CLOSE_TO_AN_ENEMY_BASE ->
-//                            block == Blocks.TNT || block == Blocks.REDSTONE_TORCH || block == Blocks.LEVER;
-//                    case IN_THE_WILD -> true;
-//                    default -> true;
-//                };
             };
             return GameUtils.whereIsThePlayer(player, new Vec3d(pos.getX(), pos.getY(), pos.getZ()), breakPlace);
         }
 
         private ActionResult cancelPlayerFromPlacingBlocks(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
-//            if (player.hasPermissionLevel(4)) return ActionResult.PASS;
-//
-//            if (!GameUtils.isGameState_RUNNING()) return ActionResult.FAIL;
-
             var currentDimId = player.getWorld().getDimension().getEffects().toString();
             var itemInHand = player.getStackInHand(player.getActiveHand());
 
@@ -280,26 +273,7 @@ public class FKGame {
             var fillBucketImpl = (GameUtils.WhereIsThePlayer<TypedActionResult<ItemStack>>) (where) -> {
                 var currentDimId = player.getWorld().getDimension().getEffects().toString();
                 var placedItemStack = player.getStackInHand(player.getActiveHand());
-
                 return playerActionImpl(targetBlock.getTranslationKey(), currentDimId, where, TypedActionResult.pass(placedItemStack), TypedActionResult.fail(placedItemStack), PlayerActionsConfigs.FILLING_BUCKET_CONFIG.data);
-
-//                return switch (where) {
-//                    case INSIDE_HIS_OWN_BASE -> TypedActionResult.pass(placedItemStack);
-//                    case CLOSE_TO_HIS_OWN_BASE -> TypedActionResult.pass(placedItemStack);
-//                    case INSIDE_AN_ENEMY_BASE -> {
-//                        if (fillFluid instanceof LavaFluid || fillFluid instanceof WaterFluid)
-//                            yield TypedActionResult.fail(placedItemStack);
-//
-//                        yield TypedActionResult.pass(placedItemStack);
-//                    }
-//                    case CLOSE_TO_AN_ENEMY_BASE -> {
-//                        if (fillFluid instanceof LavaFluid || fillFluid instanceof WaterFluid)
-//                            yield TypedActionResult.fail(placedItemStack);
-//                        yield TypedActionResult.pass(placedItemStack);
-//                    }
-//                    case IN_THE_WILD -> TypedActionResult.pass(placedItemStack);
-//                    default -> TypedActionResult.pass(placedItemStack);
-//                };
             };
 
             var blockPos = blockHitResult.getBlockPos();
@@ -312,34 +286,16 @@ public class FKGame {
             if (!GameUtils.isGameState_RUNNING()) return TypedActionResult.fail(player.getStackInHand(hand));
 
             var emptyBucketImpl = (GameUtils.WhereIsThePlayer<TypedActionResult<ItemStack>>) (where) -> {
-
                 var currentDimId = player.getWorld().getDimension().getEffects().toString();
                 var placedItemStack = player.getStackInHand(player.getActiveHand());
                 return playerActionImpl(bucketItem.getTranslationKey(), currentDimId, where, TypedActionResult.pass(placedItemStack), TypedActionResult.fail(placedItemStack), PlayerActionsConfigs.EMPTYING_BUCKET_CONFIG.data);
-
-//                return switch (where) {
-//                    case INSIDE_HIS_OWN_BASE -> TypedActionResult.pass(placedItemStack);
-//                    case CLOSE_TO_HIS_OWN_BASE -> TypedActionResult.fail(placedItemStack);
-//                    case INSIDE_AN_ENEMY_BASE -> {
-//                        if (emptyFluid instanceof LavaFluid || emptyFluid instanceof WaterFluid)
-//                            yield TypedActionResult.fail(placedItemStack);
-//                        yield TypedActionResult.pass(placedItemStack);
-//                    }
-//                    case CLOSE_TO_AN_ENEMY_BASE -> {
-//                        if (emptyFluid instanceof LavaFluid || emptyFluid instanceof WaterFluid)
-//                            yield TypedActionResult.fail(placedItemStack);
-//                        yield TypedActionResult.pass(placedItemStack);
-//                    }
-//                    case IN_THE_WILD -> TypedActionResult.pass(placedItemStack);
-//                    default -> TypedActionResult.pass(placedItemStack);
-//                };
             };
 
             var blockPos = blockHitResult.getBlockPos();
             return GameUtils.whereIsThePlayer(player, new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()), emptyBucketImpl);
         }
 
-        private ActionResult onUseBlockEvent(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult){
+        private ActionResult onUseBlockEvent(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
             if (player.hasPermissionLevel(4)) return ActionResult.PASS; // Admin can bypass this
 
             // If the game is NOT_STARTED OR PAUSED, players can't destroy block, block entity (painting, item frame, ...) or firing tnt
@@ -347,7 +303,7 @@ public class FKGame {
 
             // Check if player has a block in his hand and if we need to cancel
             var result = cancelPlayerFromPlacingBlocks(player, world, hand, hitResult);
-            if(result == ActionResult.FAIL)return result;
+            if (result == ActionResult.FAIL) return result;
 
             // Check if player has a flint and steel in his hand and if the target block is a tnt
             // if true -> we fail. Otherwise -> pass
@@ -355,10 +311,6 @@ public class FKGame {
         }
 
         private ActionResult cancelPlayerFromFiringATNT(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
-//            if (player.hasPermissionLevel(4)) return ActionResult.PASS;
-//
-//            if (!GameUtils.isGameState_RUNNING()) return ActionResult.FAIL;
-
             var itemInHand = player.getStackInHand(hand);
 
             var emptyBucketImpl = (GameUtils.WhereIsThePlayer<ActionResult>) (where) -> {

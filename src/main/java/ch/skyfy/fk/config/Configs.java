@@ -2,8 +2,13 @@ package ch.skyfy.fk.config;
 
 import ch.skyfy.fk.FKMod;
 import ch.skyfy.fk.config.constant.FallenKingRun12Config;
+import ch.skyfy.fk.config.data.*;
 import ch.skyfy.fk.config.features.VaultFeatureConfig;
+import ch.skyfy.fk.json.Defaultable;
 import ch.skyfy.fk.json.JsonDataClass;
+import net.minecraft.util.Formatting;
+
+import java.util.List;
 
 /**
  * This is where the configurations are loaded
@@ -12,31 +17,17 @@ import ch.skyfy.fk.json.JsonDataClass;
 @SuppressWarnings("CommentedOutCode")
 public class Configs {
 
-    public static final JsonDataClass<WorldBorderConfig> WORLD_CONFIG;
-    public static final JsonDataClass<FKConfig> FK_CONFIG;
-    public static final JsonDataClass<TeamsConfig> TEAMS;
+    public static final JsonDataClass<WorldBorderConfig, WorldBorderConfigDefault> WORLD_CONFIG;
+    public static final JsonDataClass<FKConfig, FKConfigDefault> FK_CONFIG;
+    public static final JsonDataClass<TeamsConfig, TeamsConfigDefault> TEAMS;
 
-    public static final JsonDataClass<VaultFeatureConfig> VAULT_CONFIG;
+    public static final JsonDataClass<VaultFeatureConfig, VaultFeatureConfigDefault> VAULT_CONFIG;
 
     static {
-
-        // Test configs
-//        WORLD_CONFIG = new JsonDataClass<>("worldBorderConfig.json5", WorldBorderConfig.class, TestConfigs.TEST_WORLD_INFO_CONFIG);
-//        FK_CONFIG = new JsonDataClass<>("fkconfig.json5", FKConfig.class, TestConfigs.TEST_FKCONFIG);
-//        TEAMS = new JsonDataClass<>("teams.json5", TeamsConfig.class, TestConfigs.TEST_TEAMS_CONFIG);
-
-        // FallenKingRun12
-        WORLD_CONFIG = new JsonDataClass<>("worldBorderConfig.json5", WorldBorderConfig.class, FallenKingRun12Config.WORLD_BORDER_CONFIG);
-        FK_CONFIG = new JsonDataClass<>("fkconfig.json5", FKConfig.class, FallenKingRun12Config.FKCONFIG);
-        TEAMS = new JsonDataClass<>("teams.json5", TeamsConfig.class, FallenKingRun12Config.TEAMS);
-        VAULT_CONFIG = new JsonDataClass<>("features\\vault.json5", VaultFeatureConfig.class, FallenKingRun12Config.CHEST_ROOM_CONFIG);
-
-        // The default config
-//        WORLD_CONFIG = new JsonDataClass<>("worldBorderConfig.json5", WorldBorderConfig.class, DefaultConfigs.DEFAULT_WORLD_INFO_CONFIG);
-//        FK_CONFIG = new JsonDataClass<>("fkconfig.json5", FKConfig.class,  DefaultConfigs.DEFAULT_FKCONFIG);
-//        TEAMS = new JsonDataClass<>("teams.json5", TeamsConfig.class, DefaultConfigs.DEFAULT_TEAMS_CONFIG);
-//        VAULT_CONFIG = new JsonDataClass<>("features\\vault.json5", VaultFeatureConfig.class, TestConfigs.CHEST_ROOM_CONFIG);
-
+        WORLD_CONFIG = new JsonDataClass<>("worldBorderConfig.json5", WorldBorderConfig.class, WorldBorderConfigDefault.class);
+        FK_CONFIG = new JsonDataClass<>("fkconfig.json5", FKConfig.class, FKConfigDefault.class);
+        TEAMS = new JsonDataClass<>("teams.json5", TeamsConfig.class, TeamsConfigDefault.class);
+        VAULT_CONFIG = new JsonDataClass<>("features\\vault.json5", VaultFeatureConfig.class, VaultFeatureConfigDefault.class);
 
         WORLD_CONFIG.data.validate();
         FK_CONFIG.data.validate();
@@ -46,4 +37,72 @@ public class Configs {
         FKMod.LOGGER.info(Configs.class.getName() + " has been loaded");
     }
 
+    private static class WorldBorderConfigDefault implements Defaultable<WorldBorderConfig> {
+
+        @Override
+        public WorldBorderConfig getDefault() {
+            // Config for FallenKingRun12 map
+            return new WorldBorderConfig(new WorldBorderData("minecraft:overworld",
+                    new Cube((short) 210, 64, 319, 0, 0, 0))
+            );
+        }
+    }
+
+    private static class TeamsConfigDefault implements Defaultable<TeamsConfig>{
+
+        @Override
+        public TeamsConfig getDefault() {
+            // Teams for FallenKingRun12 map
+            return new TeamsConfig(List.of(
+                    new FKTeam("Yellow team", Formatting.YELLOW.name(), List.of("Alex"),
+                            new Base("Yellow base",
+                                    new Cube((short) 14, 50, 500, -64, 100, -113),
+                                    new Cube((short)34, 50, 500, -64, 100, -113),
+                                    new SpawnLocation("minecraft:overworld",-64.6, 107, -113.4, 2f, 38f)
+                            )
+                    ),
+                    new FKTeam("Purple team", Formatting.DARK_PURPLE.name(), List.of("Skyfy16"),
+                            new Base("Purple base",
+                                    new Cube((short) 14, 50, 500, 121, 99, -19),
+                                    new Cube((short) 55, 50, 500, 121, 99, -19),
+                                    new SpawnLocation("minecraft:overworld",121.5, 106, -19.3, 90f, 69f)
+                            )
+                    )
+            ));
+        }
+    }
+
+    private static class FKConfigDefault implements Defaultable<FKConfig>{
+
+        @Override
+        public FKConfig getDefault() {
+            // config for FallenKingRun12 map
+            return new FKConfig(
+                    5,
+                    2,
+                    3,
+                    2,
+                    false,
+                    new WaitingRoom(
+                            new Cube((short) 22, 250, 255, 0, 101, 4),
+                            new SpawnLocation("minecraft:overworld", 0, 101, 16, 180, 2.8f)
+                    ),
+                    new SpawnLocation("minecraft:overworld", 0, 123, 7, 88, 88)
+            );
+        }
+    }
+
+    private static class VaultFeatureConfigDefault implements Defaultable<VaultFeatureConfig>{
+
+        @Override
+        public VaultFeatureConfig getDefault() {
+            return new VaultFeatureConfig(
+                    true,
+                    4,
+                    4,
+                    2,
+                    20
+            );
+        }
+    }
 }

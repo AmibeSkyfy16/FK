@@ -11,35 +11,35 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 @SuppressWarnings({"UnstableApiUsage", "unused"})
-public class JsonManager<T extends Validatable> {
+public class JsonManager<DATA extends Validatable, DEFAULT extends Defaultable<DATA>> {
 
-    private final TypeToken<T> typeToken;
+    private final TypeToken<DATA> typeToken;
 
     private final Gson gson;
 
     private final File file;
 
-    private final T config;
+    private final Class<DEFAULT> defaultConfigClass;
 
-    public JsonManager(Class<T> tClass, Gson gson, File file, T defaultConfig) {
+    public JsonManager(Class<DATA> tClass, Gson gson, File file, Class<DEFAULT> defaultConfigClass) {
         this.typeToken = TypeToken.of(tClass);
         this.gson = gson;
         this.file = file;
-        this.config = defaultConfig;
+        this.defaultConfigClass = defaultConfigClass;
     }
 
-    public JsonManager(Class<T> tClass, File file, T defaultConfig) {
-        this(tClass, new GsonBuilder().setPrettyPrinting().create(), file, defaultConfig);
+    public JsonManager(Class<DATA> tClass, File file, Class<DEFAULT> defaultConfigClass) {
+        this(tClass, new GsonBuilder().setPrettyPrinting().create(), file, defaultConfigClass);
     }
 
-    public @NotNull T getOrCreateConfig() {
-        T config;
+    public @NotNull DATA getOrCreateConfig() {
+        DATA config;
         try {
             if (file.exists())
                 config = get();
             else {
-                config = this.config;
-                save(this.config);
+                config = this.defaultConfigClass.getDeclaredConstructor().newInstance().getDefault();
+                save(config);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -47,17 +47,17 @@ public class JsonManager<T extends Validatable> {
         return config;
     }
 
-    public T get() throws IOException {
+    public DATA get() throws IOException {
         try (var reader = new FileReader(file)) {
             return gson.fromJson(reader, typeToken.getType());
         }
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    public void save(T t) throws IOException {
+    public void save(DATA DATA) throws IOException {
         file.getParentFile().mkdirs();
         try (var writer = new FileWriter(file)) {
-            gson.toJson(t, typeToken.getType(), writer);
+            gson.toJson(DATA, typeToken.getType(), writer);
         }
     }
 

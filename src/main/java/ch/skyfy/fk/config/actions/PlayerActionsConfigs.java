@@ -1,6 +1,7 @@
 package ch.skyfy.fk.config.actions;
 
 import ch.skyfy.fk.constants.Where;
+import ch.skyfy.fk.json.Defaultable;
 import ch.skyfy.fk.json.JsonDataClass;
 import ch.skyfy.fk.utils.ReflectionUtils;
 import net.minecraft.block.Block;
@@ -13,25 +14,23 @@ import java.util.List;
 
 public class PlayerActionsConfigs {
 
-    public static final JsonDataClass<PlacingBlocksConfig> PLACING_BLOCKS_CONFIG;
-    public static final JsonDataClass<BreakingBlocksConfig> BREAKING_BLOCKS_CONFIG;
-    public static final JsonDataClass<FillingBucketConfig> FILLING_BUCKET_CONFIG;
-    public static final JsonDataClass<EmptyingBucketConfig> EMPTYING_BUCKET_CONFIG;
+    public static final JsonDataClass<PlacingBlocksConfig, PlacingBlocksConfigDefault> PLACING_BLOCKS_CONFIG;
+    public static final JsonDataClass<BreakingBlocksConfig, BreakingBlocksConfigDefault> BREAKING_BLOCKS_CONFIG;
+    public static final JsonDataClass<FillingBucketConfig, FillingBucketConfigDefault> FILLING_BUCKET_CONFIG;
+    public static final JsonDataClass<EmptyingBucketConfig, EmptyingBucketConfigDefault> EMPTYING_BUCKET_CONFIG;
 
     static {
-        PLACING_BLOCKS_CONFIG = new JsonDataClass<>("actions\\placingBlocks.json5", PlacingBlocksConfig.class, PlacingBlocksConfigDefault.PLACING_BLOCKS);
-        BREAKING_BLOCKS_CONFIG = new JsonDataClass<>("actions\\breakingBlocks.json5", BreakingBlocksConfig.class, BreakingBlocksConfigDefault.BREAKING_BLOCKS);
-        FILLING_BUCKET_CONFIG = new JsonDataClass<>("actions\\fillingBucket.json5", FillingBucketConfig.class, FillingBucketConfigDefault.FILLING_BUCKET);
-        EMPTYING_BUCKET_CONFIG = new JsonDataClass<>("actions\\emptyingBucket.json5", EmptyingBucketConfig.class, EmptyingBucketConfigDefault.EMPTYING_BUCKET);
+        PLACING_BLOCKS_CONFIG = new JsonDataClass<>("actions\\placingBlocks.json5", PlacingBlocksConfig.class, PlacingBlocksConfigDefault.class);
+        BREAKING_BLOCKS_CONFIG = new JsonDataClass<>("actions\\breakingBlocks.json5", BreakingBlocksConfig.class, BreakingBlocksConfigDefault.class);
+        FILLING_BUCKET_CONFIG = new JsonDataClass<>("actions\\fillingBucket.json5", FillingBucketConfig.class, FillingBucketConfigDefault.class);
+        EMPTYING_BUCKET_CONFIG = new JsonDataClass<>("actions\\emptyingBucket.json5", EmptyingBucketConfig.class, EmptyingBucketConfigDefault.class);
     }
 
-    private static class PlacingBlocksConfigDefault {
-        private static final PlacingBlocksConfig PLACING_BLOCKS;
-
-        static {
+    private static class PlacingBlocksConfigDefault implements Defaultable<PlacingBlocksConfig> {
+        @Override
+        public PlacingBlocksConfig getDefault() {
             var all = ReflectionUtils.getListOfTranslationKey(Blocks.class, Block.class);
-
-            PLACING_BLOCKS = new PlacingBlocksConfig(new HashMap<>() {{
+            return new PlacingBlocksConfig(new HashMap<>() {{
                 put("minecraft:overworld", new HashMap<>() {{
                     put(Where.INSIDE_HIS_OWN_BASE, all);
                     put(Where.CLOSE_TO_HIS_OWN_BASE, new ArrayList<>());
@@ -55,13 +54,11 @@ public class PlayerActionsConfigs {
         }
     }
 
-    private static class BreakingBlocksConfigDefault {
-        private static final BreakingBlocksConfig BREAKING_BLOCKS;
-
-        static {
+    private static class BreakingBlocksConfigDefault implements Defaultable<BreakingBlocksConfig> {
+        @Override
+        public BreakingBlocksConfig getDefault() {
             var all = ReflectionUtils.getListOfTranslationKey(Blocks.class, Block.class);
-
-            BREAKING_BLOCKS = new BreakingBlocksConfig(new HashMap<>() {{
+            return new BreakingBlocksConfig(new HashMap<>() {{
                 put("minecraft:overworld", new HashMap<>() {{
                     put(Where.INSIDE_HIS_OWN_BASE, all);
                     put(Where.CLOSE_TO_HIS_OWN_BASE, new ArrayList<>());
@@ -85,11 +82,10 @@ public class PlayerActionsConfigs {
         }
     }
 
-    private static class FillingBucketConfigDefault {
-        private static final FillingBucketConfig FILLING_BUCKET;
-
-        static {
-            FILLING_BUCKET = new FillingBucketConfig(new HashMap<>() {{
+    private static class FillingBucketConfigDefault implements Defaultable<FillingBucketConfig> {
+        @Override
+        public FillingBucketConfig getDefault() {
+            return new FillingBucketConfig(new HashMap<>() {{
                 put("minecraft:overworld", new HashMap<>() {{
                     put(Where.INSIDE_HIS_OWN_BASE, List.of(
                             Blocks.LAVA.getTranslationKey(),
@@ -107,11 +103,10 @@ public class PlayerActionsConfigs {
         }
     }
 
-    private static class EmptyingBucketConfigDefault {
-        private static final EmptyingBucketConfig EMPTYING_BUCKET;
-
-        static {
-            EMPTYING_BUCKET = new EmptyingBucketConfig(new HashMap<>() {{
+    private static class EmptyingBucketConfigDefault implements Defaultable<EmptyingBucketConfig> {
+        @Override
+        public EmptyingBucketConfig getDefault() {
+            return new EmptyingBucketConfig(new HashMap<>() {{
                 put("minecraft:overworld", new HashMap<>() {{
                     put(Where.INSIDE_HIS_OWN_BASE, List.of(
                             Items.LAVA_BUCKET.getTranslationKey(),

@@ -12,7 +12,7 @@ public class FKGameAllData {
             FKGameData.class,
             FKGameDataDefault.class);
 
-    private static class FKGameDataDefault implements Defaultable<FKGameData> {
+    public static class FKGameDataDefault implements Defaultable<FKGameData> {
 
         @Override
         public FKGameData getDefault() {

@@ -11,7 +11,7 @@ public class VaultConstant {
             "data\\vaults.json",
             Vaults.class, VaultsDefault.class);
 
-    private static class VaultsDefault implements Defaultable<Vaults>{
+    public static class VaultsDefault implements Defaultable<Vaults>{
 
         @Override
         public Vaults getDefault() {

@@ -1,7 +1,6 @@
 package ch.skyfy.fk.config;
 
 import ch.skyfy.fk.FKMod;
-import ch.skyfy.fk.config.constant.FallenKingRun12Config;
 import ch.skyfy.fk.config.data.*;
 import ch.skyfy.fk.config.features.VaultFeatureConfig;
 import ch.skyfy.fk.json.Defaultable;
@@ -14,7 +13,6 @@ import java.util.List;
  * This is where the configurations are loaded
  * Each configuration has a validate method to check that the data is correct
  */
-@SuppressWarnings("CommentedOutCode")
 public class Configs {
 
     public static final JsonDataClass<WorldBorderConfig, WorldBorderConfigDefault> WORLD_CONFIG;
@@ -37,7 +35,7 @@ public class Configs {
         FKMod.LOGGER.info(Configs.class.getName() + " has been loaded");
     }
 
-    private static class WorldBorderConfigDefault implements Defaultable<WorldBorderConfig> {
+    public static class WorldBorderConfigDefault implements Defaultable<WorldBorderConfig> {
 
         @Override
         public WorldBorderConfig getDefault() {
@@ -48,7 +46,7 @@ public class Configs {
         }
     }
 
-    private static class TeamsConfigDefault implements Defaultable<TeamsConfig>{
+    public static class TeamsConfigDefault implements Defaultable<TeamsConfig> {
 
         @Override
         public TeamsConfig getDefault() {
@@ -57,22 +55,22 @@ public class Configs {
                     new FKTeam("Yellow team", Formatting.YELLOW.name(), List.of("Alex"),
                             new Base("Yellow base",
                                     new Cube((short) 14, 50, 500, -64, 100, -113),
-                                    new Cube((short)34, 50, 500, -64, 100, -113),
-                                    new SpawnLocation("minecraft:overworld",-64.6, 107, -113.4, 2f, 38f)
+                                    new Cube((short) 34, 50, 500, -64, 100, -113),
+                                    new SpawnLocation("minecraft:overworld", -64.6, 107, -113.4, 2f, 38f)
                             )
                     ),
                     new FKTeam("Purple team", Formatting.DARK_PURPLE.name(), List.of("Skyfy16"),
                             new Base("Purple base",
                                     new Cube((short) 14, 50, 500, 121, 99, -19),
                                     new Cube((short) 55, 50, 500, 121, 99, -19),
-                                    new SpawnLocation("minecraft:overworld",121.5, 106, -19.3, 90f, 69f)
+                                    new SpawnLocation("minecraft:overworld", 121.5, 106, -19.3, 90f, 69f)
                             )
                     )
             ));
         }
     }
 
-    private static class FKConfigDefault implements Defaultable<FKConfig>{
+    public static class FKConfigDefault implements Defaultable<FKConfig> {
 
         @Override
         public FKConfig getDefault() {
@@ -92,7 +90,7 @@ public class Configs {
         }
     }
 
-    private static class VaultFeatureConfigDefault implements Defaultable<VaultFeatureConfig>{
+    public static class VaultFeatureConfigDefault implements Defaultable<VaultFeatureConfig> {
 
         @Override
         public VaultFeatureConfig getDefault() {

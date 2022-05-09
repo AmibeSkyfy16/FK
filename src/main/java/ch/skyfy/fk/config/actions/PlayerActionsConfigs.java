@@ -26,7 +26,7 @@ public class PlayerActionsConfigs {
         EMPTYING_BUCKET_CONFIG = new JsonDataClass<>("actions\\emptyingBucket.json5", EmptyingBucketConfig.class, EmptyingBucketConfigDefault.class);
     }
 
-    private static class PlacingBlocksConfigDefault implements Defaultable<PlacingBlocksConfig> {
+    public static class PlacingBlocksConfigDefault implements Defaultable<PlacingBlocksConfig> {
         @Override
         public PlacingBlocksConfig getDefault() {
             var all = ReflectionUtils.getListOfTranslationKey(Blocks.class, Block.class);
@@ -54,14 +54,14 @@ public class PlayerActionsConfigs {
         }
     }
 
-    private static class BreakingBlocksConfigDefault implements Defaultable<BreakingBlocksConfig> {
+    public static class BreakingBlocksConfigDefault implements Defaultable<BreakingBlocksConfig> {
         @Override
         public BreakingBlocksConfig getDefault() {
             var all = ReflectionUtils.getListOfTranslationKey(Blocks.class, Block.class);
             return new BreakingBlocksConfig(new HashMap<>() {{
                 put("minecraft:overworld", new HashMap<>() {{
                     put(Where.INSIDE_HIS_OWN_BASE, all);
-                    put(Where.CLOSE_TO_HIS_OWN_BASE, new ArrayList<>());
+                    put(Where.CLOSE_TO_HIS_OWN_BASE, all);
                     put(Where.INSIDE_AN_ENEMY_BASE, new ArrayList<>() {{
                         addAll(List.of("block.minecraft.tnt",
                                 "block.minecraft.lever",
@@ -82,7 +82,7 @@ public class PlayerActionsConfigs {
         }
     }
 
-    private static class FillingBucketConfigDefault implements Defaultable<FillingBucketConfig> {
+    public static class FillingBucketConfigDefault implements Defaultable<FillingBucketConfig> {
         @Override
         public FillingBucketConfig getDefault() {
             return new FillingBucketConfig(new HashMap<>() {{
@@ -103,7 +103,7 @@ public class PlayerActionsConfigs {
         }
     }
 
-    private static class EmptyingBucketConfigDefault implements Defaultable<EmptyingBucketConfig> {
+    public static class EmptyingBucketConfigDefault implements Defaultable<EmptyingBucketConfig> {
         @Override
         public EmptyingBucketConfig getDefault() {
             return new EmptyingBucketConfig(new HashMap<>() {{

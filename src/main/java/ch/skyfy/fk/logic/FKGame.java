@@ -30,7 +30,6 @@ import net.minecraft.item.BucketItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.MessageType;
-import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
@@ -80,7 +79,7 @@ public class FKGame {
     @Getter
     private final VaultFeature vaultFeature;
 
-    public FKGame(MinecraftServer server, ServerPlayerEntity firstPlayerToJoin) {
+    public FKGame(MinecraftServer server) {
         this.server = server;
         this.timeline = new Timeline();
         pauseEvents = new PauseEvents();
@@ -88,13 +87,15 @@ public class FKGame {
 
         vaultFeature = new VaultFeature(server);
 
-        fkGameEvents.onPlayerJoin(firstPlayerToJoin, server); // Remind: when constructor is called, it's from a PlayerJoinCallback
-
         initialize();
         registerEvents();
     }
 
     private void initialize() {
+
+        if (GameUtils.isGameState_RUNNING())
+            FKGameAllData.FK_GAME_DATA.data.setGameState(FKMod.GameState.PAUSED);
+
         setWorldSpawn();
         setupWorldBorder();
     }
@@ -448,15 +449,6 @@ public class FKGame {
         }
 
         private void onPlayerJoin(ServerPlayerEntity player, MinecraftServer server) {
-
-            // TODO this is a temporary test, will be deleted
-            System.out.println("joined");
-            server.getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.UPDATE_DISPLAY_NAME, player));
-
-
-            if (GameUtils.isGameState_RUNNING())
-                FKGameAllData.FK_GAME_DATA.data.setGameState(FKMod.GameState.PAUSED);
-
             if (!player.hasPermissionLevel(4))
                 player.changeGameMode(GameMode.SURVIVAL);
 

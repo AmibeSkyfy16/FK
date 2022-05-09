@@ -8,12 +8,10 @@ import ch.skyfy.fk.config.Configs;
 import ch.skyfy.fk.exceptions.FKModException;
 import ch.skyfy.fk.logic.FKGame;
 import ch.skyfy.fk.utils.ReflectionUtils;
-import me.bymartrixx.playerevents.api.event.PlayerJoinCallback;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -34,8 +32,6 @@ public class FKMod implements DedicatedServerModInitializer {
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID.toUpperCase());
 
     public static final Path CONFIG_DIRECTORY = FabricLoader.getInstance().getConfigDir().resolve(MOD_ID);
-
-    private boolean firstJoin = false;
 
     private final AtomicReference<Optional<FKGame>> optFKGameRef;
 
@@ -67,16 +63,8 @@ public class FKMod implements DedicatedServerModInitializer {
 
     @Override
     public void onInitializeServer() {
-        PlayerJoinCallback.EVENT.register(this::onFirstPlayerJoin);
+        ServerLifecycleEvents.SERVER_STARTED.register(server -> optFKGameRef.set(Optional.of(new FKGame(server))));
         registerCommands();
-    }
-
-    private void onFirstPlayerJoin(ServerPlayerEntity player, MinecraftServer server) {
-        if (firstJoin) return;
-        if (server.getPlayerManager().getPlayerList().size() == 1) {
-            firstJoin = true;
-            optFKGameRef.set(Optional.of(new FKGame(server, player)));
-        }
     }
 
     public void registerCommands() {

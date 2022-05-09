@@ -3,10 +3,9 @@
   "minVersion": "0.8",
   "package": "ch.skyfy.fk.mixin",
   "compatibilityLevel": "JAVA_17",
-  "mixins": [
-
-  ],
+  "mixins": [],
   "server": [
+    "AbstractTeamMixin",
     "BucketMixin",
     "EndPortalBlockMixin",
     "EntityMixin",
@@ -15,11 +14,11 @@
     "ItemInvoker",
     "LivingEntityMixin",
     "NetherPortalBlockMixin",
+    "PlayerEntityMixin",
     "ServerPlayerEntityMixin",
     "ServerPlayNetworkHandlerMixin",
     "ServerWorldMixin",
-    "AbstractTeamMixin",
-    "PlayerEntityMixin"
+    "PlayerManagerMixin"
   ],
   "client": [
   ],

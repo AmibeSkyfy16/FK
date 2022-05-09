@@ -34,17 +34,18 @@ public class BucketMixin {
         var blockHitResult = ((ItemInvoker) bucketItem).invokeRaycast(world, user, this.fluid == Fluids.EMPTY ? RaycastContext.FluidHandling.SOURCE_ONLY : RaycastContext.FluidHandling.NONE);
 
         var targetFluid = world.getFluidState(blockHitResult.getBlockPos()).getFluid();
+        var targetBlock = world.getBlockState(blockHitResult.getBlockPos()).getBlock();
 
         if(!(targetFluid instanceof EmptyFluid)){ // If there is lava or water fluid on the ground
             if(fluid instanceof EmptyFluid){ // And the player's bucket is empty
-                var result = BucketFillCallback.EVENT.invoker().onUse(world, user, hand, targetFluid, bucketItem, blockHitResult);
+                var result = BucketFillCallback.EVENT.invoker().onUse(world, user, hand, targetFluid,targetBlock, bucketItem, blockHitResult);
                 if(result.getResult() == ActionResult.FAIL){
                     resultCallbackInfoReturnable.setReturnValue(result);
                     resultCallbackInfoReturnable.cancel();
                 }
             }
         }else{
-            if(!(fluid instanceof EmptyFluid)){ // And the player's bucket is not empty
+            if(!(fluid instanceof EmptyFluid)){ // if the player's bucket is not empty
                 var result = BucketEmptyCallback.EVENT.invoker().onUse(world, user, hand, fluid, bucketItem, blockHitResult);
                 if(result.getResult() == ActionResult.FAIL){
                     resultCallbackInfoReturnable.setReturnValue(result);

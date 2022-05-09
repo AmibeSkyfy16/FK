@@ -5,6 +5,7 @@ import ch.skyfy.fk.commands.*;
 import ch.skyfy.fk.commands.featured.CaptureCmd;
 import ch.skyfy.fk.commands.featured.GetMarkerCmd;
 import ch.skyfy.fk.config.Configs;
+import ch.skyfy.fk.config.actions.PlayerActionsConfigs;
 import ch.skyfy.fk.exceptions.FKModException;
 import ch.skyfy.fk.logic.FKGame;
 import ch.skyfy.fk.utils.ReflectionUtils;
@@ -48,7 +49,7 @@ public class FKMod implements DedicatedServerModInitializer {
         createConfigDirectory();
 
         // Load Configs.class a class that contains all our configuration data class
-        ReflectionUtils.loadClassesByReflection(new Class[]{Configs.class});
+        ReflectionUtils.loadClassesByReflection(new Class[]{Configs.class, PlayerActionsConfigs.class});
 
         optFKGameRef = new AtomicReference<>(Optional.empty());
 

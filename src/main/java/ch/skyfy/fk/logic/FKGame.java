@@ -24,6 +24,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.MovementType;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.decoration.AbstractDecorationEntity;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
@@ -237,6 +238,12 @@ public class FKGame {
             return GameUtils.whereIsThePlayer(player, new Vec3d(pos.getX(), pos.getY(), pos.getZ()), breakPlace);
         }
 
+        private ActionResult cancelPlayerFromBreakingEntities(PlayerEntity player, World world, Hand hand, Entity entity, @Nullable EntityHitResult hitResult){
+            var where = GameUtils.whereIsThePlayer(player, entity.getPos(), w -> w);
+            var currentDimId = player.getWorld().getDimension().getEffects().toString();
+            return playerActionImpl(entity.getType().getTranslationKey(), currentDimId, where, ActionResult.PASS, ActionResult.FAIL, PlayerActionsConfigs.BREAKING_ENTITIES_CONFIG.data);
+        }
+
         private ActionResult cancelPlayerFromPlacingBlocks(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
             var currentDimId = player.getWorld().getDimension().getEffects().toString();
             var itemInHand = player.getStackInHand(player.getActiveHand());
@@ -350,6 +357,10 @@ public class FKGame {
             if (entity instanceof PlayerEntity)
                 if (!GameUtils.isPvPEnabled(timeline.getTimelineData().getDay()))
                     return ActionResult.FAIL;
+
+            if(entity instanceof AbstractDecorationEntity)
+                return cancelPlayerFromBreakingEntities(player, world, hand, entity, hitResult);
+
             return ActionResult.PASS;
         }
 
@@ -431,11 +442,26 @@ public class FKGame {
         }
 
         private static <D extends AbstractPlayerActionConfig, T> T playerActionImpl(String translationKey, String currentDimId, Where where, T pass, T fail, D data) {
-            var allowed = data.getAllowed();
-            var allowed2 = allowed.get(currentDimId);
-            if (allowed2 == null) return pass;
-            var allowedTranslationKeys = allowed2.get(where);
+
+            // Make a check for denied block in first
+            // if a denied block is found, its fail, otherwise, if not or if a null value, its just ignored
+            var deniedMap = data.getDenied();
+            if(deniedMap != null){
+                var deniedNestedMap = deniedMap.get(currentDimId);
+                if(deniedNestedMap != null){
+                    var deniedTranslationKeys = deniedNestedMap.get(where);
+                    if(deniedTranslationKeys.contains(translationKey))return fail;
+                }
+            }
+
+            var allowedMap = data.getAllowed();
+            var allowedNestedMap = allowedMap.get(currentDimId);
+            if (allowedNestedMap == null) return pass;
+
+            var allowedTranslationKeys = allowedNestedMap.get(where);
+
             if (allowedTranslationKeys == null) return pass;
+
             if (allowedTranslationKeys.contains(translationKey)) return pass;
             return fail;
         }

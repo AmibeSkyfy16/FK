@@ -29,7 +29,7 @@ public class JsonManager<DATA extends Validatable, DEFAULT extends Defaultable<D
     }
 
     public JsonManager(Class<DATA> tClass, File file, Class<DEFAULT> defaultConfigClass) {
-        this(tClass, new GsonBuilder().setPrettyPrinting().create(), file, defaultConfigClass);
+        this(tClass, new GsonBuilder().setPrettyPrinting().serializeNulls().create(), file, defaultConfigClass);
     }
 
     public @NotNull DATA getOrCreateConfig() {

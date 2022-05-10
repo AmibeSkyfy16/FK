@@ -8,8 +8,8 @@ import java.util.Map;
 
 public class PlacingBlocksConfig extends AbstractPlayerActionConfig implements Validatable {
 
-    protected PlacingBlocksConfig(Map<String, Map<Where, List<String>>> allowed) {
-        super(allowed);
+    protected PlacingBlocksConfig(Map<String, Map<Where, List<String>>> allowed, Map<String, Map<Where, List<String>>> denied) {
+        super(allowed, denied);
     }
 
     @Override

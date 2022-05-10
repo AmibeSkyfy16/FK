@@ -9,10 +9,11 @@ import java.util.Map;
 public class AbstractPlayerActionConfig {
 
     @Getter
-    protected final Map<String, Map<Where, List<String>>> allowed;
+    protected final Map<String, Map<Where, List<String>>> allowed, denied;
 
-    protected AbstractPlayerActionConfig(Map<String, Map<Where, List<String>>> allowed) {
+    protected AbstractPlayerActionConfig(Map<String, Map<Where, List<String>>> allowed, Map<String, Map<Where, List<String>>> denied) {
         this.allowed = allowed;
+        this.denied = denied;
     }
 
 }

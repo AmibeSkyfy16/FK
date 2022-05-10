@@ -8,8 +8,8 @@ import java.util.Map;
 
 public class FillingBucketConfig extends AbstractPlayerActionConfig implements Validatable {
 
-    protected FillingBucketConfig(Map<String, Map<Where, List<String>>> allowed) {
-        super(allowed);
+    protected FillingBucketConfig(Map<String, Map<Where, List<String>>> allowed, Map<String, Map<Where, List<String>>> denied) {
+        super(allowed, denied);
     }
 
     @Override

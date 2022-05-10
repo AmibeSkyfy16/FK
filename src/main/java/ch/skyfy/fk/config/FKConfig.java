@@ -26,6 +26,8 @@ public class FKConfig implements Validatable {
     @Getter
     private final boolean shouldTeleportPlayersToTheirOwnBaseWhenGameIsStarted;
     @Getter
+    private final boolean allowEnderPearlAssault;
+    @Getter
     private final WaitingRoom waitingRoom;
     @Getter
     private final SpawnLocation worldSpawn;
@@ -35,6 +37,7 @@ public class FKConfig implements Validatable {
                     int dayOfAuthorizationOfTheEntryInTheEnd,
                     int dayOfAuthorizationOfThePvP,
                     int dayDuration,
+                    boolean allowEnderPearlAssault,
                     boolean shouldTeleportPlayersToTheirOwnBaseWhenGameIsStarted, WaitingRoom waitingRoom, SpawnLocation worldSpawn) {
 
         this.dayOfAuthorizationOfTheAssaults = dayOfAuthorizationOfTheAssaults;
@@ -42,6 +45,7 @@ public class FKConfig implements Validatable {
         this.dayOfAuthorizationOfTheEntryInTheEnd = dayOfAuthorizationOfTheEntryInTheEnd;
         this.dayOfAuthorizationOfThePvP = dayOfAuthorizationOfThePvP;
         this.dayDuration = dayDuration;
+        this.allowEnderPearlAssault = allowEnderPearlAssault;
         this.shouldTeleportPlayersToTheirOwnBaseWhenGameIsStarted = shouldTeleportPlayersToTheirOwnBaseWhenGameIsStarted;
         this.waitingRoom = waitingRoom;
         this.worldSpawn = worldSpawn;

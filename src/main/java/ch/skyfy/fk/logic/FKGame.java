@@ -29,10 +29,7 @@ import net.minecraft.entity.decoration.AbstractDecorationEntity;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
-import net.minecraft.item.BucketItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.PotionItem;
+import net.minecraft.item.*;
 import net.minecraft.network.MessageType;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.server.MinecraftServer;
@@ -49,6 +46,9 @@ import net.minecraft.world.GameMode;
 import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static net.minecraft.util.Util.NIL_UUID;
 
@@ -84,13 +84,15 @@ public class FKGame {
     @Getter
     private final VaultFeature vaultFeature;
 
+    private final Map<String, Vec3d> onUsedEnderPearlMap;
+
     public FKGame(MinecraftServer server) {
         this.server = server;
         this.timeline = new Timeline();
         pauseEvents = new PauseEvents();
         fkGameEvents = new FKGameEvents();
-
         vaultFeature = new VaultFeature(server);
+        onUsedEnderPearlMap = new HashMap<>();
 
         initialize();
         registerEvents();
@@ -200,7 +202,7 @@ public class FKGame {
         // Event use when the game state is "running"
         PlayerBlockBreakEvents.BEFORE.register(fkGameEvents::cancelPlayerFromBreakingBlocks);
         UseBlockCallback.EVENT.register(FKGameEvents.SECOND, fkGameEvents::onUseBlockEvent);
-        UseItemCallback.EVENT.register(fkGameEvents::cancelPlayerFromUsingAPotion);
+        UseItemCallback.EVENT.register(fkGameEvents::cancelPlayerFromUsingAItem);
         BucketFillCallback.EVENT.register(fkGameEvents::cancelPlayerFromFillingABucket);
         BucketEmptyCallback.EVENT.register(fkGameEvents::cancelPlayerFromEmptyingABucket);
         AttackEntityCallback.EVENT.register(fkGameEvents::cancelPlayerPvP);
@@ -212,6 +214,7 @@ public class FKGame {
         PlayerJoinCallback.EVENT.register(fkGameEvents::onPlayerJoin);
         EntitySpawnCallback.EVENT.register(fkGameEvents::onEntitySpawn);
         ItemDespawnCallback.EVENT.register(fkGameEvents::onItemDespawn);
+        EnderPearlCollisionCallback.EVENT.register(fkGameEvents::cancelPlayerFromAssaultWithEnderPearl);
 
 //        // Event use when the game state is "pause"
         TimeOfDayUpdatedCallback.EVENT.register(pauseEvents::cancelTimeOfDayToBeingUpdated);
@@ -243,6 +246,9 @@ public class FKGame {
         }
 
         private ActionResult cancelPlayerFromBreakingEntities(PlayerEntity player, World world, Hand hand, Entity entity, @Nullable EntityHitResult hitResult) {
+            if (player.hasPermissionLevel(4)) return ActionResult.PASS;
+            if (!GameUtils.isGameState_RUNNING()) return ActionResult.FAIL;
+
             var where = GameUtils.whereIsThePlayer(player, entity.getPos(), w -> w);
             var currentDimId = player.getWorld().getDimension().getEffects().toString();
             return playerActionImpl(entity.getType().getTranslationKey(), currentDimId, where, ActionResult.PASS, ActionResult.FAIL, PlayerActionsConfigs.BREAKING_ENTITIES_CONFIG.data);
@@ -306,15 +312,41 @@ public class FKGame {
             return GameUtils.whereIsThePlayer(player, new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()), emptyBucketImpl);
         }
 
-        private TypedActionResult<ItemStack> cancelPlayerFromUsingAPotion(PlayerEntity player, World world, Hand hand) {
+        private TypedActionResult<ItemStack> cancelPlayerFromUsingAItem(PlayerEntity player, World world, Hand hand) {
+            if (player.hasPermissionLevel(4)) return TypedActionResult.pass(player.getStackInHand(hand));
+
+            if (!GameUtils.isGameState_RUNNING()) return TypedActionResult.fail(player.getStackInHand(hand));
+
             var item = player.getStackInHand(hand);
-            if (item.getItem() instanceof PotionItem potionItem) {
-                var where = GameUtils.whereIsThePlayer(player, player.getPos(), w -> w);
-                var currentDimId = player.getWorld().getDimension().getEffects().toString();
-                var translationKey = Registry.POTION.getId(PotionUtil.getPotion(item)).toString();
-                return playerActionImpl(translationKey, currentDimId, where, TypedActionResult.pass(item), TypedActionResult.fail(item), PlayerActionsConfigs.USE_POTIONS_CONFIG.data);
-            }
-            return TypedActionResult.pass(item);
+            var wherePlayer = GameUtils.whereIsThePlayer(player, player.getPos(), w -> w);
+
+            // Use with allowEnderPearlAssault config
+            if(item.isOf(Items.ENDER_PEARL))
+                onUsedEnderPearlMap.compute(player.getUuidAsString(), (s, vec3d) -> player.getPos());
+
+            String translationKey;
+            var currentDimId = player.getWorld().getDimension().getEffects().toString();
+            if (item.getItem() instanceof PotionItem)
+                translationKey = Registry.POTION.getId(PotionUtil.getPotion(item)).toString();
+            else
+                translationKey = item.getTranslationKey();
+
+            return playerActionImpl(translationKey, currentDimId, wherePlayer, TypedActionResult.pass(item), TypedActionResult.fail(item), PlayerActionsConfigs.USE_ITEMS_CONFIG.data);
+        }
+
+        private ActionResult cancelPlayerFromAssaultWithEnderPearl(ServerPlayerEntity player, Vec3d pos){
+            if (player.hasPermissionLevel(4)) return ActionResult.PASS;
+            if (!GameUtils.isGameState_RUNNING()) return ActionResult.FAIL;
+
+            if(Configs.FK_CONFIG.data.isAllowEnderPearlAssault())return ActionResult.PASS;
+
+            var playerLastPos = onUsedEnderPearlMap.get(player.getUuidAsString());
+            if(playerLastPos == null)return ActionResult.PASS;
+
+            var where = GameUtils.whereIsThePlayer(player, pos, w -> w);
+            if(where == Where.INSIDE_AN_ENEMY_BASE)return ActionResult.FAIL;
+
+            return ActionResult.PASS;
         }
 
         private ActionResult onUseBlockEvent(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {

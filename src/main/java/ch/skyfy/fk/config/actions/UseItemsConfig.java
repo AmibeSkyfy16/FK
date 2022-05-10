@@ -6,9 +6,9 @@ import ch.skyfy.fk.json.Validatable;
 import java.util.List;
 import java.util.Map;
 
-public class UsePotionsConfig extends AbstractPlayerActionConfig implements Validatable {
+public class UseItemsConfig extends AbstractPlayerActionConfig implements Validatable {
 
-    public UsePotionsConfig(Map<String, Map<Where, List<String>>> allowed, Map<String, Map<Where, List<String>>> denied) {
+    public UseItemsConfig(Map<String, Map<Where, List<String>>> allowed, Map<String, Map<Where, List<String>>> denied) {
         super(allowed, denied);
     }
 

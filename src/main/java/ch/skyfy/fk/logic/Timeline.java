@@ -2,6 +2,7 @@ package ch.skyfy.fk.logic;
 
 import ch.skyfy.fk.FKMod;
 import ch.skyfy.fk.ScoreboardManager;
+import ch.skyfy.fk.config.Configs;
 import ch.skyfy.fk.logic.data.FKGameAllData;
 import ch.skyfy.fk.logic.data.TimelineData;
 import lombok.Getter;
@@ -10,15 +11,11 @@ import net.minecraft.server.MinecraftServer;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Timeline {
 
     @Getter
     private final AtomicBoolean isTimerStartedRef = new AtomicBoolean(false);
-
-    @Getter
-    private final AtomicInteger timeOfDay = new AtomicInteger(0);
 
     @Getter
     private final TimelineData timelineData;
@@ -38,15 +35,15 @@ public class Timeline {
     private void updateTimeTest(MinecraftServer server) {
         if (!GameUtils.isGameState_RUNNING() || !isTimerStartedRef.get()) return;
 
-        if (timeOfDay.get() >= 24000) {
-            timeOfDay.set(0);
+        if (timelineData.getTimeOfDay() >= Configs.FK_CONFIG.data.getDayDuration() * 1200) {
+            timelineData.setTimeOfDay(0);
             timelineData.setDay(timelineData.getDay() + 1);
         }
 
         var previousMinutes = timelineData.getMinutes();
 
-        timelineData.setMinutes((int) (timeOfDay.get() / 1200d));
-        timelineData.setSeconds((int) (((timeOfDay.get() / 1200d) - timelineData.getMinutes()) * 60));
+        timelineData.setMinutes((int) (timelineData.getTimeOfDay() / 1200d));
+        timelineData.setSeconds((int) (((timelineData.getTimeOfDay() / 1200d) - timelineData.getMinutes()) * 60));
 
         if (previousMinutes != timelineData.getMinutes())
             saveData();
@@ -55,7 +52,7 @@ public class Timeline {
         for (var fkPlayer : GameUtils.getAllConnectedFKPlayers(server.getPlayerManager().getPlayerList()))
             ScoreboardManager.getInstance().updateSidebar(fkPlayer, timelineData.getDay(), timelineData.getMinutes(), timelineData.getSeconds());
 
-        timeOfDay.getAndIncrement();
+        timelineData.setTimeOfDay(timelineData.getTimeOfDay() + 1);
     }
 
     private void saveData() {

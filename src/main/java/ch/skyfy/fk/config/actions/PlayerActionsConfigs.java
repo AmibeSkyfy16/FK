@@ -5,6 +5,9 @@ import ch.skyfy.fk.json.Defaultable;
 import ch.skyfy.fk.json.JsonDataClass;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityType;
+import net.minecraft.item.Items;
+import net.minecraft.potion.Potions;
+import net.minecraft.util.registry.Registry;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,6 +23,7 @@ public class PlayerActionsConfigs {
     public static final JsonDataClass<FillingBucketConfig, FillingBucketConfigDefault> FILLING_BUCKET_CONFIG;
     public static final JsonDataClass<EmptyingBucketConfig, EmptyingBucketConfigDefault> EMPTYING_BUCKET_CONFIG;
     public static final JsonDataClass<BreakingEntitiesConfig, BreakingEntitiesConfigDefault> BREAKING_ENTITIES_CONFIG;
+    public static final JsonDataClass<UsePotionsConfig, UsePotionsConfigDefault> USE_POTIONS_CONFIG;
 
     static {
         PLACING_BLOCKS_CONFIG = new JsonDataClass<>("actions\\placingBlocks.json5", PlacingBlocksConfig.class, PlacingBlocksConfigDefault.class);
@@ -27,6 +31,7 @@ public class PlayerActionsConfigs {
         FILLING_BUCKET_CONFIG = new JsonDataClass<>("actions\\fillingBucket.json5", FillingBucketConfig.class, FillingBucketConfigDefault.class);
         EMPTYING_BUCKET_CONFIG = new JsonDataClass<>("actions\\emptyingBucket.json5", EmptyingBucketConfig.class, EmptyingBucketConfigDefault.class);
         BREAKING_ENTITIES_CONFIG = new JsonDataClass<>("actions\\breakingEntities.json5", BreakingEntitiesConfig.class, BreakingEntitiesConfigDefault.class);
+        USE_POTIONS_CONFIG = new JsonDataClass<>("actions\\usePotions.json5", UsePotionsConfig.class, UsePotionsConfigDefault.class);
     }
 
     public static class PlacingBlocksConfigDefault implements Defaultable<PlacingBlocksConfig> {
@@ -192,6 +197,37 @@ public class PlayerActionsConfigs {
             deniedMap.put("minecraft:the_end", null);
 
             return new BreakingEntitiesConfig(allowedMap, deniedMap);
+        }
+    }
+
+    public static class UsePotionsConfigDefault implements Defaultable<UsePotionsConfig>{
+
+        @Override
+        public UsePotionsConfig getDefault() {
+
+            var nestedAllowedMap = new HashMap<Where, List<String>>();
+            nestedAllowedMap.put(INSIDE_HIS_OWN_BASE, null);
+            nestedAllowedMap.put(CLOSE_TO_HIS_OWN_BASE, new ArrayList<>());
+            nestedAllowedMap.put(INSIDE_AN_ENEMY_BASE, new ArrayList<>());
+            nestedAllowedMap.put(CLOSE_TO_AN_ENEMY_BASE, new ArrayList<>());
+            nestedAllowedMap.put(IN_THE_WILD, null);
+            var allowedMap = new HashMap<String, Map<Where, List<String>>>();
+            allowedMap.put("minecraft:overworld", nestedAllowedMap);
+            allowedMap.put("minecraft:the_nether", null);
+            allowedMap.put("minecraft:the_end", null);
+
+            var nestedDeniedMap = new HashMap<Where, List<String>>();
+            nestedDeniedMap.put(INSIDE_HIS_OWN_BASE, List.of(Registry.POTION.getId(Potions.STRONG_STRENGTH).toString()));
+            nestedDeniedMap.put(CLOSE_TO_HIS_OWN_BASE, new ArrayList<>());
+            nestedDeniedMap.put(INSIDE_AN_ENEMY_BASE, new ArrayList<>());
+            nestedDeniedMap.put(CLOSE_TO_AN_ENEMY_BASE, new ArrayList<>());
+            nestedDeniedMap.put(IN_THE_WILD, new ArrayList<>());
+            var deniedMap = new HashMap<String, Map<Where, List<String>>>();
+            deniedMap.put("minecraft:overworld", nestedDeniedMap);
+            deniedMap.put("minecraft:the_nether", null);
+            deniedMap.put("minecraft:the_end", null);
+
+            return new UsePotionsConfig(allowedMap, deniedMap);
         }
     }
 

@@ -22,6 +22,8 @@ public class FKConfig implements Validatable {
     @Getter
     private final int dayOfAuthorizationOfThePvP;
     @Getter
+    private final int dayDuration;
+    @Getter
     private final boolean shouldTeleportPlayersToTheirOwnBaseWhenGameIsStarted;
     @Getter
     private final WaitingRoom waitingRoom;
@@ -32,12 +34,14 @@ public class FKConfig implements Validatable {
                     int dayOfAuthorizationOfTheEntryInTheNether,
                     int dayOfAuthorizationOfTheEntryInTheEnd,
                     int dayOfAuthorizationOfThePvP,
+                    int dayDuration,
                     boolean shouldTeleportPlayersToTheirOwnBaseWhenGameIsStarted, WaitingRoom waitingRoom, SpawnLocation worldSpawn) {
 
         this.dayOfAuthorizationOfTheAssaults = dayOfAuthorizationOfTheAssaults;
         this.dayOfAuthorizationOfTheEntryInTheNether = dayOfAuthorizationOfTheEntryInTheNether;
         this.dayOfAuthorizationOfTheEntryInTheEnd = dayOfAuthorizationOfTheEntryInTheEnd;
         this.dayOfAuthorizationOfThePvP = dayOfAuthorizationOfThePvP;
+        this.dayDuration = dayDuration;
         this.shouldTeleportPlayersToTheirOwnBaseWhenGameIsStarted = shouldTeleportPlayersToTheirOwnBaseWhenGameIsStarted;
         this.waitingRoom = waitingRoom;
         this.worldSpawn = worldSpawn;
@@ -70,6 +74,8 @@ public class FKConfig implements Validatable {
             errors.add("dayOfAuthorizationOfTheEntryInTheEnd value is currently " + dayOfAuthorizationOfTheEntryInTheEnd + " it should not be smaller than 0");
         if (dayOfAuthorizationOfThePvP < 0)
             errors.add("dayOfAuthorizationOfThePvP value is currently " + dayOfAuthorizationOfThePvP + " it should not be smaller than 0");
+        if(dayDuration < 0)
+            errors.add("dayDuration value is currently " + dayDuration + " it should not be smaller than 0");
 
         ValidateUtils.checkForNegativeValueInCubeClass(waitingRoom.getCube(), errors);
     }

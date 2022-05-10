@@ -16,6 +16,7 @@ import me.bymartrixx.playerevents.api.event.PlayerJoinCallback;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.TntBlock;
@@ -31,7 +32,9 @@ import net.minecraft.fluid.Fluid;
 import net.minecraft.item.BucketItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.item.PotionItem;
 import net.minecraft.network.MessageType;
+import net.minecraft.potion.PotionUtil;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
@@ -197,6 +200,7 @@ public class FKGame {
         // Event use when the game state is "running"
         PlayerBlockBreakEvents.BEFORE.register(fkGameEvents::cancelPlayerFromBreakingBlocks);
         UseBlockCallback.EVENT.register(FKGameEvents.SECOND, fkGameEvents::onUseBlockEvent);
+        UseItemCallback.EVENT.register(fkGameEvents::cancelPlayerFromUsingAPotion);
         BucketFillCallback.EVENT.register(fkGameEvents::cancelPlayerFromFillingABucket);
         BucketEmptyCallback.EVENT.register(fkGameEvents::cancelPlayerFromEmptyingABucket);
         AttackEntityCallback.EVENT.register(fkGameEvents::cancelPlayerPvP);
@@ -238,7 +242,7 @@ public class FKGame {
             return GameUtils.whereIsThePlayer(player, new Vec3d(pos.getX(), pos.getY(), pos.getZ()), breakPlace);
         }
 
-        private ActionResult cancelPlayerFromBreakingEntities(PlayerEntity player, World world, Hand hand, Entity entity, @Nullable EntityHitResult hitResult){
+        private ActionResult cancelPlayerFromBreakingEntities(PlayerEntity player, World world, Hand hand, Entity entity, @Nullable EntityHitResult hitResult) {
             var where = GameUtils.whereIsThePlayer(player, entity.getPos(), w -> w);
             var currentDimId = player.getWorld().getDimension().getEffects().toString();
             return playerActionImpl(entity.getType().getTranslationKey(), currentDimId, where, ActionResult.PASS, ActionResult.FAIL, PlayerActionsConfigs.BREAKING_ENTITIES_CONFIG.data);
@@ -302,6 +306,17 @@ public class FKGame {
             return GameUtils.whereIsThePlayer(player, new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()), emptyBucketImpl);
         }
 
+        private TypedActionResult<ItemStack> cancelPlayerFromUsingAPotion(PlayerEntity player, World world, Hand hand) {
+            var item = player.getStackInHand(hand);
+            if (item.getItem() instanceof PotionItem potionItem) {
+                var where = GameUtils.whereIsThePlayer(player, player.getPos(), w -> w);
+                var currentDimId = player.getWorld().getDimension().getEffects().toString();
+                var translationKey = Registry.POTION.getId(PotionUtil.getPotion(item)).toString();
+                return playerActionImpl(translationKey, currentDimId, where, TypedActionResult.pass(item), TypedActionResult.fail(item), PlayerActionsConfigs.USE_POTIONS_CONFIG.data);
+            }
+            return TypedActionResult.pass(item);
+        }
+
         private ActionResult onUseBlockEvent(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
             if (player.hasPermissionLevel(4)) return ActionResult.PASS; // Admin can bypass this
 
@@ -358,7 +373,7 @@ public class FKGame {
                 if (!GameUtils.isPvPEnabled(timeline.getTimelineData().getDay()))
                     return ActionResult.FAIL;
 
-            if(entity instanceof AbstractDecorationEntity)
+            if (entity instanceof AbstractDecorationEntity)
                 return cancelPlayerFromBreakingEntities(player, world, hand, entity, hitResult);
 
             return ActionResult.PASS;
@@ -446,11 +461,11 @@ public class FKGame {
             // Make a check for denied block in first
             // if a denied block is found, its fail, otherwise, if not or if a null value, its just ignored
             var deniedMap = data.getDenied();
-            if(deniedMap != null){
+            if (deniedMap != null) {
                 var deniedNestedMap = deniedMap.get(currentDimId);
-                if(deniedNestedMap != null){
+                if (deniedNestedMap != null) {
                     var deniedTranslationKeys = deniedNestedMap.get(where);
-                    if(deniedTranslationKeys.contains(translationKey))return fail;
+                    if (deniedTranslationKeys.contains(translationKey)) return fail;
                 }
             }
 

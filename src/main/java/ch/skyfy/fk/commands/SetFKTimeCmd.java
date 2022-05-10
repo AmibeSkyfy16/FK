@@ -5,7 +5,6 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
@@ -23,7 +22,7 @@ public class SetFKTimeCmd implements Command<ServerCommandSource> {
     public void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(CommandManager.literal("setFKTime")
                 .then(
-                        CommandManager.argument("timeOfDay", IntegerArgumentType.integer(0, 24000))
+                        CommandManager.argument("timeOfDay", IntegerArgumentType.integer(0, 144000))
                                 .executes(this)
                 )
         );
@@ -36,10 +35,10 @@ public class SetFKTimeCmd implements Command<ServerCommandSource> {
     }
 
     @Override
-    public int run(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+    public int run(CommandContext<ServerCommandSource> context) {
         var time = getInteger(context, "timeOfDay");
         optFKGameRef.get().ifPresent(fkGame -> {
-            fkGame.getTimeline().getTimeOfDay().set(time);
+            fkGame.getTimeline().getTimelineData().setTimeOfDay(time);
             context.getSource().sendFeedback(new LiteralText("time has been set to " + time).setStyle(Style.EMPTY.withColor(Formatting.GREEN)), true);
         });
         return SINGLE_SUCCESS;

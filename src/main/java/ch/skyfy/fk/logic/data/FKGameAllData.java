@@ -18,7 +18,7 @@ public class FKGameAllData {
         public FKGameData getDefault() {
             return new FKGameData(
                     FKMod.GameState.NOT_STARTED,
-                    new ch.skyfy.fk.logic.data.TimelineData(1, 0, 0)
+                    new ch.skyfy.fk.logic.data.TimelineData(1, 0, 0, 0)
             );
         }
     }

@@ -80,6 +80,7 @@ public class Configs {
                     2,
                     3,
                     2,
+                    20,
                     false,
                     new WaitingRoom(
                             new Cube((short) 22, 250, 255, 0, 101, 4),

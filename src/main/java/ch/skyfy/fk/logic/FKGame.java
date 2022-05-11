@@ -19,6 +19,7 @@ import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.TntBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
@@ -29,7 +30,10 @@ import net.minecraft.entity.decoration.AbstractDecorationEntity;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
-import net.minecraft.item.*;
+import net.minecraft.item.BucketItem;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.item.PotionItem;
 import net.minecraft.network.MessageType;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.server.MinecraftServer;
@@ -47,7 +51,9 @@ import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static net.minecraft.util.Util.NIL_UUID;
@@ -199,6 +205,7 @@ public class FKGame {
     }
 
     private void registerEvents() {
+        System.out.println(PlayerActionsConfigs.USE_BLOCKS_CONFIG.data.getDenied().toString());
         // Event use when the game state is "running"
         PlayerBlockBreakEvents.BEFORE.register(fkGameEvents::cancelPlayerFromBreakingBlocks);
         UseBlockCallback.EVENT.register(FKGameEvents.SECOND, fkGameEvents::onUseBlockEvent);
@@ -224,6 +231,61 @@ public class FKGame {
      * This class contains events that will be used when the game state is "RUNNING
      */
     public class FKGameEvents {
+
+        public static final List<String> interactiveBlocks = new ArrayList<>(){{
+            addAll(List.of(
+                    Blocks.ANVIL.getTranslationKey(),
+                    Blocks.CHIPPED_ANVIL.getTranslationKey(),
+                    Blocks.DAMAGED_ANVIL.getTranslationKey(),
+
+                    Blocks.RESPAWN_ANCHOR.getTranslationKey(),
+
+                    Blocks.WHITE_BED.getTranslationKey(),
+                    Blocks.ORANGE_BED.getTranslationKey(),
+                    Blocks.MAGENTA_BED.getTranslationKey(),
+                    Blocks.LIGHT_BLUE_BED.getTranslationKey(),
+                    Blocks.YELLOW_BED.getTranslationKey(),
+                    Blocks.LIME_BED.getTranslationKey(),
+                    Blocks.PINK_BED.getTranslationKey(),
+                    Blocks.GRAY_BED.getTranslationKey(),
+                    Blocks.LIGHT_GRAY_BED.getTranslationKey(),
+                    Blocks.CYAN_BED.getTranslationKey(),
+                    Blocks.PURPLE_BED.getTranslationKey(),
+                    Blocks.BLUE_BED.getTranslationKey(),
+                    Blocks.BROWN_BED.getTranslationKey(),
+                    Blocks.GREEN_BED.getTranslationKey(),
+                    Blocks.RED_BED.getTranslationKey(),
+                    Blocks.BLACK_BED.getTranslationKey(),
+
+                    Blocks.BELL.getTranslationKey(),
+                    Blocks.BLAST_FURNACE.getTranslationKey(),
+                    Blocks.FURNACE.getTranslationKey(),
+                    Blocks.CRAFTING_TABLE.getTranslationKey(),
+                    Blocks.BREWING_STAND.getTranslationKey(),
+                    Blocks.LEVER.getTranslationKey(),
+                    Blocks.LOOM.getTranslationKey(),
+                    Blocks.NOTE_BLOCK.getTranslationKey(),
+                    Blocks.CARTOGRAPHY_TABLE.getTranslationKey(),
+                    Blocks.CHEST.getTranslationKey(),
+                    Blocks.SMITHING_TABLE.getTranslationKey(),
+                    Blocks.SMOKER.getTranslationKey(),
+                    Blocks.ENCHANTING_TABLE.getTranslationKey(),
+                    Blocks.ENDER_CHEST.getTranslationKey(),
+                    Blocks.STONECUTTER.getTranslationKey(),
+                    Blocks.GRINDSTONE.getTranslationKey(),
+
+                    Blocks.BIRCH_BUTTON.getTranslationKey(),
+                    Blocks.ACACIA_BUTTON.getTranslationKey(),
+                    Blocks.SPRUCE_BUTTON.getTranslationKey(),
+                    Blocks.OAK_BUTTON.getTranslationKey(),
+                    Blocks.JUNGLE_BUTTON.getTranslationKey(),
+                    Blocks.DARK_OAK_BUTTON.getTranslationKey(),
+                    Blocks.CRIMSON_BUTTON.getTranslationKey(),
+                    Blocks.WARPED_BUTTON.getTranslationKey(),
+                    Blocks.STONE_BUTTON.getTranslationKey(),
+                    Blocks.POLISHED_BLACKSTONE_BUTTON.getTranslationKey()
+            ));
+        }};
 
         public static final Identifier FIRST = new Identifier("fabric", "first");
         public static final Identifier SECOND = new Identifier("fabric", "second");
@@ -258,24 +320,23 @@ public class FKGame {
             var currentDimId = player.getWorld().getDimension().getEffects().toString();
             var itemInHand = player.getStackInHand(player.getActiveHand());
 
-            var placeBlock = (GameUtils.WhereIsThePlayer<ActionResult>) (where) -> {
-                if (!Registry.BLOCK.containsId(Registry.ITEM.getId(itemInHand.getItem()))) // It's not a block
-                    return ActionResult.PASS;
+            // It's not a block
+            if (!Registry.BLOCK.containsId(Registry.ITEM.getId(itemInHand.getItem())))
+                return ActionResult.PASS;
 
-                return switch (where) {
-                    case INSIDE_HIS_OWN_BASE ->
-                            playerActionImpl(itemInHand.getTranslationKey(), currentDimId, where, ActionResult.PASS, ActionResult.FAIL, PlayerActionsConfigs.PLACING_BLOCKS_CONFIG.data);
-                    case CLOSE_TO_HIS_OWN_BASE ->
-                            playerActionImpl(itemInHand.getTranslationKey(), currentDimId, where, ActionResult.PASS, ActionResult.FAIL, PlayerActionsConfigs.PLACING_BLOCKS_CONFIG.data);
-                    case INSIDE_AN_ENEMY_BASE, CLOSE_TO_AN_ENEMY_BASE -> {
-                        if (!GameUtils.areAssaultEnabled(timeline.getTimelineData().getDay()))
-                            yield ActionResult.FAIL;
-                        yield playerActionImpl(itemInHand.getTranslationKey(), currentDimId, where, ActionResult.PASS, ActionResult.FAIL, PlayerActionsConfigs.PLACING_BLOCKS_CONFIG.data);
-                    }
-                    case IN_THE_WILD ->
-                            playerActionImpl(itemInHand.getTranslationKey(), currentDimId, where, ActionResult.PASS, ActionResult.FAIL, PlayerActionsConfigs.PLACING_BLOCKS_CONFIG.data);
-                    default -> ActionResult.PASS;
-                };
+            var placeBlock = (GameUtils.WhereIsThePlayer<ActionResult>) (where) -> switch (where) {
+                case INSIDE_HIS_OWN_BASE ->
+                        playerActionImpl(itemInHand.getTranslationKey(), currentDimId, where, ActionResult.PASS, ActionResult.FAIL, PlayerActionsConfigs.PLACING_BLOCKS_CONFIG.data);
+                case CLOSE_TO_HIS_OWN_BASE ->
+                        playerActionImpl(itemInHand.getTranslationKey(), currentDimId, where, ActionResult.PASS, ActionResult.FAIL, PlayerActionsConfigs.PLACING_BLOCKS_CONFIG.data);
+                case INSIDE_AN_ENEMY_BASE, CLOSE_TO_AN_ENEMY_BASE -> {
+                    if (!GameUtils.areAssaultEnabled(timeline.getTimelineData().getDay()))
+                        yield ActionResult.FAIL;
+                    yield playerActionImpl(itemInHand.getTranslationKey(), currentDimId, where, ActionResult.PASS, ActionResult.FAIL, PlayerActionsConfigs.PLACING_BLOCKS_CONFIG.data);
+                }
+                case IN_THE_WILD ->
+                        playerActionImpl(itemInHand.getTranslationKey(), currentDimId, where, ActionResult.PASS, ActionResult.FAIL, PlayerActionsConfigs.PLACING_BLOCKS_CONFIG.data);
+                default -> ActionResult.PASS;
             };
 
             var blockPos = hitResult.getBlockPos();
@@ -321,7 +382,7 @@ public class FKGame {
             var wherePlayer = GameUtils.whereIsThePlayer(player, player.getPos(), w -> w);
 
             // Use with allowEnderPearlAssault config
-            if(item.isOf(Items.ENDER_PEARL))
+            if (item.isOf(Items.ENDER_PEARL))
                 onUsedEnderPearlMap.compute(player.getUuidAsString(), (s, vec3d) -> player.getPos());
 
             String translationKey;
@@ -334,17 +395,17 @@ public class FKGame {
             return playerActionImpl(translationKey, currentDimId, wherePlayer, TypedActionResult.pass(item), TypedActionResult.fail(item), PlayerActionsConfigs.USE_ITEMS_CONFIG.data);
         }
 
-        private ActionResult cancelPlayerFromAssaultWithEnderPearl(ServerPlayerEntity player, Vec3d pos){
+        private ActionResult cancelPlayerFromAssaultWithEnderPearl(ServerPlayerEntity player, Vec3d pos) {
             if (player.hasPermissionLevel(4)) return ActionResult.PASS;
             if (!GameUtils.isGameState_RUNNING()) return ActionResult.FAIL;
 
-            if(Configs.FK_CONFIG.data.isAllowEnderPearlAssault())return ActionResult.PASS;
+            if (Configs.FK_CONFIG.data.isAllowEnderPearlAssault()) return ActionResult.PASS;
 
             var playerLastPos = onUsedEnderPearlMap.get(player.getUuidAsString());
-            if(playerLastPos == null)return ActionResult.PASS;
+            if (playerLastPos == null) return ActionResult.PASS;
 
             var where = GameUtils.whereIsThePlayer(player, pos, w -> w);
-            if(where == Where.INSIDE_AN_ENEMY_BASE)return ActionResult.FAIL;
+            if (where == Where.INSIDE_AN_ENEMY_BASE) return ActionResult.FAIL;
 
             return ActionResult.PASS;
         }
@@ -354,6 +415,10 @@ public class FKGame {
 
             // If the game is NOT_STARTED OR PAUSED, players can't destroy block, block entity (painting, item frame, ...) or firing tnt
             if (!GameUtils.isGameState_RUNNING()) return ActionResult.FAIL;
+
+            // check if a player is trying to use an interactive bloc like crafting table, respawn anchor, etc.
+            var result2 = cancelPlayerFromUsingABlock(player, world, hand, hitResult);
+            if (result2 == ActionResult.FAIL) return result2;
 
             // Check if player has a block in his hand and if we need to cancel
             var result = cancelPlayerFromPlacingBlocks(player, world, hand, hitResult);
@@ -394,6 +459,21 @@ public class FKGame {
 
             var blockPos = hitResult.getBlockPos();
             return GameUtils.whereIsThePlayer(player, new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()), emptyBucketImpl);
+        }
+
+        private ActionResult cancelPlayerFromUsingABlock(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
+            var targetBlock = world.getBlockState(hitResult.getBlockPos()).getBlock();
+
+            if(!interactiveBlocks.contains(targetBlock.getTranslationKey()))return ActionResult.PASS;
+
+            // if player try to use an interactive bloc like anvil, crafting table, ...
+            if(!player.isSneaking() || (player.isSneaking() && player.getStackInHand(hand) == ItemStack.EMPTY)){
+                var currentDimId = player.getWorld().getDimension().getEffects().toString();
+                var where = GameUtils.whereIsThePlayer(player, hitResult.getPos(), w -> w);
+                return playerActionImpl(targetBlock.getTranslationKey(), currentDimId, where, ActionResult.PASS, ActionResult.FAIL, PlayerActionsConfigs.USE_BLOCKS_CONFIG.data);
+            }
+
+            return ActionResult.PASS;
         }
 
         private ActionResult cancelPlayerPvP(PlayerEntity player, World world, Hand hand, Entity entity, @Nullable EntityHitResult hitResult) {

@@ -2,18 +2,16 @@ package ch.skyfy.fk.config.data;
 
 import lombok.Getter;
 
+import java.util.Map;
+
 @SuppressWarnings("ClassCanBeRecord")
 public class WorldBorderData {
 
     @Getter
-    private final String dimensionName;
+    private final Map<String, Cube> spawns;
 
-    @Getter
-    private final Cube cube;
-
-    public WorldBorderData(String dimensionName, Cube cube) {
-        this.dimensionName = dimensionName;
-        this.cube = cube;
+    public WorldBorderData(Map<String, Cube> spawns) {
+        this.spawns = spawns;
     }
 
 }

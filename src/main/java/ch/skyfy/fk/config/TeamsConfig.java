@@ -115,10 +115,17 @@ public class TeamsConfig implements Validatable {
         }
 
         // Check if the base is inside the world border
-        var worldBorderCube = Configs.WORLD_CONFIG.data.getWorldBorderData().getCube();
-        for (var team : teams)
-            if (!MathUtils.isInside(worldBorderCube, team.getBase().getProximityCube()))
-                errors.add("the base " + team.getBase().getName() + " is not inside the world border !");
+        for (var team : teams){
+            var base = team.getBase();
+            Configs.WORLD_CONFIG.data.getWorldBorderData().getSpawns().entrySet()
+                    .stream()
+                    .filter(entry -> entry.getKey().equals(base.getSpawnLocation().getDimensionName()))
+                    .findFirst()
+                    .ifPresent(entry -> {
+                        if (!MathUtils.isInside(entry.getValue(), base.getProximityCube()))
+                            errors.add("the base " + base.getName() + " is not inside the world border !");
+                    });
+        }
 
         confirmValidate(errors);
     }

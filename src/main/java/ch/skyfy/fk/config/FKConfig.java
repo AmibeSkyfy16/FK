@@ -1,6 +1,5 @@
 package ch.skyfy.fk.config;
 
-import ch.skyfy.fk.config.data.SpawnLocation;
 import ch.skyfy.fk.config.data.WaitingRoom;
 import ch.skyfy.fk.json.Validatable;
 import ch.skyfy.fk.utils.MathUtils;
@@ -29,8 +28,6 @@ public class FKConfig implements Validatable {
     private final boolean allowEnderPearlAssault;
     @Getter
     private final WaitingRoom waitingRoom;
-    @Getter
-    private final SpawnLocation worldSpawn;
 
     public FKConfig(int dayOfAuthorizationOfTheAssaults,
                     int dayOfAuthorizationOfTheEntryInTheNether,
@@ -38,7 +35,7 @@ public class FKConfig implements Validatable {
                     int dayOfAuthorizationOfThePvP,
                     int dayDuration,
                     boolean allowEnderPearlAssault,
-                    boolean shouldTeleportPlayersToTheirOwnBaseWhenGameIsStarted, WaitingRoom waitingRoom, SpawnLocation worldSpawn) {
+                    boolean shouldTeleportPlayersToTheirOwnBaseWhenGameIsStarted, WaitingRoom waitingRoom) {
 
         this.dayOfAuthorizationOfTheAssaults = dayOfAuthorizationOfTheAssaults;
         this.dayOfAuthorizationOfTheEntryInTheNether = dayOfAuthorizationOfTheEntryInTheNether;
@@ -48,7 +45,6 @@ public class FKConfig implements Validatable {
         this.allowEnderPearlAssault = allowEnderPearlAssault;
         this.shouldTeleportPlayersToTheirOwnBaseWhenGameIsStarted = shouldTeleportPlayersToTheirOwnBaseWhenGameIsStarted;
         this.waitingRoom = waitingRoom;
-        this.worldSpawn = worldSpawn;
     }
 
     @Override
@@ -61,9 +57,14 @@ public class FKConfig implements Validatable {
         if (!Identifier.isValid(waitingRoom.getSpawnLocation().getDimensionName()))
             errors.add("dimensionName " + waitingRoom.getSpawnLocation().getDimensionName() + " is not a valid dimension name");
 
-        var worldBorderCube = Configs.WORLD_CONFIG.data.getWorldBorderData().getCube();
-        if (!MathUtils.isInside(worldBorderCube, waitingRoom.getCube()))
-            errors.add("the waiting room is not inside the world border !");
+        Configs.WORLD_CONFIG.data.getWorldBorderData().getSpawns().entrySet()
+                .stream()
+                .filter(entry -> entry.getKey().equals(waitingRoom.getSpawnLocation().getDimensionName()))
+                .findFirst()
+                .ifPresent(entry -> {
+                    if (!MathUtils.isInside(entry.getValue(), waitingRoom.getCube()))
+                        errors.add("the waiting room is not inside the world border !");
+                });
 
         confirmValidate(errors);
     }

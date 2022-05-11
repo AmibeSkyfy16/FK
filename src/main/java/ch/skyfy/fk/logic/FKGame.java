@@ -109,8 +109,6 @@ public class FKGame {
         if (GameUtils.isGameState_RUNNING())
             FKGameAllData.FK_GAME_DATA.data.setGameState(FKMod.GameState.PAUSED);
 
-        setWorldSpawn();
-        setupWorldBorder();
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -192,18 +190,6 @@ public class FKGame {
         }
     }
 
-    private void setupWorldBorder() {
-        var worldBorderCube = Configs.WORLD_CONFIG.data.getWorldBorderData().getCube();
-        server.getOverworld().getWorldBorder().setSize(worldBorderCube.getSize() * 2);
-        server.getOverworld().getWorldBorder().setCenter(worldBorderCube.getX(), worldBorderCube.getZ());
-        server.getOverworld().getWorldBorder().tick();
-    }
-
-    private void setWorldSpawn() {
-        var spawnLocation = Configs.FK_CONFIG.data.getWorldSpawn();
-        server.getOverworld().setSpawnPos(new BlockPos(spawnLocation.getX(), spawnLocation.getY(), spawnLocation.getZ()), 1.0f);
-    }
-
     private void registerEvents() {
         System.out.println(PlayerActionsConfigs.USE_BLOCKS_CONFIG.data.getDenied().toString());
         // Event use when the game state is "running"
@@ -232,7 +218,7 @@ public class FKGame {
      */
     public class FKGameEvents {
 
-        public static final List<String> interactiveBlocks = new ArrayList<>(){{
+        public static final List<String> interactiveBlocks = new ArrayList<>() {{
             addAll(List.of(
                     Blocks.ANVIL.getTranslationKey(),
                     Blocks.CHIPPED_ANVIL.getTranslationKey(),
@@ -464,10 +450,10 @@ public class FKGame {
         private ActionResult cancelPlayerFromUsingABlock(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
             var targetBlock = world.getBlockState(hitResult.getBlockPos()).getBlock();
 
-            if(!interactiveBlocks.contains(targetBlock.getTranslationKey()))return ActionResult.PASS;
+            if (!interactiveBlocks.contains(targetBlock.getTranslationKey())) return ActionResult.PASS;
 
             // if player try to use an interactive bloc like anvil, crafting table, ...
-            if(!player.isSneaking() || (player.isSneaking() && player.getStackInHand(hand) == ItemStack.EMPTY)){
+            if (!player.isSneaking() || (player.isSneaking() && player.getStackInHand(hand) == ItemStack.EMPTY)) {
                 var currentDimId = player.getWorld().getDimension().getEffects().toString();
                 var where = GameUtils.whereIsThePlayer(player, hitResult.getPos(), w -> w);
                 return playerActionImpl(targetBlock.getTranslationKey(), currentDimId, where, ActionResult.PASS, ActionResult.FAIL, PlayerActionsConfigs.USE_BLOCKS_CONFIG.data);
@@ -512,6 +498,9 @@ public class FKGame {
 
             if (GameUtils.isGameState_NOT_STARTED()) {
                 var waitingRoom = Configs.FK_CONFIG.data.getWaitingRoom();
+                // if player is not in a waiting room
+                if (!player.getWorld().getDimension().getEffects().toString().equals(waitingRoom.getSpawnLocation().getDimensionName()))
+                    return ActionResult.PASS;
                 if (Utils.cancelPlayerFromLeavingAnArea(waitingRoom.getCube(), player, waitingRoom.getSpawnLocation()))
                     return ActionResult.FAIL;
                 return ActionResult.PASS;
@@ -522,9 +511,16 @@ public class FKGame {
                 return ActionResult.FAIL;
 
             // Cancel the player from going too far into the map
-            if (Utils.cancelPlayerFromLeavingAnArea(Configs.WORLD_CONFIG.data.getWorldBorderData().getCube(), player, null)) {
-                player.sendMessage(new LiteralText("You reach the border limit !").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
-                return ActionResult.FAIL;
+            var opt = Configs.WORLD_CONFIG.data.getWorldBorderData().getSpawns()
+                    .entrySet()
+                    .stream()
+                    .filter(entry -> entry.getKey().equals(player.getWorld().getDimension().getEffects().toString()))
+                    .findFirst();
+            if (opt.isPresent()) {
+                if (Utils.cancelPlayerFromLeavingAnArea(opt.get().getValue(), player, null)) {
+                    player.sendMessage(new LiteralText("You reach the border limit !").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
+                    return ActionResult.FAIL;
+                }
             }
 
             return ActionResult.PASS;

@@ -27,14 +27,17 @@ public class WorldBorderConfig implements Validatable {
         validateNonNull(errors);
         validatePrimitivesType(errors);
 
-        if(!Identifier.isValid(worldBorderData.getDimensionName()))
-            errors.add("dimensionName " + worldBorderData.getDimensionName() + " is not a valid dimension name");
+        worldBorderData.getSpawns().forEach((s, cube) -> {
+            if(!Identifier.isValid(s))
+                errors.add("dimensionName " + s + " is not a valid dimension name");
+        });
+
 
         confirmValidate(errors);
     }
 
     @Override
     public void validatePrimitivesType(List<String> errors) {
-        ValidateUtils.checkForNegativeValueInCubeClass(worldBorderData.getCube(), errors);
+        worldBorderData.getSpawns().forEach((s, cube) -> ValidateUtils.checkForNegativeValueInCubeClass(cube, errors));
     }
 }

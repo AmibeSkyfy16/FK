@@ -7,6 +7,7 @@ import ch.skyfy.fk.json.Defaultable;
 import ch.skyfy.fk.json.JsonDataClass;
 import net.minecraft.util.Formatting;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -40,9 +41,11 @@ public class Configs {
         @Override
         public WorldBorderConfig getDefault() {
             // Config for FallenKingRun12 map
-            return new WorldBorderConfig(new WorldBorderData("minecraft:overworld",
-                    new Cube((short) 210, 64, 319, 0, 0, 0))
-            );
+            var map = new HashMap<String, Cube>();
+            map.put("minecraft:overworld", new Cube((short) 210, 64, 319, 0, 0, 0));
+            map.put("minecraft:the_nether", new Cube((short) 300, 64, 319, 0, 0, 0));
+            map.put("minecraft:the_end", new Cube((short) 1000, 64, 319, 0, 0, 0));
+            return new WorldBorderConfig(new WorldBorderData(map));
         }
     }
 
@@ -86,8 +89,7 @@ public class Configs {
                     new WaitingRoom(
                             new Cube((short) 22, 250, 255, 0, 101, 4),
                             new SpawnLocation("minecraft:overworld", 0, 101, 16, 180, 2.8f)
-                    ),
-                    new SpawnLocation("minecraft:overworld", 0, 123, 7, 88, 88)
+                    )
             );
         }
     }

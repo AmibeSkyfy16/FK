@@ -6,9 +6,9 @@ import ch.skyfy.fk.json.Validatable;
 import java.util.List;
 import java.util.Map;
 
-public class BreakingEntitiesConfig extends AbstractPlayerActionConfig implements Validatable {
+public class KillingEntitiesConfig extends AbstractPlayerActionConfig implements Validatable {
 
-    protected BreakingEntitiesConfig(Map<String, Map<Where, List<String>>> allowed, Map<String, Map<Where, List<String>>> denied) {
+    protected KillingEntitiesConfig(Map<String, Map<Where, List<String>>> allowed, Map<String, Map<Where, List<String>>> denied) {
         super(allowed, denied);
     }
 

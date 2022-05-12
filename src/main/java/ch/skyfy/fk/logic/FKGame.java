@@ -26,14 +26,10 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.MovementType;
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.decoration.AbstractDecorationEntity;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
-import net.minecraft.item.BucketItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.PotionItem;
+import net.minecraft.item.*;
 import net.minecraft.network.MessageType;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.server.MinecraftServer;
@@ -293,13 +289,13 @@ public class FKGame {
             return GameUtils.whereIsThePlayer(player, new Vec3d(pos.getX(), pos.getY(), pos.getZ()), breakPlace);
         }
 
-        private ActionResult cancelPlayerFromBreakingEntities(PlayerEntity player, World world, Hand hand, Entity entity, @Nullable EntityHitResult hitResult) {
+        private ActionResult cancelPlayerFromKillingEntities(PlayerEntity player, World world, Hand hand, Entity entity, @Nullable EntityHitResult hitResult) {
             if (player.hasPermissionLevel(4)) return ActionResult.PASS;
             if (!GameUtils.isGameState_RUNNING()) return ActionResult.FAIL;
 
             var where = GameUtils.whereIsThePlayer(player, entity.getPos(), w -> w);
             var currentDimId = player.getWorld().getDimension().getEffects().toString();
-            return playerActionImpl(entity.getType().getTranslationKey(), currentDimId, where, ActionResult.PASS, ActionResult.FAIL, PlayerActionsConfigs.BREAKING_ENTITIES_CONFIG.data);
+            return playerActionImpl(entity.getType().getTranslationKey(), currentDimId, where, ActionResult.PASS, ActionResult.FAIL, PlayerActionsConfigs.KILLING_ENTITIES_CONFIG.data);
         }
 
         private ActionResult cancelPlayerFromPlacingBlocks(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
@@ -344,7 +340,7 @@ public class FKGame {
             return GameUtils.whereIsThePlayer(player, new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()), fillBucketImpl);
         }
 
-        private TypedActionResult<ItemStack> cancelPlayerFromEmptyingABucket(World world, PlayerEntity player, Hand hand, Fluid emptyFluid, BucketItem bucketItem, BlockHitResult blockHitResult) {
+        private TypedActionResult<ItemStack> cancelPlayerFromEmptyingABucket(World world, PlayerEntity player, Hand hand, Fluid emptyFluid, Item item, Vec3d pos) {
             if (player.hasPermissionLevel(4)) return TypedActionResult.pass(player.getStackInHand(hand));
 
             if (!GameUtils.isGameState_RUNNING()) return TypedActionResult.fail(player.getStackInHand(hand));
@@ -352,11 +348,10 @@ public class FKGame {
             var emptyBucketImpl = (GameUtils.WhereIsThePlayer<TypedActionResult<ItemStack>>) (where) -> {
                 var currentDimId = player.getWorld().getDimension().getEffects().toString();
                 var placedItemStack = player.getStackInHand(player.getActiveHand());
-                return playerActionImpl(bucketItem.getTranslationKey(), currentDimId, where, TypedActionResult.pass(placedItemStack), TypedActionResult.fail(placedItemStack), PlayerActionsConfigs.EMPTYING_BUCKET_CONFIG.data);
+                return playerActionImpl(item.getTranslationKey(), currentDimId, where, TypedActionResult.pass(placedItemStack), TypedActionResult.fail(placedItemStack), PlayerActionsConfigs.EMPTYING_BUCKET_CONFIG.data);
             };
 
-            var blockPos = blockHitResult.getBlockPos();
-            return GameUtils.whereIsThePlayer(player, new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()), emptyBucketImpl);
+            return GameUtils.whereIsThePlayer(player, pos, emptyBucketImpl);
         }
 
         private TypedActionResult<ItemStack> cancelPlayerFromUsingAItem(PlayerEntity player, World world, Hand hand) {
@@ -471,10 +466,8 @@ public class FKGame {
                 if (!GameUtils.isPvPEnabled(timeline.getTimelineData().getDay()))
                     return ActionResult.FAIL;
 
-            if (entity instanceof AbstractDecorationEntity)
-                return cancelPlayerFromBreakingEntities(player, world, hand, entity, hitResult);
 
-            return ActionResult.PASS;
+            return cancelPlayerFromKillingEntities(player, world, hand, entity, hitResult);
         }
 
         private ActionResult cancelPlayerFromEnteringInPortal(ServerPlayerEntity player, Identifier dimensionId) {

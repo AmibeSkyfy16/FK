@@ -2,6 +2,7 @@ package ch.skyfy.fk.mixin;
 
 import ch.skyfy.fk.events.BucketEmptyCallback;
 import ch.skyfy.fk.events.BucketFillCallback;
+import net.minecraft.block.PowderSnowBlock;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.EmptyFluid;
 import net.minecraft.fluid.Fluid;
@@ -11,6 +12,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Final;
@@ -36,9 +38,9 @@ public class BucketMixin {
         var targetFluid = world.getFluidState(blockHitResult.getBlockPos()).getFluid();
         var targetBlock = world.getBlockState(blockHitResult.getBlockPos()).getBlock();
 
-        if(!(targetFluid instanceof EmptyFluid)){ // If there is lava or water fluid on the ground
+        if(!(targetFluid instanceof EmptyFluid) || targetBlock instanceof PowderSnowBlock){ // If there is lava or water fluid or powdersSnowBucketItem on the ground
             if(fluid instanceof EmptyFluid){ // And the player's bucket is empty
-                var result = BucketFillCallback.EVENT.invoker().onUse(world, user, hand, targetFluid,targetBlock, bucketItem, blockHitResult);
+                var result = BucketFillCallback.EVENT.invoker().onUse(world, user, hand, targetFluid, targetBlock, bucketItem, blockHitResult);
                 if(result.getResult() == ActionResult.FAIL){
                     resultCallbackInfoReturnable.setReturnValue(result);
                     resultCallbackInfoReturnable.cancel();
@@ -46,7 +48,7 @@ public class BucketMixin {
             }
         }else{
             if(!(fluid instanceof EmptyFluid)){ // if the player's bucket is not empty
-                var result = BucketEmptyCallback.EVENT.invoker().onUse(world, user, hand, fluid, bucketItem, blockHitResult);
+                var result = BucketEmptyCallback.EVENT.invoker().onUse(world, user, hand, fluid, bucketItem, new Vec3d(blockHitResult.getBlockPos().getX(), blockHitResult.getBlockPos().getY(), blockHitResult.getBlockPos().getZ()));
                 if(result.getResult() == ActionResult.FAIL){
                     resultCallbackInfoReturnable.setReturnValue(result);
                     resultCallbackInfoReturnable.cancel();
@@ -55,5 +57,4 @@ public class BucketMixin {
         }
 
     }
-
 }

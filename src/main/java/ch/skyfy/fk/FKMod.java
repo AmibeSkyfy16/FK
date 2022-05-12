@@ -8,6 +8,7 @@ import ch.skyfy.fk.config.Configs;
 import ch.skyfy.fk.config.actions.PlayerActionsConfigs;
 import ch.skyfy.fk.exceptions.FKModException;
 import ch.skyfy.fk.logic.FKGame;
+import ch.skyfy.fk.utils.ModUtils;
 import ch.skyfy.fk.utils.ReflectionUtils;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
@@ -50,6 +51,8 @@ public class FKMod implements DedicatedServerModInitializer {
 
         // Load Configs.class a class that contains all our configuration data class
         ReflectionUtils.loadClassesByReflection(new Class[]{Configs.class, PlayerActionsConfigs.class});
+
+        ModUtils.generateMinecraftIdentifier();
 
         optFKGameRef = new AtomicReference<>(Optional.empty());
 

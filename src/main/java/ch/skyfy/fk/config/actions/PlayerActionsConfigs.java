@@ -4,6 +4,7 @@ import ch.skyfy.fk.constants.Where;
 import ch.skyfy.fk.json.Defaultable;
 import ch.skyfy.fk.json.JsonDataClass;
 import net.minecraft.block.Blocks;
+import net.minecraft.entity.EntityType;
 import net.minecraft.potion.Potions;
 import net.minecraft.util.registry.Registry;
 
@@ -20,16 +21,16 @@ public class PlayerActionsConfigs {
     public static final JsonDataClass<BreakingBlocksConfig, BreakingBlocksConfigDefault> BREAKING_BLOCKS_CONFIG;
     public static final JsonDataClass<FillingBucketConfig, FillingBucketConfigDefault> FILLING_BUCKET_CONFIG;
     public static final JsonDataClass<EmptyingBucketConfig, EmptyingBucketConfigDefault> EMPTYING_BUCKET_CONFIG;
-    public static final JsonDataClass<BreakingEntitiesConfig, BreakingEntitiesConfigDefault> BREAKING_ENTITIES_CONFIG;
+    public static final JsonDataClass<KillingEntitiesConfig, KillingEntitiesConfigDefault> KILLING_ENTITIES_CONFIG;
     public static final JsonDataClass<UseItemsConfig, UseItemsConfigDefault> USE_ITEMS_CONFIG;
     public static final JsonDataClass<UseBlocksConfig, UseBlocksConfigDefault> USE_BLOCKS_CONFIG;
 
     static {
-        PLACING_BLOCKS_CONFIG = new JsonDataClass<>("actions\\placingBlocks.json5", PlacingBlocksConfig.class, PlacingBlocksConfigDefault.class);
-        BREAKING_BLOCKS_CONFIG = new JsonDataClass<>("actions\\breakingBlocks.json5", BreakingBlocksConfig.class, BreakingBlocksConfigDefault.class);
-        FILLING_BUCKET_CONFIG = new JsonDataClass<>("actions\\fillingBucket.json5", FillingBucketConfig.class, FillingBucketConfigDefault.class);
-        EMPTYING_BUCKET_CONFIG = new JsonDataClass<>("actions\\emptyingBucket.json5", EmptyingBucketConfig.class, EmptyingBucketConfigDefault.class);
-        BREAKING_ENTITIES_CONFIG = new JsonDataClass<>("actions\\breakingEntities.json5", BreakingEntitiesConfig.class, BreakingEntitiesConfigDefault.class);
+        PLACING_BLOCKS_CONFIG = new JsonDataClass<>("actions\\placeBlocks.json5", PlacingBlocksConfig.class, PlacingBlocksConfigDefault.class);
+        BREAKING_BLOCKS_CONFIG = new JsonDataClass<>("actions\\breakBlocks.json5", BreakingBlocksConfig.class, BreakingBlocksConfigDefault.class);
+        FILLING_BUCKET_CONFIG = new JsonDataClass<>("actions\\fillBucket.json5", FillingBucketConfig.class, FillingBucketConfigDefault.class);
+        EMPTYING_BUCKET_CONFIG = new JsonDataClass<>("actions\\emptyBucket.json5", EmptyingBucketConfig.class, EmptyingBucketConfigDefault.class);
+        KILLING_ENTITIES_CONFIG = new JsonDataClass<>("actions\\killEntities.json5", KillingEntitiesConfig.class, KillingEntitiesConfigDefault.class);
         USE_ITEMS_CONFIG = new JsonDataClass<>("actions\\useItems.json5", UseItemsConfig.class, UseItemsConfigDefault.class);
         USE_BLOCKS_CONFIG = new JsonDataClass<>("actions\\useBlocks.json5", UseBlocksConfig.class, UseBlocksConfigDefault.class);
     }
@@ -102,9 +103,9 @@ public class PlayerActionsConfigs {
             return new BreakingBlocksConfig(allowedMap, deniedMap);
         }
     }
-    public static class BreakingEntitiesConfigDefault implements Defaultable<BreakingEntitiesConfig> {
+    public static class KillingEntitiesConfigDefault implements Defaultable<KillingEntitiesConfig> {
         @Override
-        public BreakingEntitiesConfig getDefault() {
+        public KillingEntitiesConfig getDefault() {
             var nestedAllowedMap = new HashMap<Where, List<String>>();
             nestedAllowedMap.put(INSIDE_HIS_OWN_BASE, null);
             nestedAllowedMap.put(CLOSE_TO_HIS_OWN_BASE, new ArrayList<>());
@@ -116,18 +117,31 @@ public class PlayerActionsConfigs {
             allowedMap.put("minecraft:the_nether", new HashMap<>(nestedAllowedMap));
             allowedMap.put("minecraft:the_end", new HashMap<>(nestedAllowedMap));
 
+            var deniedList = List.of(
+                    EntityType.ITEM_FRAME.getTranslationKey(),
+                    EntityType.GLOW_ITEM_FRAME.getTranslationKey(),
+                    EntityType.PAINTING.getTranslationKey(),
+                    EntityType.MINECART.getTranslationKey(),
+                    EntityType.CHEST_MINECART.getTranslationKey(),
+                    EntityType.FURNACE_MINECART.getTranslationKey(),
+                    EntityType.HOPPER_MINECART.getTranslationKey(),
+                    EntityType.TNT_MINECART.getTranslationKey(),
+                    EntityType.BOAT.getTranslationKey(),
+                    EntityType.ARMOR_STAND.getTranslationKey()
+            );
+
             var nestedDeniedMap = new HashMap<Where, List<String>>();
             nestedDeniedMap.put(INSIDE_HIS_OWN_BASE, new ArrayList<>());
             nestedDeniedMap.put(CLOSE_TO_HIS_OWN_BASE, new ArrayList<>());
-            nestedDeniedMap.put(INSIDE_AN_ENEMY_BASE, new ArrayList<>());
-            nestedDeniedMap.put(CLOSE_TO_AN_ENEMY_BASE, new ArrayList<>());
+            nestedDeniedMap.put(INSIDE_AN_ENEMY_BASE, deniedList);
+            nestedDeniedMap.put(CLOSE_TO_AN_ENEMY_BASE, deniedList);
             nestedDeniedMap.put(IN_THE_WILD, new ArrayList<>());
             var deniedMap = new HashMap<String, Map<Where, List<String>>>();
             deniedMap.put("minecraft:overworld", nestedDeniedMap);
             deniedMap.put("minecraft:the_nether", new HashMap<>(nestedDeniedMap));
             deniedMap.put("minecraft:the_end", new HashMap<>(nestedDeniedMap));
 
-            return new BreakingEntitiesConfig(allowedMap, deniedMap);
+            return new KillingEntitiesConfig(allowedMap, deniedMap);
         }
     }
     public static class FillingBucketConfigDefault implements Defaultable<FillingBucketConfig> {

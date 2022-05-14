@@ -4,8 +4,8 @@ import ch.skyfy.fk.FKMod;
 import ch.skyfy.fk.config.Configs;
 import ch.skyfy.fk.config.data.FKTeam;
 import ch.skyfy.fk.constants.Where;
+import ch.skyfy.fk.features.data.PersistantVault;
 import ch.skyfy.fk.features.data.Vault;
-import ch.skyfy.fk.features.data.VaultConstant;
 import ch.skyfy.fk.logic.data.FKGameAllData;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
 
-import static ch.skyfy.fk.config.Configs.TEAMS;
+import static ch.skyfy.fk.config.Configs.FK_TEAMS_CONFIG;
 
 @SuppressWarnings({"unused"})
 public class GameUtils {
@@ -39,7 +39,7 @@ public class GameUtils {
      */
     public static List<String> getMissingFKPlayer(List<ServerPlayerEntity> onlinePlayers) {
         var missingPlayers = new ArrayList<String>();
-        for (var fkTeam : TEAMS.data.getTeams()) {
+        for (var fkTeam : FK_TEAMS_CONFIG.data.getTeams()) {
             for (var fkPlayerName : fkTeam.getPlayers()) {
                 if (onlinePlayers.stream().noneMatch(serverPlayerEntity -> serverPlayerEntity.getName().asString().equals(fkPlayerName)))
                     missingPlayers.add(fkPlayerName);
@@ -53,7 +53,7 @@ public class GameUtils {
      * @return True if the player is part of the game. False otherwise
      */
     public static boolean isFKPlayer(String playerName) {
-        return TEAMS.data.getTeams().stream().flatMap(fkTeam -> fkTeam.getPlayers().stream()).anyMatch(fkPlayerName -> fkPlayerName.equals(playerName));
+        return FK_TEAMS_CONFIG.data.getTeams().stream().flatMap(fkTeam -> fkTeam.getPlayers().stream()).anyMatch(fkPlayerName -> fkPlayerName.equals(playerName));
     }
 
     /**
@@ -61,7 +61,7 @@ public class GameUtils {
      * @return A list with only the players participating in the FK
      */
     public static List<ServerPlayerEntity> getAllConnectedFKPlayers(List<ServerPlayerEntity> onlinePlayers) {
-        return TEAMS.data.getTeams().stream()
+        return FK_TEAMS_CONFIG.data.getTeams().stream()
                 .flatMap(fkTeam -> onlinePlayers.stream()
                         .filter(player -> fkTeam.getPlayers().contains(player.getName().asString())))
                 .toList();
@@ -76,21 +76,21 @@ public class GameUtils {
 
     @Nullable
     public static BlockPos getBaseCoordinateByPlayer(String name) {
-        for (var fkTeam : TEAMS.data.getTeams())
+        for (var fkTeam : FK_TEAMS_CONFIG.data.getTeams())
             if (fkTeam.getPlayers().stream().anyMatch(name::equals))
                 return new BlockPos(fkTeam.getBase().getCube().getX(), fkTeam.getBase().getCube().getY(), fkTeam.getBase().getCube().getZ());
         return null;
     }
 
     public static Optional<FKTeam> getTeamByCoordinate(Vec3d pos) {
-        for (var team : TEAMS.data.getTeams())
+        for (var team : FK_TEAMS_CONFIG.data.getTeams())
             if (Utils.isAPosInsideCube(team.getBase().getCube(), pos))
                 return Optional.of(team);
         return Optional.empty();
     }
 
     public static Optional<Vault> getVaultByTeamName(String teamName) {
-        return VaultConstant.DATA.data.getVaults().stream().filter(vault -> vault.getTeamId().equals(getFKTeamIdentifierByName(teamName))).findFirst();
+        return PersistantVault.DATA.data.getVaults().stream().filter(vault -> vault.getTeamId().equals(getFKTeamIdentifierByName(teamName))).findFirst();
     }
 
     public static Optional<ServerWorld> getServerWorldByIdentifier(MinecraftServer server, String id) {
@@ -100,13 +100,13 @@ public class GameUtils {
     }
 
     public static FKTeam getFKTeamOfPlayerByName(String name) {
-        for (var fkTeam : TEAMS.data.getTeams())
+        for (var fkTeam : FK_TEAMS_CONFIG.data.getTeams())
             if (fkTeam.getPlayers().stream().anyMatch(name::equals)) return fkTeam;
         return null;
     }
 
     public static boolean isInTheSameTeam(String playerName1, String playerName2) {
-        for (var fkTeam : TEAMS.data.getTeams())
+        for (var fkTeam : FK_TEAMS_CONFIG.data.getTeams())
             if (fkTeam.getPlayers().stream().anyMatch(playerName1::equals) && fkTeam.getPlayers().stream().anyMatch(playerName2::equals))
                 return true;
         return false;
@@ -125,7 +125,7 @@ public class GameUtils {
 
         WhereObject where = null;
 
-        for (var team : TEAMS.data.getTeams()) {
+        for (var team : FK_TEAMS_CONFIG.data.getTeams()) {
             var baseCube = team.getBase().getCube();
 
             // Is this base the base of the player who break the block ?
@@ -154,9 +154,9 @@ public class GameUtils {
     }
 
     private static void nestsVault(WhereObject where, Vec3d pos) {
-        if (!Configs.VAULT_CONFIG.data.isEnabled()) return;
+        if (!Configs.VAULT_FEATURE_CONFIG.data.isEnabled()) return;
         Box box;
-        for (var vault : VaultConstant.DATA.data.getVaults()) {
+        for (var vault : PersistantVault.DATA.data.getVaults()) {
             if (vault.getBlockPos()[0] == null || vault.getBlockPos()[1] == null) continue;
             box = ch.skyfy.fk.features.data.BlockPos.toBox(vault.getBlockPos());
             switch (where.getRoot()) {
@@ -185,15 +185,15 @@ public class GameUtils {
     }
 
     public static Optional<FKTeam> getFKTeamById(String teamId) {
-        return TEAMS.data.getTeams().stream().filter(fkTeam -> getFKTeamIdentifierByName(fkTeam.getName()).equals(teamId)).findFirst();
+        return FK_TEAMS_CONFIG.data.getTeams().stream().filter(fkTeam -> getFKTeamIdentifierByName(fkTeam.getName()).equals(teamId)).findFirst();
     }
 
     public static boolean isFKPlayerEliminate(String playerName) {
-        if (!Configs.VAULT_CONFIG.data.isEnabled()) return false;
+        if (!Configs.VAULT_FEATURE_CONFIG.data.isEnabled()) return false;
         var fkTeam = getFKTeamOfPlayerByName(playerName);
         if (fkTeam == null) return false;
         var fkTeamId = getFKTeamIdentifierByName(fkTeam.getName());
-        return VaultConstant.DATA.data.getEliminatedTeams().values().stream().anyMatch(id -> id.equals(fkTeamId));
+        return PersistantVault.DATA.data.getEliminatedTeams().values().stream().anyMatch(id -> id.equals(fkTeamId));
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")

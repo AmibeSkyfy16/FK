@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings("ClassCanBeRecord")
-public class VaultData implements Validatable {
+public class PersistantVaultData implements Validatable {
 
     @Getter
     private final List<Vault> vaults;
@@ -16,7 +16,7 @@ public class VaultData implements Validatable {
     @Getter
     private final Map<String, String> eliminatedTeams;
 
-    public VaultData(List<Vault> vaults, Map<String, String> eliminatedTeams) {
+    public PersistantVaultData(List<Vault> vaults, Map<String, String> eliminatedTeams) {
         this.vaults = vaults;
         this.eliminatedTeams = eliminatedTeams;
     }

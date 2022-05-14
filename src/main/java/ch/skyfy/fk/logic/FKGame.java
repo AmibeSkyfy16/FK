@@ -308,7 +308,7 @@ public class FKGame {
             if(GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
 
             // It's not a block
-            if (!Registry.BLOCK.containsId(Registry.ITEM.getId(itemInHand.getItem())))
+            if (!Registry.BLOCK.containsId(Registry.ITEM.getId(itemInHand.getItem())) || itemInHand.isOf(Items.AIR))
                 return ActionResult.PASS;
 
             var placeBlock = (GameUtils.WhereIsThePlayer<ActionResult>) (where) -> switch (where.getRoot()) {
@@ -516,7 +516,7 @@ public class FKGame {
                 return ActionResult.FAIL;
 
             // Cancel the player from going too far into the map
-            var opt = Configs.WORLD_CONFIG.data.getWorldBorderData().getSpawns()
+            var opt = Configs.WORLD_BORDER_CONFIG.data.getWorldBorderData().getSpawns()
                     .entrySet()
                     .stream()
                     .filter(entry -> entry.getKey().equals(player.getWorld().getDimension().getEffects().toString()))

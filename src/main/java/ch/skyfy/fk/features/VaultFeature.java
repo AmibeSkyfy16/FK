@@ -8,9 +8,9 @@ import ch.skyfy.fk.constants.MsgBase;
 import ch.skyfy.fk.constants.Where;
 import ch.skyfy.fk.events.PlayerMoveCallback;
 import ch.skyfy.fk.features.data.BlockPos;
+import ch.skyfy.fk.features.data.PersistantVault;
+import ch.skyfy.fk.features.data.PersistantVaultData;
 import ch.skyfy.fk.features.data.Vault;
-import ch.skyfy.fk.features.data.VaultConstant;
-import ch.skyfy.fk.features.data.VaultData;
 import ch.skyfy.fk.logic.FKGame;
 import ch.skyfy.fk.logic.GameUtils;
 import ch.skyfy.fk.logic.Utils;
@@ -81,8 +81,8 @@ public class VaultFeature {
     }
 
     static {
-        ReflectionUtils.loadClassesByReflection(new Class[]{VaultConstant.class});
-        FKMod.LOGGER.info(VaultConstant.class.getCanonicalName() + " loaded successfully");
+        ReflectionUtils.loadClassesByReflection(new Class[]{PersistantVault.class});
+        FKMod.LOGGER.info(PersistantVault.class.getCanonicalName() + " loaded successfully");
     }
 
     public enum Mode {
@@ -90,8 +90,8 @@ public class VaultFeature {
         NORMAL
     }
 
-    private final VaultFeatureConfig config = Configs.VAULT_CONFIG.data;
-    private final VaultData vaultData = VaultConstant.DATA.data;
+    private final VaultFeatureConfig config = Configs.VAULT_FEATURE_CONFIG.data;
+    private final PersistantVaultData persistantVaultData = PersistantVault.DATA.data;
     private final MinecraftServer server;
     private final FKGame fkGame;
     private final Map<FKTeam, Capture> captureMap;
@@ -198,11 +198,11 @@ public class VaultFeature {
                 var fkTeam = GameUtils.getFKTeamOfPlayerByName(player.getName().asString());
                 var fkTeamId = GameUtils.getFKTeamIdentifierByName(fkTeam.getName());
 
-                var optVault = vaultData.getVaults().stream().filter(vault -> vault.getTeamId().equals(fkTeamId)).findFirst();
+                var optVault = persistantVaultData.getVaults().stream().filter(vault -> vault.getTeamId().equals(fkTeamId)).findFirst();
                 if (optVault.isEmpty()) {
                     var blockPos = new BlockPos[2];
                     blockPos[0] = BlockPos.of(hitResult.getBlockPos());
-                    vaultData.getVaults().add(new Vault(false, fkTeamId, blockPos));
+                    persistantVaultData.getVaults().add(new Vault(false, fkTeamId, blockPos));
                     player.sendMessage(Text.of("first position set: " + hitResult.getBlockPos().toString()), false);
                     return ActionResult.PASS;
                 }
@@ -222,7 +222,7 @@ public class VaultFeature {
 
                 if (valid) {
                     try {
-                        VaultConstant.DATA.jsonManager.save(vaultData);
+                        PersistantVault.DATA.jsonManager.save(persistantVaultData);
                     } catch (IOException e) {
                         FKMod.LOGGER.error("An error occurred when trying to save vault");
                     }
@@ -325,12 +325,12 @@ public class VaultFeature {
         private void win(MinecraftServer server) {
             win.set(true);
 
-            if (Configs.VAULT_CONFIG.data.getMode() == Mode.NORMAL) {
+            if (Configs.VAULT_FEATURE_CONFIG.data.getMode() == Mode.NORMAL) {
                 server.getPlayerManager().broadcast(Msg.GAME_IS_OVER.text(), MessageType.CHAT, NIL_UUID);
                 server.getPlayerManager().broadcast(Msg.WINNER.formatted(fkTeamAttacker.getName(), fkTeamVictim.getName()).text(), MessageType.CHAT, NIL_UUID);
                 FKGameAllData.FK_GAME_DATA.data.setGameState(FKMod.GameState.FINISHED);
                 GameUtils.getAllConnectedFKPlayers(server.getPlayerManager().getPlayerList()).forEach(fkGame::updateSidebar);
-            } else if (Configs.VAULT_CONFIG.data.getMode() == Mode.BATTLE_ROYAL) {
+            } else if (Configs.VAULT_FEATURE_CONFIG.data.getMode() == Mode.BATTLE_ROYAL) {
                 Msg.NEW_TEAM_ELIMINATE.formatted(fkTeamVictim.getName(), fkTeamAttacker.getName()).broadcast(server.getPlayerManager());
                 for (var serverPlayerEntity : GameUtils.getAllFKPlayerOfFKTeam(server.getPlayerManager(), fkTeamVictim)) {
                     serverPlayerEntity.changeGameMode(GameMode.SPECTATOR);
@@ -339,9 +339,9 @@ public class VaultFeature {
             }
 
             captureMap.remove(fkTeamAttacker);
-            vaultData.getEliminatedTeams().putIfAbsent(GameUtils.getFKTeamIdentifierByName(fkTeamVictim.getName()), GameUtils.getFKTeamIdentifierByName(fkTeamAttacker.getName()));
+            persistantVaultData.getEliminatedTeams().putIfAbsent(GameUtils.getFKTeamIdentifierByName(fkTeamVictim.getName()), GameUtils.getFKTeamIdentifierByName(fkTeamAttacker.getName()));
             try {
-                VaultConstant.DATA.jsonManager.save(vaultData);
+                PersistantVault.DATA.jsonManager.save(persistantVaultData);
             } catch (IOException ignored) {
             }
         }

@@ -15,12 +15,12 @@ import java.util.Collections;
 import java.util.List;
 
 @SuppressWarnings("ClassCanBeRecord")
-public class TeamsConfig implements Validatable {
+public class FKTeamsConfig implements Validatable {
 
     @Getter
     private final List<FKTeam> teams;
 
-    public TeamsConfig(List<FKTeam> teams) {
+    public FKTeamsConfig(List<FKTeam> teams) {
         this.teams = teams;
     }
 
@@ -117,7 +117,7 @@ public class TeamsConfig implements Validatable {
         // Check if the base is inside the world border
         for (var team : teams){
             var base = team.getBase();
-            Configs.WORLD_CONFIG.data.getWorldBorderData().getSpawns().entrySet()
+            Configs.WORLD_BORDER_CONFIG.data.getWorldBorderData().getSpawns().entrySet()
                     .stream()
                     .filter(entry -> entry.getKey().equals(base.getSpawnLocation().getDimensionName()))
                     .findFirst()

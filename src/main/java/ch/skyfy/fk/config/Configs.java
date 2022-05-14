@@ -17,22 +17,22 @@ import java.util.List;
  */
 public class Configs {
 
-    public static final JsonDataClass<WorldBorderConfig, WorldBorderConfigDefault> WORLD_CONFIG;
+    public static final JsonDataClass<WorldBorderConfig, WorldBorderConfigDefault> WORLD_BORDER_CONFIG;
     public static final JsonDataClass<FKConfig, FKConfigDefault> FK_CONFIG;
-    public static final JsonDataClass<TeamsConfig, TeamsConfigDefault> TEAMS;
+    public static final JsonDataClass<FKTeamsConfig, FKTeamsConfigDefault> FK_TEAMS_CONFIG;
 
-    public static final JsonDataClass<VaultFeatureConfig, VaultFeatureConfigDefault> VAULT_CONFIG;
+    public static final JsonDataClass<VaultFeatureConfig, VaultFeatureConfigDefault> VAULT_FEATURE_CONFIG;
 
     static {
-        WORLD_CONFIG = new JsonDataClass<>("worldBorderConfig.json5", WorldBorderConfig.class, WorldBorderConfigDefault.class);
+        WORLD_BORDER_CONFIG = new JsonDataClass<>("worldBorderConfig.json5", WorldBorderConfig.class, WorldBorderConfigDefault.class);
         FK_CONFIG = new JsonDataClass<>("fkconfig.json5", FKConfig.class, FKConfigDefault.class);
-        TEAMS = new JsonDataClass<>("teams.json5", TeamsConfig.class, TeamsConfigDefault.class);
-        VAULT_CONFIG = new JsonDataClass<>("features\\vault.json5", VaultFeatureConfig.class, VaultFeatureConfigDefault.class);
+        FK_TEAMS_CONFIG = new JsonDataClass<>("teams.json5", FKTeamsConfig.class, FKTeamsConfigDefault.class);
+        VAULT_FEATURE_CONFIG = new JsonDataClass<>("features\\vault.json5", VaultFeatureConfig.class, VaultFeatureConfigDefault.class);
 
-        WORLD_CONFIG.data.validate();
+        WORLD_BORDER_CONFIG.data.validate();
         FK_CONFIG.data.validate();
-        TEAMS.data.validate();
-        VAULT_CONFIG.data.validate();
+        FK_TEAMS_CONFIG.data.validate();
+        VAULT_FEATURE_CONFIG.data.validate();
 
         FKMod.LOGGER.info(Configs.class.getName() + " has been loaded");
     }
@@ -50,12 +50,12 @@ public class Configs {
         }
     }
 
-    public static class TeamsConfigDefault implements Defaultable<TeamsConfig> {
+    public static class FKTeamsConfigDefault implements Defaultable<FKTeamsConfig> {
 
         @Override
-        public TeamsConfig getDefault() {
+        public FKTeamsConfig getDefault() {
             // Teams for FallenKingRun12 map
-            return new TeamsConfig(List.of(
+            return new FKTeamsConfig(List.of(
                     new FKTeam("Yellow team", Formatting.YELLOW.name(), List.of("Alex"),
                             new Base("Yellow base",
                                     new Cube((short) 14, 50, 500, -64, 100, -113),

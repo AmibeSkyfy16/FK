@@ -11,8 +11,6 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.Style;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Vec3d;
 
@@ -61,7 +59,7 @@ public class CaptureCmd implements Command<ServerCommandSource> {
             return 0;
         }
 
-        if (!Configs.VAULT_CONFIG.data.isEnabled()) {
+        if (!Configs.VAULT_FEATURE_CONFIG.data.isEnabled()) {
             Msg.VAULT_FEATURE_NOT_ENABLED.send(playerAttacker);
             return 0;
         }

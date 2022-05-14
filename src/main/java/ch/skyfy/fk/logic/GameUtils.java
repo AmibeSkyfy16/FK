@@ -90,7 +90,7 @@ public class GameUtils {
     }
 
     public static Optional<Vault> getVaultByTeamName(String teamName) {
-        return VaultConstant.VAULTS.data.getVaults().stream().filter(vault -> vault.getTeamId().equals(getFKTeamIdentifierByName(teamName))).findFirst();
+        return VaultConstant.DATA.data.getVaults().stream().filter(vault -> vault.getTeamId().equals(getFKTeamIdentifierByName(teamName))).findFirst();
     }
 
     public static Optional<ServerWorld> getServerWorldByIdentifier(MinecraftServer server, String id) {
@@ -156,7 +156,7 @@ public class GameUtils {
     private static void nestsVault(Where where, Vec3d pos){
         if(!Configs.VAULT_CONFIG.data.isEnabled())return;
         Box box;
-        for (var vault : VaultConstant.VAULTS.data.getVaults()) {
+        for (var vault : VaultConstant.DATA.data.getVaults()) {
             if (vault.getBlockPos()[0] == null || vault.getBlockPos()[1] == null) continue;
             box = ch.skyfy.fk.features.data.BlockPos.toBox(vault.getBlockPos());
             switch (where) {
@@ -184,6 +184,10 @@ public class GameUtils {
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public static boolean isGameState_PAUSED() {
         return FKGameAllData.FK_GAME_DATA.data.getGameState() == FKMod.GameState.PAUSED;
+    }
+
+    public static boolean isGameState_FINISHED() {
+        return FKGameAllData.FK_GAME_DATA.data.getGameState() == FKMod.GameState.FINISHED;
     }
 
     public static boolean isGameState_NOT_STARTED() {

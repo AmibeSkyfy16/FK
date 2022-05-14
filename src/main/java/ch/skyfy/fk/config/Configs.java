@@ -3,6 +3,7 @@ package ch.skyfy.fk.config;
 import ch.skyfy.fk.FKMod;
 import ch.skyfy.fk.config.data.*;
 import ch.skyfy.fk.config.features.VaultFeatureConfig;
+import ch.skyfy.fk.features.VaultFeature;
 import ch.skyfy.fk.json.Defaultable;
 import ch.skyfy.fk.json.JsonDataClass;
 import net.minecraft.util.Formatting;
@@ -103,7 +104,8 @@ public class Configs {
                     4,
                     4,
                     2,
-                    20
+                    20,
+                    VaultFeature.Mode.NORMAL
             );
         }
     }

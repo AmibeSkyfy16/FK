@@ -93,7 +93,7 @@ public class FKGame {
         this.timeline = new Timeline();
         pauseEvents = new PauseEvents();
         fkGameEvents = new FKGameEvents();
-        vaultFeature = new VaultFeature(server);
+        vaultFeature = new VaultFeature(server, this);
         onUsedEnderPearlMap = new HashMap<>();
 
         initialize();
@@ -174,7 +174,7 @@ public class FKGame {
         serverScoreboard.updateScoreboardTeam(team);
     }
 
-    private void updateSidebar(ServerPlayerEntity player) {
+    public void updateSidebar(ServerPlayerEntity player) {
         var timelineData = timeline.getTimelineData();
         ScoreboardManager.getInstance().updateSidebar(player, timelineData.getDay(), timelineData.getMinutes(), timelineData.getSeconds());
     }
@@ -279,6 +279,8 @@ public class FKGame {
         private boolean cancelPlayerFromBreakingBlocks(World world, PlayerEntity player, BlockPos pos, BlockState state, /* Nullable */ BlockEntity blockEntity) {
             if (player.hasPermissionLevel(4)) return true;
 
+            if(GameUtils.isGameState_FINISHED()) return true;
+
             if (!GameUtils.isGameState_RUNNING()) return false;
 
             var breakPlace = (GameUtils.WhereIsThePlayer<Boolean>) (where) -> {
@@ -291,6 +293,7 @@ public class FKGame {
 
         private ActionResult cancelPlayerFromKillingEntities(PlayerEntity player, World world, Hand hand, Entity entity, @Nullable EntityHitResult hitResult) {
             if (player.hasPermissionLevel(4)) return ActionResult.PASS;
+            if(GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
             if (!GameUtils.isGameState_RUNNING()) return ActionResult.FAIL;
 
             var where = GameUtils.whereIsThePlayer(player, entity.getPos(), w -> w);
@@ -301,6 +304,8 @@ public class FKGame {
         private ActionResult cancelPlayerFromPlacingBlocks(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
             var currentDimId = player.getWorld().getDimension().getEffects().toString();
             var itemInHand = player.getStackInHand(player.getActiveHand());
+
+            if(GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
 
             // It's not a block
             if (!Registry.BLOCK.containsId(Registry.ITEM.getId(itemInHand.getItem())))
@@ -327,7 +332,7 @@ public class FKGame {
 
         private TypedActionResult<ItemStack> cancelPlayerFromFillingABucket(World world, PlayerEntity player, Hand hand, Fluid fillFluid, Block targetBlock, BucketItem bucketItem, BlockHitResult blockHitResult) {
             if (player.hasPermissionLevel(4)) return TypedActionResult.pass(player.getStackInHand(hand));
-
+            if(GameUtils.isGameState_FINISHED()) return TypedActionResult.pass(player.getStackInHand(hand));
             if (!GameUtils.isGameState_RUNNING()) return TypedActionResult.fail(player.getStackInHand(hand));
 
             var fillBucketImpl = (GameUtils.WhereIsThePlayer<TypedActionResult<ItemStack>>) (where) -> {
@@ -342,7 +347,7 @@ public class FKGame {
 
         private TypedActionResult<ItemStack> cancelPlayerFromEmptyingABucket(World world, PlayerEntity player, Hand hand, Fluid emptyFluid, Item item, Vec3d pos) {
             if (player.hasPermissionLevel(4)) return TypedActionResult.pass(player.getStackInHand(hand));
-
+            if(GameUtils.isGameState_FINISHED()) return TypedActionResult.pass(player.getStackInHand(hand));
             if (!GameUtils.isGameState_RUNNING()) return TypedActionResult.fail(player.getStackInHand(hand));
 
             var emptyBucketImpl = (GameUtils.WhereIsThePlayer<TypedActionResult<ItemStack>>) (where) -> {
@@ -356,7 +361,7 @@ public class FKGame {
 
         private TypedActionResult<ItemStack> cancelPlayerFromUsingAItem(PlayerEntity player, World world, Hand hand) {
             if (player.hasPermissionLevel(4)) return TypedActionResult.pass(player.getStackInHand(hand));
-
+            if(GameUtils.isGameState_FINISHED()) return TypedActionResult.pass(player.getStackInHand(hand));
             if (!GameUtils.isGameState_RUNNING()) return TypedActionResult.fail(player.getStackInHand(hand));
 
             var item = player.getStackInHand(hand);
@@ -378,6 +383,7 @@ public class FKGame {
 
         private ActionResult cancelPlayerFromAssaultWithEnderPearl(ServerPlayerEntity player, Vec3d pos) {
             if (player.hasPermissionLevel(4)) return ActionResult.PASS;
+            if(GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
             if (!GameUtils.isGameState_RUNNING()) return ActionResult.FAIL;
 
             if (Configs.FK_CONFIG.data.isAllowEnderPearlAssault()) return ActionResult.PASS;
@@ -393,6 +399,8 @@ public class FKGame {
 
         private ActionResult onUseBlockEvent(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
             if (player.hasPermissionLevel(4)) return ActionResult.PASS; // Admin can bypass this
+
+            if(GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
 
             // If the game is NOT_STARTED OR PAUSED, players can't destroy block, block entity (painting, item frame, ...) or firing tnt
             if (!GameUtils.isGameState_RUNNING()) return ActionResult.FAIL;
@@ -412,6 +420,8 @@ public class FKGame {
 
         private ActionResult cancelPlayerFromFiringATNT(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
             var itemInHand = player.getStackInHand(hand);
+
+            if(GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
 
             var emptyBucketImpl = (GameUtils.WhereIsThePlayer<ActionResult>) (where) -> {
 
@@ -445,6 +455,8 @@ public class FKGame {
         private ActionResult cancelPlayerFromUsingABlock(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
             var targetBlock = world.getBlockState(hitResult.getBlockPos()).getBlock();
 
+            if(GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
+
             if (!interactiveBlocks.contains(targetBlock.getTranslationKey())) return ActionResult.PASS;
 
             // if player try to use an interactive bloc like anvil, crafting table, ...
@@ -459,7 +471,7 @@ public class FKGame {
 
         private ActionResult cancelPlayerPvP(PlayerEntity player, World world, Hand hand, Entity entity, @Nullable EntityHitResult hitResult) {
             if (player.hasPermissionLevel(4)) return ActionResult.PASS;
-
+            if(GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
             if (!GameUtils.isGameState_RUNNING()) return ActionResult.FAIL;
 
             if (entity instanceof PlayerEntity)
@@ -472,7 +484,7 @@ public class FKGame {
 
         private ActionResult cancelPlayerFromEnteringInPortal(ServerPlayerEntity player, Identifier dimensionId) {
             if (player.hasPermissionLevel(4)) return ActionResult.PASS;
-
+            if(GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
             if (!GameUtils.isGameState_RUNNING()) return ActionResult.FAIL;
 
             if (dimensionId == DimensionType.THE_NETHER_ID) {
@@ -488,7 +500,7 @@ public class FKGame {
 
         private ActionResult onPlayerMove(PlayerMoveCallback.MoveData moveData, ServerPlayerEntity player) {
             if (player.hasPermissionLevel(4)) return ActionResult.PASS; // OP Player can move anymore
-
+            if(GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
             if (GameUtils.isGameState_NOT_STARTED()) {
                 var waitingRoom = Configs.FK_CONFIG.data.getWaitingRoom();
                 // if player is not in a waiting room
@@ -545,8 +557,8 @@ public class FKGame {
         }
 
         private ActionResult onItemDespawn(ItemEntity itemEntity) {
-            if (!GameUtils.isGameState_PAUSED()) return ActionResult.PASS;
-            return ActionResult.FAIL;
+            if (GameUtils.isGameState_PAUSED()) return ActionResult.FAIL;
+            return ActionResult.PASS;
         }
 
         private void onPlayerJoin(ServerPlayerEntity player, MinecraftServer server) {

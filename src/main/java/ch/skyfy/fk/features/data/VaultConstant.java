@@ -4,18 +4,19 @@ import ch.skyfy.fk.json.Defaultable;
 import ch.skyfy.fk.json.JsonDataClass;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class VaultConstant {
 
-    public static final JsonDataClass<Vaults, VaultsDefault> VAULTS = new JsonDataClass<>(
+    public static final JsonDataClass<VaultData, VaultsDefault> DATA = new JsonDataClass<>(
             "data\\vaults.json",
-            Vaults.class, VaultsDefault.class);
+            VaultData.class, VaultsDefault.class);
 
-    public static class VaultsDefault implements Defaultable<Vaults>{
+    public static class VaultsDefault implements Defaultable<VaultData>{
 
         @Override
-        public Vaults getDefault() {
-            return new Vaults(new ArrayList<>());
+        public VaultData getDefault() {
+            return new VaultData(new ArrayList<>(), new HashMap<>());
         }
     }
 

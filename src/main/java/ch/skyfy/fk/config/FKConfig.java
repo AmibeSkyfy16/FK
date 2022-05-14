@@ -47,6 +47,7 @@ public class FKConfig implements Validatable {
         this.waitingRoom = waitingRoom;
     }
 
+    @SuppressWarnings("CommentedOutCode")
     @Override
     public void validate() {
         var errors = new ArrayList<String>();
@@ -57,14 +58,14 @@ public class FKConfig implements Validatable {
         if (!Identifier.isValid(waitingRoom.getSpawnLocation().getDimensionName()))
             errors.add("dimensionName " + waitingRoom.getSpawnLocation().getDimensionName() + " is not a valid dimension name");
 
-        Configs.WORLD_CONFIG.data.getWorldBorderData().getSpawns().entrySet()
-                .stream()
-                .filter(entry -> entry.getKey().equals(waitingRoom.getSpawnLocation().getDimensionName()))
-                .findFirst()
-                .ifPresent(entry -> {
-                    if (!MathUtils.isInside(entry.getValue(), waitingRoom.getCube()))
-                        errors.add("the waiting room is not inside the world border !");
-                });
+//        Configs.WORLD_CONFIG.data.getWorldBorderData().getSpawns().entrySet()
+//                .stream()
+//                .filter(entry -> entry.getKey().equals(waitingRoom.getSpawnLocation().getDimensionName()))
+//                .findFirst()
+//                .ifPresent(entry -> {
+//                    if (!MathUtils.isInside(entry.getValue(), waitingRoom.getCube()))
+//                        errors.add("the waiting room is not inside the world border !");
+//                });
 
         confirmValidate(errors);
     }

@@ -1,5 +1,6 @@
 package ch.skyfy.fk.config.features;
 
+import ch.skyfy.fk.features.VaultFeature;
 import ch.skyfy.fk.json.Validatable;
 import lombok.Getter;
 
@@ -17,12 +18,16 @@ public class VaultFeatureConfig extends FeatureConfig implements Validatable {
     @Getter
     private final int maximumNumberOfBlocksDown;
 
-    public VaultFeatureConfig(boolean enabled, int minWidth, int minLength, int minHeight, int maximumNumberOfBlocksDown) {
+    @Getter
+    private final VaultFeature.Mode mode;
+
+    public VaultFeatureConfig(boolean enabled, int minWidth, int minLength, int minHeight, int maximumNumberOfBlocksDown, VaultFeature.Mode mode) {
         super(enabled);
         this.minWidth = minWidth;
         this.minLength = minLength;
         this.minHeight = minHeight;
         this.maximumNumberOfBlocksDown = maximumNumberOfBlocksDown;
+        this.mode = mode;
     }
 
     @Override

@@ -5,13 +5,11 @@ import ch.skyfy.fk.json.Defaultable;
 import ch.skyfy.fk.json.JsonDataClass;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityType;
+import net.minecraft.item.Items;
 import net.minecraft.potion.Potions;
 import net.minecraft.util.registry.Registry;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static ch.skyfy.fk.constants.Where.*;
 
@@ -222,12 +220,28 @@ public class PlayerActionsConfigs {
             var opPotions = List.of(
                     Registry.POTION.getId(Potions.STRONG_STRENGTH).toString()
             );
+            var otherItems = List.of(
+                    Items.BIRCH_BOAT.getTranslationKey(),
+                    Items.OAK_BOAT.getTranslationKey(),
+                    Items.ACACIA_BOAT.getTranslationKey(),
+                    Items.DARK_OAK_BOAT.getTranslationKey(),
+                    Items.JUNGLE_BOAT.getTranslationKey(),
+                    Items.SPRUCE_BOAT.getTranslationKey(),
+                    Items.MINECART.getTranslationKey(),
+                    Items.CHEST_MINECART.getTranslationKey(),
+                    Items.FURNACE_MINECART.getTranslationKey(),
+                    Items.TNT_MINECART.getTranslationKey(),
+                    Items.HOPPER_MINECART.getTranslationKey()
+            );
+            var list = new ArrayList<String>();
+            list.addAll(opPotions);
+            list.addAll(otherItems);
 
             var nestedDeniedMap = new HashMap<Where, List<String>>();
             nestedDeniedMap.put(INSIDE_HIS_OWN_BASE, opPotions);
             nestedDeniedMap.put(CLOSE_TO_HIS_OWN_BASE, opPotions);
-            nestedDeniedMap.put(INSIDE_AN_ENEMY_BASE, opPotions);
-            nestedDeniedMap.put(CLOSE_TO_AN_ENEMY_BASE, opPotions);
+            nestedDeniedMap.put(INSIDE_AN_ENEMY_BASE, list);
+            nestedDeniedMap.put(CLOSE_TO_AN_ENEMY_BASE, list);
             nestedDeniedMap.put(IN_THE_WILD, opPotions);
             var deniedMap = new HashMap<String, Map<Where, List<String>>>();
             deniedMap.put("minecraft:overworld", nestedDeniedMap);

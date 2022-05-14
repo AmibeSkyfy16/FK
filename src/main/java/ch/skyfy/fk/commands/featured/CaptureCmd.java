@@ -9,9 +9,10 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Style;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Vec3d;
 
@@ -96,6 +97,8 @@ public class CaptureCmd implements Command<ServerCommandSource> {
         var chestRoomFeature = fkGame.getVaultFeature();
         if(chestRoomFeature.whereIsThePlayer(playerAttacker) == Where.INSIDE_THE_VAULT_OF_AN_ENEMY_BASE)
             chestRoomFeature.addCapture(vault, fkTeamVictim, GameUtils.getFKTeamOfPlayerByName(playerAttacker.getName().asString()), playerAttacker);
+        else
+            playerAttacker.sendMessage(new LiteralText("You are not inside the vault !").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
 
         return 0;
     }

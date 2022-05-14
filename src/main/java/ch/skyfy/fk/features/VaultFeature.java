@@ -10,10 +10,11 @@ import ch.skyfy.fk.events.PlayerMoveCallback;
 import ch.skyfy.fk.features.data.BlockPos;
 import ch.skyfy.fk.features.data.Vault;
 import ch.skyfy.fk.features.data.VaultConstant;
-import ch.skyfy.fk.features.data.Vaults;
+import ch.skyfy.fk.features.data.VaultData;
 import ch.skyfy.fk.logic.FKGame;
 import ch.skyfy.fk.logic.GameUtils;
 import ch.skyfy.fk.logic.Utils;
+import ch.skyfy.fk.logic.data.FKGameAllData;
 import ch.skyfy.fk.utils.ReflectionUtils;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
@@ -81,13 +82,20 @@ public class VaultFeature {
         FKMod.LOGGER.info(VaultConstant.class.getCanonicalName() + " loaded successfully");
     }
 
+    public enum Mode {
+        BATTLE_ROYAL,
+        NORMAL
+    }
+
     private final VaultFeatureConfig config = Configs.VAULT_CONFIG.data;
-    private final Vaults vaults = VaultConstant.VAULTS.data;
+    private final VaultData vaultData = VaultConstant.DATA.data;
     private final MinecraftServer server;
+    private final FKGame fkGame;
     private final Map<FKTeam, Capture> captureMap;
 
-    public VaultFeature(MinecraftServer server) {
+    public VaultFeature(MinecraftServer server, FKGame fkGame) {
         this.server = server;
+        this.fkGame = fkGame;
         captureMap = new HashMap<>();
 
         if (!config.isEnabled()) return;
@@ -99,10 +107,13 @@ public class VaultFeature {
         UseBlockCallback.EVENT.register(FKGame.FKGameEvents.FIRST, this::updatePlayerVaultDimension);
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server1) -> {
             var player = handler.getPlayer();
-            if (whereIsThePlayer(player) == INSIDE_THE_VAULT_OF_AN_ENEMY_BASE) return;
-            manageCapture(player);
+            if (whereIsThePlayer(player) != INSIDE_THE_VAULT_OF_AN_ENEMY_BASE)return;
+            captureMap.forEach((fkteam,capture) -> {
+                if(fkteam.getPlayers().stream().anyMatch(name -> player.getName().asString().equals(name))){
+                    capture.leave(player);
+                }
+            });
         });
-        if(0 == 0)return;
         PlayerMoveCallback.EVENT.register((moveData, player) -> {
             if (whereIsThePlayer(player) == INSIDE_THE_VAULT_OF_AN_ENEMY_BASE) return ActionResult.PASS;
             manageCapture(player);
@@ -122,8 +133,9 @@ public class VaultFeature {
                 if (capture.playerAttackers.size() == 1) {
                     capture.cancel(player);
                     toRemove = fkTeamAttacker;
-                } else
+                } else {
                     capture.leave(player);
+                }
             }
         }
         if (toRemove != null)
@@ -131,6 +143,7 @@ public class VaultFeature {
     }
 
     public void addCapture(Vault vault, FKTeam fkTeamVictim, FKTeam fkTeamAttacker, ServerPlayerEntity playerAttacker) {
+        boolean shouldCapture = true;
         for (var entry : captureMap.entrySet()) {
             var fkTeamAttacker2 = entry.getKey();
             var capture = entry.getValue();
@@ -138,16 +151,21 @@ public class VaultFeature {
                 if (fkTeamAttacker2 != fkTeamAttacker) {
                     Msg.ANOTHER_TEAM_ALREADY_CAPTURING_THIS_VAULT.send(playerAttacker);
                 } else {
-                    if (!capture.playerAttackers.contains(playerAttacker))
+                    if (!capture.playerAttackers.contains(playerAttacker)) {
                         capture.playerAttackers.add(playerAttacker);
-                    else
+                        playerAttacker.sendMessage(new LiteralText("You're now " + capture.playerAttackers.size() + " players capturing this vault").setStyle(Style.EMPTY.withColor(GREEN)), false);
+                    }else {
                         Msg.YOU_ARE_ALREADY_CAPTURING_THIS_VAULT.send(playerAttacker);
+                    }
                 }
+                shouldCapture = false;
             }
-
         }
         // Here we start a new capture
-        captureMap.putIfAbsent(fkTeamAttacker, new Capture(vault, fkTeamVictim, playerAttacker));
+        if(shouldCapture) {
+            playerAttacker.sendMessage(new LiteralText("The capture of the vault has started").setStyle(Style.EMPTY.withColor(GREEN)), false);
+            captureMap.putIfAbsent(fkTeamAttacker, new Capture(vault, fkTeamVictim, playerAttacker));
+        }
     }
 
     public Where whereIsThePlayer(ServerPlayerEntity player) {
@@ -172,11 +190,11 @@ public class VaultFeature {
                 var fkTeam = GameUtils.getFKTeamOfPlayerByName(player.getName().asString());
                 var fkTeamId = GameUtils.getFKTeamIdentifierByName(fkTeam.getName());
 
-                var optVault = vaults.getVaults().stream().filter(vault -> vault.getTeamId().equals(fkTeamId)).findFirst();
+                var optVault = vaultData.getVaults().stream().filter(vault -> vault.getTeamId().equals(fkTeamId)).findFirst();
                 if (optVault.isEmpty()) {
                     var blockPos = new BlockPos[2];
                     blockPos[0] = BlockPos.of(hitResult.getBlockPos());
-                    vaults.getVaults().add(new Vault(false, fkTeamId, blockPos));
+                    vaultData.getVaults().add(new Vault(false, fkTeamId, blockPos));
                     player.sendMessage(Text.of("first position set: " + hitResult.getBlockPos().toString()), false);
                     return ActionResult.PASS;
                 }
@@ -196,7 +214,7 @@ public class VaultFeature {
 
                 if (valid) {
                     try {
-                        VaultConstant.VAULTS.jsonManager.save(vaults);
+                        VaultConstant.DATA.jsonManager.save(vaultData);
                     } catch (IOException e) {
                         FKMod.LOGGER.error("An error occurred when trying to save vault");
                     }
@@ -283,17 +301,29 @@ public class VaultFeature {
 
         public void cancel(ServerPlayerEntity player) {
             cancelled.set(true);
+            playerAttackers.clear();
             Msg.CANCELLED.send(player);
         }
 
         private void leave(ServerPlayerEntity player) {
+            playerAttackers.remove(player);
             Msg.LEFT.send(player);
         }
 
         private void win(MinecraftServer server) {
             win.set(true);
             server.getPlayerManager().broadcast(Msg.GAME_IS_OVER.text(), MessageType.CHAT, NIL_UUID);
-            server.getPlayerManager().broadcast(Msg.WINNER.formatted(fkTeamAttacker.getName()).text(), MessageType.CHAT, NIL_UUID);
+            server.getPlayerManager().broadcast(Msg.WINNER.formatted(fkTeamAttacker.getName(), fkTeamVictim.getName()).text(), MessageType.CHAT, NIL_UUID);
+
+            if(Configs.VAULT_CONFIG.data.getMode() == Mode.NORMAL) {
+                FKGameAllData.FK_GAME_DATA.data.setGameState(FKMod.GameState.FINISHED);
+                GameUtils.getAllConnectedFKPlayers(server.getPlayerManager().getPlayerList()).forEach(fkGame::updateSidebar);
+            }
+
+            vaultData.getEliminatedTeams().putIfAbsent(fkTeamVictim, fkTeamAttacker);
+            try {
+                VaultConstant.DATA.jsonManager.save(vaultData);
+            } catch (IOException ignored) {}
         }
 
     }

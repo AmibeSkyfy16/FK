@@ -26,7 +26,9 @@ public class FKMod implements DedicatedServerModInitializer {
     public enum GameState {
         NOT_STARTED,
         RUNNING,
-        PAUSED
+        PAUSED,
+
+        FINISHED
     }
 
     public static final String MOD_ID = "fk";

@@ -1,6 +1,5 @@
 package ch.skyfy.fk.features.data;
 
-import ch.skyfy.fk.config.data.FKTeam;
 import ch.skyfy.fk.json.Validatable;
 import lombok.Getter;
 
@@ -15,9 +14,9 @@ public class VaultData implements Validatable {
     private final List<Vault> vaults;
 
     @Getter
-    private final Map<FKTeam, FKTeam> eliminatedTeams;
+    private final Map<String, String> eliminatedTeams;
 
-    public VaultData(List<Vault> vaults, Map<FKTeam, FKTeam> eliminatedTeams) {
+    public VaultData(List<Vault> vaults, Map<String, String> eliminatedTeams) {
         this.vaults = vaults;
         this.eliminatedTeams = eliminatedTeams;
     }

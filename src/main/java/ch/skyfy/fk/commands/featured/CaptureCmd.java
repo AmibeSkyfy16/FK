@@ -30,6 +30,8 @@ public class CaptureCmd implements Command<ServerCommandSource> {
         public static Msg NO_BASE_HERE = new Msg("There is no base where you are", Formatting.GOLD);
         public static Msg NO_BASE_FOUND_IN_BASE = new Msg("No vault found inside the %s team base", Formatting.GOLD);
         public static Msg VAULT_IS_NOT_VALID = new Msg("The vault found inside the %s team base is not valid", Formatting.GOLD);
+        public static Msg NOT_INSIDE_A_VAULT = new Msg("You are not inside a vault", Formatting.RED);
+        public static Msg YOU_ARE_ELIMINATED = new Msg("You cannot use this command because you are eliminated", Formatting.RED);
 
         protected Msg(String text, Formatting formatting) {
             super(text, formatting);
@@ -50,7 +52,14 @@ public class CaptureCmd implements Command<ServerCommandSource> {
     public int run(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         if (optFKGameRef.get().isEmpty()) return 0;
 
+        if(!GameUtils.isGameState_RUNNING()) return 0;
+
         var playerAttacker = context.getSource().getPlayer();
+
+        if(GameUtils.isFKPlayerEliminate(playerAttacker.getName().asString())){
+            Msg.YOU_ARE_ELIMINATED.send(playerAttacker);
+            return 0;
+        }
 
         if (!Configs.VAULT_CONFIG.data.isEnabled()) {
             Msg.VAULT_FEATURE_NOT_ENABLED.send(playerAttacker);
@@ -98,7 +107,7 @@ public class CaptureCmd implements Command<ServerCommandSource> {
         if(chestRoomFeature.whereIsThePlayer(playerAttacker) == Where.INSIDE_THE_VAULT_OF_AN_ENEMY_BASE)
             chestRoomFeature.addCapture(vault, fkTeamVictim, GameUtils.getFKTeamOfPlayerByName(playerAttacker.getName().asString()), playerAttacker);
         else
-            playerAttacker.sendMessage(new LiteralText("You are not inside the vault !").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
+            Msg.NOT_INSIDE_A_VAULT.send(playerAttacker);
 
         return 0;
     }

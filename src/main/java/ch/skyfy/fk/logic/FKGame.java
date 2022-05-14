@@ -311,7 +311,7 @@ public class FKGame {
             if (!Registry.BLOCK.containsId(Registry.ITEM.getId(itemInHand.getItem())))
                 return ActionResult.PASS;
 
-            var placeBlock = (GameUtils.WhereIsThePlayer<ActionResult>) (where) -> switch (where) {
+            var placeBlock = (GameUtils.WhereIsThePlayer<ActionResult>) (where) -> switch (where.getRoot()) {
                 case INSIDE_HIS_OWN_BASE ->
                         playerActionImpl(itemInHand.getTranslationKey(), currentDimId, where, ActionResult.PASS, ActionResult.FAIL, PlayerActionsConfigs.PLACING_BLOCKS_CONFIG.data);
                 case CLOSE_TO_HIS_OWN_BASE ->
@@ -392,7 +392,7 @@ public class FKGame {
             if (playerLastPos == null) return ActionResult.PASS;
 
             var where = GameUtils.whereIsThePlayer(player, pos, w -> w);
-            if (where == Where.INSIDE_AN_ENEMY_BASE) return ActionResult.FAIL;
+            if (where.getRoot() == Where.INSIDE_AN_ENEMY_BASE) return ActionResult.FAIL;
 
             return ActionResult.PASS;
         }
@@ -430,7 +430,7 @@ public class FKGame {
                     if (!(block instanceof TntBlock)) return ActionResult.PASS;
                 }
 
-                return switch (where) {
+                return switch (where.getRoot()) {
                     case INSIDE_HIS_OWN_BASE -> ActionResult.PASS;
                     case CLOSE_TO_HIS_OWN_BASE -> ActionResult.PASS;
                     case INSIDE_AN_ENEMY_BASE -> {
@@ -569,7 +569,7 @@ public class FKGame {
             update(player);
         }
 
-        private static <D extends AbstractPlayerActionConfig, T> T playerActionImpl(String translationKey, String currentDimId, Where where, T pass, T fail, D data) {
+        private static <D extends AbstractPlayerActionConfig, T> T playerActionImpl(String translationKey, String currentDimId, WhereObject where, T pass, T fail, D data) {
 
             // Make a check for denied block in first
             // if a denied block is found, its fail, otherwise, if not or if a null value, its just ignored
@@ -577,7 +577,7 @@ public class FKGame {
             if (deniedMap != null) {
                 var deniedNestedMap = deniedMap.get(currentDimId);
                 if (deniedNestedMap != null) {
-                    var deniedTranslationKeys = deniedNestedMap.get(where);
+                    var deniedTranslationKeys = deniedNestedMap.get(where.getRoot());
                     if (deniedTranslationKeys.contains(translationKey)) return fail;
                 }
             }
@@ -586,7 +586,7 @@ public class FKGame {
             var allowedNestedMap = allowedMap.get(currentDimId);
             if (allowedNestedMap == null) return pass;
 
-            var allowedTranslationKeys = allowedNestedMap.get(where);
+            var allowedTranslationKeys = allowedNestedMap.get(where.getRoot());
 
             if (allowedTranslationKeys == null) return pass;
 

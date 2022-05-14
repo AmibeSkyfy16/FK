@@ -21,7 +21,7 @@ public class WhereIAmCmd implements Command<ServerCommandSource> {
         var player = context.getSource().getPlayer();
 
         var whereIsThePlayer = (GameUtils.WhereIsThePlayer<Void>) (where) -> {
-            switch (where) {
+            switch (where.getRoot()) {
                 case INSIDE_HIS_OWN_BASE -> {
                     if (where.getNested() != null && where.getNested() == Where.INSIDE_THE_VAULT_OF_HIS_OWN_BASE)
                         WhereMsg.IN_THE_VAULT_OF_YOUR_OWN_BASE.send(player);

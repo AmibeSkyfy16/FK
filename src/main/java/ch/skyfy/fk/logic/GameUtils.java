@@ -30,7 +30,7 @@ public class GameUtils {
 
     @FunctionalInterface
     public interface WhereIsThePlayer<T> {
-        T impl(Where where);
+        T impl(WhereObject where);
 
     }
 
@@ -123,7 +123,7 @@ public class GameUtils {
 
     public static <T> T whereIsThePlayer(PlayerEntity player, Vec3d pos, WhereIsThePlayer<T> whereIsThePlayer) {
 
-        Where where = null;
+        WhereObject where = null;
 
         for (var team : TEAMS.data.getTeams()) {
             var baseCube = team.getBase().getCube();
@@ -136,30 +136,30 @@ public class GameUtils {
 
                 // And this base is not his own
                 if (!isBaseOfPlayer)
-                    where = Where.INSIDE_AN_ENEMY_BASE;
+                    where = new WhereObject(Where.INSIDE_AN_ENEMY_BASE);
                 else
-                    where = Where.INSIDE_HIS_OWN_BASE;
+                    where = new WhereObject(Where.INSIDE_HIS_OWN_BASE);
                 nestsVault(where, pos);
             } else {
                 if (Utils.isAPosInsideCube(team.getBase().getProximityCube(), pos)) {
-                    if (isBaseOfPlayer) where = Where.CLOSE_TO_HIS_OWN_BASE;
-                    else where = Where.CLOSE_TO_AN_ENEMY_BASE;
+                    if (isBaseOfPlayer) where = new WhereObject(Where.CLOSE_TO_HIS_OWN_BASE);
+                    else where = new WhereObject(Where.CLOSE_TO_AN_ENEMY_BASE);
                 }
             }
 
-            if (where == null) where = Where.IN_THE_WILD;
+            if (where == null) where = new WhereObject(Where.IN_THE_WILD);
         }
 
         return whereIsThePlayer.impl(where);
     }
 
-    private static void nestsVault(Where where, Vec3d pos){
-        if(!Configs.VAULT_CONFIG.data.isEnabled())return;
+    private static void nestsVault(WhereObject where, Vec3d pos) {
+        if (!Configs.VAULT_CONFIG.data.isEnabled()) return;
         Box box;
         for (var vault : VaultConstant.DATA.data.getVaults()) {
             if (vault.getBlockPos()[0] == null || vault.getBlockPos()[1] == null) continue;
             box = ch.skyfy.fk.features.data.BlockPos.toBox(vault.getBlockPos());
-            switch (where) {
+            switch (where.getRoot()) {
                 case INSIDE_HIS_OWN_BASE -> {
                     if (box.contains(pos))
                         where.withNested(Where.INSIDE_THE_VAULT_OF_HIS_OWN_BASE);
@@ -172,8 +172,28 @@ public class GameUtils {
         }
     }
 
+    public static List<ServerPlayerEntity> getAllFKPlayerOfFKTeam(PlayerManager playerManager, FKTeam fkTeam) {
+        var list = new ArrayList<ServerPlayerEntity>();
+        for (var serverPlayerEntity : playerManager.getPlayerList())
+            if (fkTeam.getPlayers().contains(serverPlayerEntity.getName().asString()))
+                list.add(serverPlayerEntity);
+        return list;
+    }
+
     public static String getFKTeamIdentifierByName(String fkteamName) {
         return fkteamName.replaceAll("[^a-zA-Z\\d]", "");
+    }
+
+    public static Optional<FKTeam> getFKTeamById(String teamId) {
+        return TEAMS.data.getTeams().stream().filter(fkTeam -> getFKTeamIdentifierByName(fkTeam.getName()).equals(teamId)).findFirst();
+    }
+
+    public static boolean isFKPlayerEliminate(String playerName) {
+        if (!Configs.VAULT_CONFIG.data.isEnabled()) return false;
+        var fkTeam = getFKTeamOfPlayerByName(playerName);
+        if (fkTeam == null) return false;
+        var fkTeamId = getFKTeamIdentifierByName(fkTeam.getName());
+        return VaultConstant.DATA.data.getEliminatedTeams().values().stream().anyMatch(id -> id.equals(fkTeamId));
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")

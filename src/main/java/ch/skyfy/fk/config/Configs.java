@@ -66,7 +66,7 @@ public class Configs {
                     new FKTeam("Purple team", Formatting.DARK_PURPLE.name(), List.of("Skyfy16"),
                             new Base("Purple base",
                                     new Cube((short) 14, 50, 500, 121, 99, -19),
-                                    new Cube((short) 55, 50, 500, 121, 99, -19),
+                                    new Cube((short) 34, 50, 500, 121, 99, -19),
                                     new SpawnLocation("minecraft:overworld", 121.5, 106, -19.3, 90f, 69f)
                             )
                     )

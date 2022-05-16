@@ -67,7 +67,7 @@ public class VaultFeature {
         private static final Msg VAULT_IS_TOO_DEEP = new Msg("""
                 Your room is too deep
                 According to the rules, your vault must be located no more
-                than %d blocks below the center point (x:%d y:%d z:%d) of your base
+                than %d blocks below the center point (x:%.0f y:%.0f z:%.0f) of your base
                 """, RED);
 
         private static final Msg VAULT_WIDTH_TOO_SMALL = new Msg("The width of the vault must be at least %d blocks", RED);
@@ -236,7 +236,7 @@ public class VaultFeature {
     private boolean validateVault(BlockPos pos1, BlockPos pos2, PlayerEntity player) {
         var box = new Box(pos1.getX(), pos1.getY(), pos1.getZ(), pos2.getX(), pos2.getY(), pos2.getZ());
 
-        var minY = Math.min(pos1.getX(), pos2.getY());
+        var minY = Math.min(pos1.getY(), pos2.getY());
         var fkTeam = GameUtils.getFKTeamOfPlayerByName(player.getName().asString());
         var base = fkTeam.getBase();
 

@@ -28,7 +28,7 @@ public class CaptureCmd implements Command<ServerCommandSource> {
         public static Msg NO_BASE_HERE = new Msg("There is no base where you are", Formatting.GOLD);
         public static Msg NO_VAULT_FOUND_IN_BASE = new Msg(" No vault found inside the %s team base ! \n There should be a vault at this point in the game", Formatting.GOLD);
         public static Msg VAULT_IS_NOT_VALID = new Msg("The vault found inside the %s team base is not valid", Formatting.GOLD);
-        public static Msg NOT_INSIDE_A_VAULT = new Msg("You are not inside a vault", Formatting.RED);
+        public static Msg NOT_INSIDE_AN_ENEMY_VAULT = new Msg("You are not inside an enemy vault", Formatting.RED);
         public static Msg YOU_ARE_ELIMINATED = new Msg("You cannot use this command because you are eliminated", Formatting.RED);
         public static Msg TEAM_ALREADY_ELIMINATED = new Msg("The vault of the team you want to capture is already eliminated", Formatting.RED);
 
@@ -51,7 +51,7 @@ public class CaptureCmd implements Command<ServerCommandSource> {
     public int run(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         if (optFKGameRef.get().isEmpty()) return 0;
 
-        if(!GameUtils.isGameState_RUNNING()) return 0;
+        if (!GameUtils.isGameState_RUNNING()) return 0;
 
         var playerAttacker = context.getSource().getPlayer();
 
@@ -60,7 +60,7 @@ public class CaptureCmd implements Command<ServerCommandSource> {
             return Msg.VAULT_FEATURE_NOT_ENABLED.send(playerAttacker, 0);
 
         // A player who is part of a team that is eliminated can no longer use the command
-        if(GameUtils.isFKPlayerEliminate(playerAttacker.getName().asString()))
+        if (GameUtils.isFKPlayerEliminate(playerAttacker.getName().asString()))
             return Msg.YOU_ARE_ELIMINATED.send(playerAttacker, 0);
 
         var fkGame = optFKGameRef.get().get();
@@ -97,15 +97,15 @@ public class CaptureCmd implements Command<ServerCommandSource> {
 
         var chestRoomFeature = fkGame.getVaultFeature();
 
-        if(chestRoomFeature.whereIsThePlayer(playerAttacker) == Where.INSIDE_THE_VAULT_OF_AN_ENEMY_BASE) {
+        if (chestRoomFeature.whereIsThePlayer(playerAttacker) == Where.INSIDE_THE_VAULT_OF_AN_ENEMY_BASE) {
             // A player can no longer capture the room of a team that is already eliminated
-            if(GameUtils.isFKTeamEliminate(fkTeamVictim))
+            if (GameUtils.isFKTeamEliminate(fkTeamVictim))
                 return Msg.TEAM_ALREADY_ELIMINATED.send(playerAttacker, 0);
 
             chestRoomFeature.addCapture(vault, fkTeamVictim, GameUtils.getFKTeamOfPlayerByName(playerAttacker.getName().asString()), playerAttacker);
-        }else
-            Msg.NOT_INSIDE_A_VAULT.send(playerAttacker);
-
+        } else {
+            return Msg.NOT_INSIDE_AN_ENEMY_VAULT.send(playerAttacker, 0);
+        }
         return 0;
     }
 

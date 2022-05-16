@@ -162,11 +162,11 @@ public class GameUtils {
             box = ch.skyfy.fk.data.BlockPos.toBox(vault.getBlockPos());
             switch (where.getRoot()) {
                 case INSIDE_HIS_OWN_BASE -> {
-                    if (box.contains(pos))
+                    if (MathUtils.isAPosInsideBox(box, pos))
                         where.withNested(Where.INSIDE_THE_VAULT_OF_HIS_OWN_BASE);
                 }
                 case INSIDE_AN_ENEMY_BASE -> {
-                    if (box.contains(pos))
+                    if (MathUtils.isAPosInsideBox(box, pos))
                         where.withNested(Where.INSIDE_THE_VAULT_OF_AN_ENEMY_BASE);
                 }
             }

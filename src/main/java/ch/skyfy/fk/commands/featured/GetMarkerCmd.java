@@ -33,7 +33,7 @@ public class GetMarkerCmd implements Command<ServerCommandSource> {
 
     @Override
     public int run(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-        var markerItem = Items.WOODEN_AXE.getDefaultStack();
+        var markerItem = Items.WOODEN_HOE.getDefaultStack();
         markerItem.setCustomName(new LiteralText("marker").setStyle(Style.EMPTY.withColor(Formatting.GREEN)));
         markerItem.setDamage(0);
         context.getSource().getPlayer().dropItem(markerItem, false);

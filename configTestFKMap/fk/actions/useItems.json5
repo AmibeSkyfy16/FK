@@ -1,0 +1,144 @@
+{
+  "allowed": {
+    "minecraft:overworld": {
+      "INSIDE_AN_ENEMY_BASE": null,
+      "CLOSE_TO_AN_ENEMY_BASE": null,
+      "IN_THE_WILD": null,
+      "INSIDE_HIS_OWN_BASE": null,
+      "CLOSE_TO_HIS_OWN_BASE": null
+    },
+    "minecraft:the_nether": {
+      "IN_THE_WILD": null,
+      "INSIDE_AN_ENEMY_BASE": null,
+      "CLOSE_TO_AN_ENEMY_BASE": null,
+      "INSIDE_HIS_OWN_BASE": null,
+      "CLOSE_TO_HIS_OWN_BASE": null
+    },
+    "minecraft:the_end": {
+      "IN_THE_WILD": null,
+      "INSIDE_AN_ENEMY_BASE": null,
+      "CLOSE_TO_AN_ENEMY_BASE": null,
+      "INSIDE_HIS_OWN_BASE": null,
+      "CLOSE_TO_HIS_OWN_BASE": null
+    }
+  },
+  "denied": {
+    "minecraft:overworld": {
+      "INSIDE_AN_ENEMY_BASE": [
+        "minecraft:strong_strength",
+        "item.minecraft.birch_boat",
+        "item.minecraft.oak_boat",
+        "item.minecraft.acacia_boat",
+        "item.minecraft.dark_oak_boat",
+        "item.minecraft.jungle_boat",
+        "item.minecraft.spruce_boat",
+        "item.minecraft.minecart",
+        "item.minecraft.chest_minecart",
+        "item.minecraft.furnace_minecart",
+        "item.minecraft.tnt_minecart",
+        "item.minecraft.hopper_minecart"
+      ],
+      "CLOSE_TO_AN_ENEMY_BASE": [
+        "minecraft:strong_strength",
+        "item.minecraft.birch_boat",
+        "item.minecraft.oak_boat",
+        "item.minecraft.acacia_boat",
+        "item.minecraft.dark_oak_boat",
+        "item.minecraft.jungle_boat",
+        "item.minecraft.spruce_boat",
+        "item.minecraft.minecart",
+        "item.minecraft.chest_minecart",
+        "item.minecraft.furnace_minecart",
+        "item.minecraft.tnt_minecart",
+        "item.minecraft.hopper_minecart"
+      ],
+      "IN_THE_WILD": [
+        "minecraft:strong_strength"
+      ],
+      "INSIDE_HIS_OWN_BASE": [
+        "minecraft:strong_strength"
+      ],
+      "CLOSE_TO_HIS_OWN_BASE": [
+        "minecraft:strong_strength"
+      ]
+    },
+    "minecraft:the_nether": {
+      "IN_THE_WILD": [
+        "minecraft:strong_strength"
+      ],
+      "INSIDE_AN_ENEMY_BASE": [
+        "minecraft:strong_strength",
+        "item.minecraft.birch_boat",
+        "item.minecraft.oak_boat",
+        "item.minecraft.acacia_boat",
+        "item.minecraft.dark_oak_boat",
+        "item.minecraft.jungle_boat",
+        "item.minecraft.spruce_boat",
+        "item.minecraft.minecart",
+        "item.minecraft.chest_minecart",
+        "item.minecraft.furnace_minecart",
+        "item.minecraft.tnt_minecart",
+        "item.minecraft.hopper_minecart"
+      ],
+      "CLOSE_TO_AN_ENEMY_BASE": [
+        "minecraft:strong_strength",
+        "item.minecraft.birch_boat",
+        "item.minecraft.oak_boat",
+        "item.minecraft.acacia_boat",
+        "item.minecraft.dark_oak_boat",
+        "item.minecraft.jungle_boat",
+        "item.minecraft.spruce_boat",
+        "item.minecraft.minecart",
+        "item.minecraft.chest_minecart",
+        "item.minecraft.furnace_minecart",
+        "item.minecraft.tnt_minecart",
+        "item.minecraft.hopper_minecart"
+      ],
+      "INSIDE_HIS_OWN_BASE": [
+        "minecraft:strong_strength"
+      ],
+      "CLOSE_TO_HIS_OWN_BASE": [
+        "minecraft:strong_strength"
+      ]
+    },
+    "minecraft:the_end": {
+      "IN_THE_WILD": [
+        "minecraft:strong_strength"
+      ],
+      "INSIDE_AN_ENEMY_BASE": [
+        "minecraft:strong_strength",
+        "item.minecraft.birch_boat",
+        "item.minecraft.oak_boat",
+        "item.minecraft.acacia_boat",
+        "item.minecraft.dark_oak_boat",
+        "item.minecraft.jungle_boat",
+        "item.minecraft.spruce_boat",
+        "item.minecraft.minecart",
+        "item.minecraft.chest_minecart",
+        "item.minecraft.furnace_minecart",
+        "item.minecraft.tnt_minecart",
+        "item.minecraft.hopper_minecart"
+      ],
+      "CLOSE_TO_AN_ENEMY_BASE": [
+        "minecraft:strong_strength",
+        "item.minecraft.birch_boat",
+        "item.minecraft.oak_boat",
+        "item.minecraft.acacia_boat",
+        "item.minecraft.dark_oak_boat",
+        "item.minecraft.jungle_boat",
+        "item.minecraft.spruce_boat",
+        "item.minecraft.minecart",
+        "item.minecraft.chest_minecart",
+        "item.minecraft.furnace_minecart",
+        "item.minecraft.tnt_minecart",
+        "item.minecraft.hopper_minecart"
+      ],
+      "INSIDE_HIS_OWN_BASE": [
+        "minecraft:strong_strength"
+      ],
+      "CLOSE_TO_HIS_OWN_BASE": [
+        "minecraft:strong_strength"
+      ]
+    }
+  }
+}

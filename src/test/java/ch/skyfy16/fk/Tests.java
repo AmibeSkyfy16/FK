@@ -1,11 +1,14 @@
 package ch.skyfy16.fk;
 
 import ch.skyfy.fk.data.Cube;
+import ch.skyfy.fk.features.vault.VaultFeature;
 import ch.skyfy.fk.utils.MathUtils;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static net.minecraft.util.Formatting.RED;
 
 public class Tests {
 

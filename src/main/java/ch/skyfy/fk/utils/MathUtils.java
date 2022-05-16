@@ -3,6 +3,7 @@ package ch.skyfy.fk.utils;
 import ch.skyfy.fk.data.Cube;
 import ch.skyfy.fk.data.SpawnLocation;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
@@ -69,6 +70,9 @@ public class MathUtils {
     public static boolean isPlayerInsideArea(Cube cube, Vec3d pos) {
         if ((pos.getX() <= cube.getX() + cube.getSize()) && (pos.getX() >= cube.getX() - cube.getSize()))
             return (pos.getZ() <= cube.getZ() + cube.getSize()) && (pos.getZ() >= cube.getZ() - cube.getSize());
+
+//        if ((pos.getX() <= cube.getX() + cube.getSize()) && (pos.getX() >= cube.getX() - cube.getSize()))
+//            return (pos.getZ() <= cube.getZ() + cube.getSize()) && (pos.getZ() >= cube.getZ() - cube.getSize());
         return false;
     }
 
@@ -81,19 +85,23 @@ public class MathUtils {
         return false;
     }
 
+    public static boolean isAPosInsideBox(Box box, Vec3d pos){
+        return pos.x >= box.minX && pos.x <= box.maxX && pos.y >= box.minY && pos.y <= box.maxY && pos.z >= box.minZ && pos.z <= box.maxZ;
+    }
+
     /**
      * If a player is inside a cube, and tries to get out, he is teleported one step back
      */
     public static boolean cancelPlayerFromLeavingAnArea(Cube cube, ServerPlayerEntity player, @Nullable SpawnLocation spawnLocation) {
         Vec3d vec = null;
 
-        if (player.getX() >= cube.getX() + cube.getSize()) {
+        if (player.getBlockX() > cube.getX() + cube.getSize()) {
             vec = new Vec3d(player.getX() - 1, player.getY(), player.getZ());
-        } else if (player.getX() <= cube.getX() - cube.getSize()) {
+        } else if (player.getBlockX() < cube.getX() - cube.getSize()) {
             vec = new Vec3d(player.getX() + 1, player.getY(), player.getZ());
-        } else if (player.getZ() >= cube.getZ() + cube.getSize()) {
+        } else if (player.getBlockZ() > cube.getZ() + cube.getSize()) {
             vec = new Vec3d(player.getZ() - 1, player.getY(), player.getZ() - 1);
-        } else if (player.getZ() <= cube.getZ() - cube.getSize()) {
+        } else if (player.getBlockZ() < cube.getZ() - cube.getSize()) {
             vec = new Vec3d(player.getX(), player.getY(), player.getZ() + 1);
         }
 

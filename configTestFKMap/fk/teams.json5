@@ -1,0 +1,140 @@
+{
+  "teams": [
+    {
+      "name": "Machala",
+      "color": "YELLOW",
+      "players": [
+        "Alex"
+      ],
+      "base": {
+        "name": "Machala",
+        "cube": {
+          "size": 14,
+          "numberOfBlocksDown": 66,
+          "numberOfBlocksUp": 500,
+          "x": 50.0,
+          "y": 35.0,
+          "z": 50.0
+        },
+        "proximityCube": {
+          "size": 34,
+          "numberOfBlocksDown": 66,
+          "numberOfBlocksUp": 500,
+          "x": 50.0,
+          "y": 35.0,
+          "z": 50.0
+        },
+        "spawnLocation": {
+          "dimensionName": "minecraft:overworld",
+          "x": -64.6,
+          "y": 107.0,
+          "z": -113.4,
+          "yaw": 2.0,
+          "pitch": 38.0
+        }
+      }
+    },
+    {
+      "name": "Jiboula",
+      "color": "RED",
+      "players": [
+        "Steve"
+      ],
+      "base": {
+        "name": "Jiboula",
+        "cube": {
+          "size": 14,
+          "numberOfBlocksDown": 66,
+          "numberOfBlocksUp": 500,
+          "x": 50.0,
+          "y": 35.0,
+          "z": -50.0
+        },
+        "proximityCube": {
+          "size": 34,
+          "numberOfBlocksDown": 66,
+          "numberOfBlocksUp": 500,
+          "x": 50.0,
+          "y": 35.0,
+          "z": -50.0
+        },
+        "spawnLocation": {
+          "dimensionName": "minecraft:overworld",
+          "x": -64.6,
+          "y": 107.0,
+          "z": -113.4,
+          "yaw": 2.0,
+          "pitch": 38.0
+        }
+      }
+    },
+    {
+      "name": "Sky's Team",
+      "color": "BLUE",
+      "players": [
+        "Skyfy16"
+      ],
+      "base": {
+        "name": "Sky's Team",
+        "cube": {
+          "size": 14,
+          "numberOfBlocksDown": 66,
+          "numberOfBlocksUp": 500,
+          "x": -50.0,
+          "y": 35.0,
+          "z": -50.0
+        },
+        "proximityCube": {
+          "size": 34,
+          "numberOfBlocksDown": 66,
+          "numberOfBlocksUp": 500,
+          "x": -50.0,
+          "y": 35.0,
+          "z": -50.0
+        },
+        "spawnLocation": {
+          "dimensionName": "minecraft:overworld",
+          "x": -64.6,
+          "y": 107.0,
+          "z": -113.4,
+          "yaw": 2.0,
+          "pitch": 38.0
+        }
+      }
+    },
+    {
+      "name": "Hadda",
+      "color": "GREEN",
+      "players": [
+        "AmibeSkyfy16"
+      ],
+      "base": {
+        "name": "Hadda",
+        "cube": {
+          "size": 14,
+          "numberOfBlocksDown": 66,
+          "numberOfBlocksUp": 500,
+          "x": -50.0,
+          "y": 35.0,
+          "z": 50.0
+        },
+        "proximityCube": {
+          "size": 34,
+          "numberOfBlocksDown": 66,
+          "numberOfBlocksUp": 500,
+          "x": -50.0,
+          "y": 35.0,
+          "z": 50.0
+        },
+        "spawnLocation": {
+          "dimensionName": "minecraft:overworld",
+          "x": -64.6,
+          "y": 107.0,
+          "z": -113.4,
+          "yaw": 2.0,
+          "pitch": 38.0
+        }
+      }
+    }
+  ]
+}

@@ -30,7 +30,13 @@ public class BlockPos {
         return new BlockPos(blockPos.getX(), blockPos.getY(), blockPos.getZ());
     }
     public static Box toBox(BlockPos[] blockPos){
-        return new Box(blockPos[0].getX(), blockPos[0].getY(), blockPos[0].getZ(), blockPos[1].getX(), blockPos[1].getY(), blockPos[1].getZ());
+        var minX = Math.min(blockPos[0].getX(), blockPos[1].getX());
+        var maxX = Math.max(blockPos[0].getX(), blockPos[1].getX());
+        var minY = Math.min(blockPos[0].getY(), blockPos[1].getY());
+        var maxY = Math.max(blockPos[0].getY(), blockPos[1].getY());
+        var minZ = Math.min(blockPos[0].getZ(), blockPos[1].getZ());
+        var maxZ = Math.max(blockPos[0].getZ(), blockPos[1].getZ());
+        return new Box(minX, minY, minZ, maxX, maxY, maxZ);
     }
 
 }

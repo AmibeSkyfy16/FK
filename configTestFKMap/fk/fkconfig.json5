@@ -1,0 +1,27 @@
+{
+  "dayOfAuthorizationOfTheAssaults": 5,
+  "dayOfAuthorizationOfTheEntryInTheNether": 3,
+  "dayOfAuthorizationOfTheEntryInTheEnd": 4,
+  "dayOfAuthorizationOfThePvP": 2,
+  "dayDuration": 20,
+  "shouldTeleportPlayersToTheirOwnBaseWhenGameIsStarted": false,
+  "allowEnderPearlAssault": false,
+  "waitingRoom": {
+    "cube": {
+      "size": 4,
+      "numberOfBlocksDown": 250,
+      "numberOfBlocksUp": 255,
+      "x": 0.0,
+      "y": 36.0,
+      "z": 0.0
+    },
+    "spawnLocation": {
+      "dimensionName": "minecraft:overworld",
+      "x": 0.0,
+      "y": 38.0,
+      "z": 0.0,
+      "yaw": 180.0,
+      "pitch": 2.8
+    }
+  }
+}

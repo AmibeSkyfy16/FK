@@ -9,6 +9,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.util.math.Vec3d;
 
 public class WhereIAmCmd implements Command<ServerCommandSource> {
 
@@ -42,7 +43,7 @@ public class WhereIAmCmd implements Command<ServerCommandSource> {
             return null;
         };
 
-        GameUtils.whereIsThePlayer(player, player.getPos(), whereIsThePlayer);
+        GameUtils.whereIsThePlayer(player, new Vec3d(player.getBlockX(), player.getBlockY(), player.getBlockZ()), whereIsThePlayer);
 
         return 0;
     }

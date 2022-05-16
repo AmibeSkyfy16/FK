@@ -1,8 +1,15 @@
-package ch.skyfy.fk.features.data;
+package ch.skyfy.fk.features.vault.persistant;
 
+import ch.skyfy.fk.data.BlockPos;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Represents the location of a vault for a given team
+ *
+ * @see PersistantVaultData
+ * @see PersistantVault
+ */
 public class Vault {
 
     @Getter @Setter

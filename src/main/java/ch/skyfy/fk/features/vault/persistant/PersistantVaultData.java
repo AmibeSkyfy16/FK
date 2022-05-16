@@ -1,4 +1,4 @@
-package ch.skyfy.fk.features.data;
+package ch.skyfy.fk.features.vault.persistant;
 
 import ch.skyfy.fk.json.Validatable;
 import lombok.Getter;
@@ -7,6 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This class contains data saved and loaded through a file called vault.json
+ * @see PersistantVault
+ */
 @SuppressWarnings("ClassCanBeRecord")
 public class PersistantVaultData implements Validatable {
 

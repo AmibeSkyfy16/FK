@@ -1,7 +1,7 @@
 package ch.skyfy.fk.commands;
 
 import ch.skyfy.fk.constants.Where;
-import ch.skyfy.fk.constants.WhereMsg;
+import ch.skyfy.fk.msg.WhereMsg;
 import ch.skyfy.fk.logic.GameUtils;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;

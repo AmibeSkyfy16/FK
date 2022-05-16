@@ -2,11 +2,12 @@ package ch.skyfy.fk.logic;
 
 import ch.skyfy.fk.FKMod;
 import ch.skyfy.fk.config.Configs;
-import ch.skyfy.fk.config.data.FKTeam;
+import ch.skyfy.fk.data.FKTeam;
 import ch.skyfy.fk.constants.Where;
-import ch.skyfy.fk.features.data.PersistantVault;
-import ch.skyfy.fk.features.data.Vault;
-import ch.skyfy.fk.logic.data.FKGameAllData;
+import ch.skyfy.fk.features.vault.persistant.PersistantVault;
+import ch.skyfy.fk.features.vault.persistant.Vault;
+import ch.skyfy.fk.logic.persistant.PersistantFKGame;
+import ch.skyfy.fk.utils.MathUtils;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerManager;
@@ -84,7 +85,7 @@ public class GameUtils {
 
     public static Optional<FKTeam> getTeamByCoordinate(Vec3d pos) {
         for (var team : FK_TEAMS_CONFIG.data.getTeams())
-            if (Utils.isAPosInsideCube(team.getBase().getCube(), pos))
+            if (MathUtils.isAPosInsideCube(team.getBase().getCube(), pos))
                 return Optional.of(team);
         return Optional.empty();
     }
@@ -132,7 +133,7 @@ public class GameUtils {
             var isBaseOfPlayer = team.getPlayers().stream().anyMatch(fkPlayerName -> player.getName().asString().equals(fkPlayerName));
 
             // If player is inside a base
-            if (Utils.isAPosInsideCube(baseCube, pos)) {
+            if (MathUtils.isAPosInsideCube(baseCube, pos)) {
 
                 // And this base is not his own
                 if (!isBaseOfPlayer)
@@ -141,7 +142,7 @@ public class GameUtils {
                     where = new WhereObject(Where.INSIDE_HIS_OWN_BASE);
                 nestsVault(where, pos);
             } else {
-                if (Utils.isAPosInsideCube(team.getBase().getProximityCube(), pos)) {
+                if (MathUtils.isAPosInsideCube(team.getBase().getProximityCube(), pos)) {
                     if (isBaseOfPlayer) where = new WhereObject(Where.CLOSE_TO_HIS_OWN_BASE);
                     else where = new WhereObject(Where.CLOSE_TO_AN_ENEMY_BASE);
                 }
@@ -158,7 +159,7 @@ public class GameUtils {
         Box box;
         for (var vault : PersistantVault.DATA.data.getVaults()) {
             if (vault.getBlockPos()[0] == null || vault.getBlockPos()[1] == null) continue;
-            box = ch.skyfy.fk.features.data.BlockPos.toBox(vault.getBlockPos());
+            box = ch.skyfy.fk.data.BlockPos.toBox(vault.getBlockPos());
             switch (where.getRoot()) {
                 case INSIDE_HIS_OWN_BASE -> {
                     if (box.contains(pos))
@@ -196,22 +197,27 @@ public class GameUtils {
         return PersistantVault.DATA.data.getEliminatedTeams().values().stream().anyMatch(id -> id.equals(fkTeamId));
     }
 
+    public static boolean isFKTeamEliminate(FKTeam fkTeam){
+        var fkTeamId = getFKTeamIdentifierByName(fkTeam.getName());
+        return PersistantVault.DATA.data.getEliminatedTeams().values().stream().anyMatch(id -> id.equals(fkTeamId));
+    }
+
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public static boolean isGameState_RUNNING() {
-        return FKGameAllData.FK_GAME_DATA.data.getGameState() == FKMod.GameState.RUNNING;
+        return PersistantFKGame.FK_GAME_DATA.data.getGameState() == FKMod.GameState.RUNNING;
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public static boolean isGameState_PAUSED() {
-        return FKGameAllData.FK_GAME_DATA.data.getGameState() == FKMod.GameState.PAUSED;
+        return PersistantFKGame.FK_GAME_DATA.data.getGameState() == FKMod.GameState.PAUSED;
     }
 
     public static boolean isGameState_FINISHED() {
-        return FKGameAllData.FK_GAME_DATA.data.getGameState() == FKMod.GameState.FINISHED;
+        return PersistantFKGame.FK_GAME_DATA.data.getGameState() == FKMod.GameState.FINISHED;
     }
 
     public static boolean isGameState_NOT_STARTED() {
-        return FKGameAllData.FK_GAME_DATA.data.getGameState() == FKMod.GameState.NOT_STARTED;
+        return PersistantFKGame.FK_GAME_DATA.data.getGameState() == FKMod.GameState.NOT_STARTED;
     }
 
     public static boolean areAssaultEnabled(int currentDay) {

@@ -5,11 +5,12 @@ import ch.skyfy.fk.ScoreboardManager;
 import ch.skyfy.fk.config.Configs;
 import ch.skyfy.fk.config.actions.AbstractPlayerActionConfig;
 import ch.skyfy.fk.config.actions.PlayerActionsConfigs;
-import ch.skyfy.fk.constants.MsgBase;
+import ch.skyfy.fk.logic.persistant.PersistantFKGame;
+import ch.skyfy.fk.msg.MsgBase;
 import ch.skyfy.fk.constants.Where;
 import ch.skyfy.fk.events.*;
-import ch.skyfy.fk.features.VaultFeature;
-import ch.skyfy.fk.logic.data.FKGameAllData;
+import ch.skyfy.fk.features.vault.VaultFeature;
+import ch.skyfy.fk.utils.MathUtils;
 import ch.skyfy.fk.utils.ReflectionUtils;
 import lombok.Getter;
 import me.bymartrixx.playerevents.api.event.PlayerJoinCallback;
@@ -70,8 +71,8 @@ public class FKGame {
     }
 
     static {
-        ReflectionUtils.loadClassesByReflection(new Class[]{FKGameAllData.class});
-        FKMod.LOGGER.info(FKGameAllData.class.getCanonicalName() + " loaded successfully");
+        ReflectionUtils.loadClassesByReflection(new Class[]{PersistantFKGame.class});
+        FKMod.LOGGER.info(PersistantFKGame.class.getCanonicalName() + " loaded successfully");
     }
 
     private final MinecraftServer server;
@@ -103,7 +104,7 @@ public class FKGame {
     private void initialize() {
 
         if (GameUtils.isGameState_RUNNING())
-            FKGameAllData.FK_GAME_DATA.data.setGameState(FKMod.GameState.PAUSED);
+            PersistantFKGame.FK_GAME_DATA.data.setGameState(FKMod.GameState.PAUSED);
 
     }
 
@@ -129,13 +130,13 @@ public class FKGame {
     }
 
     public void pause() {
-        FKGameAllData.FK_GAME_DATA.data.setGameState(FKMod.GameState.PAUSED);
+        PersistantFKGame.FK_GAME_DATA.data.setGameState(FKMod.GameState.PAUSED);
         server.getPlayerManager().broadcast(Msg.GAME_HAS_BEEN_PAUSED.text(), MessageType.CHAT, NIL_UUID);
         GameUtils.getAllConnectedFKPlayers(server.getPlayerManager().getPlayerList()).forEach(this::updateSidebar);
     }
 
     public void resume() {
-        FKGameAllData.FK_GAME_DATA.data.setGameState(FKMod.GameState.RUNNING);
+        PersistantFKGame.FK_GAME_DATA.data.setGameState(FKMod.GameState.RUNNING);
         server.getPlayerManager().broadcast(Msg.GAME_HAS_BEEN_RESUMED.text(), MessageType.CHAT, NIL_UUID);
 
         // If the timeline wasn't started (in the case of a server restart with gamestate at PAUSE OR RUNNING)
@@ -506,7 +507,7 @@ public class FKGame {
                 // if player is not in a waiting room
                 if (!player.getWorld().getDimension().getEffects().toString().equals(waitingRoom.getSpawnLocation().getDimensionName()))
                     return ActionResult.PASS;
-                if (Utils.cancelPlayerFromLeavingAnArea(waitingRoom.getCube(), player, waitingRoom.getSpawnLocation()))
+                if (MathUtils.cancelPlayerFromLeavingAnArea(waitingRoom.getCube(), player, waitingRoom.getSpawnLocation()))
                     return ActionResult.FAIL;
                 return ActionResult.PASS;
             }
@@ -516,13 +517,13 @@ public class FKGame {
                 return ActionResult.FAIL;
 
             // Cancel the player from going too far into the map
-            var opt = Configs.WORLD_BORDER_CONFIG.data.getWorldBorderData().getSpawns()
+            var opt = Configs.WORLD_BORDER_CONFIG.data.getWorldBorder().getSpawns()
                     .entrySet()
                     .stream()
                     .filter(entry -> entry.getKey().equals(player.getWorld().getDimension().getEffects().toString()))
                     .findFirst();
             if (opt.isPresent()) {
-                if (Utils.cancelPlayerFromLeavingAnArea(opt.get().getValue(), player, null)) {
+                if (MathUtils.cancelPlayerFromLeavingAnArea(opt.get().getValue(), player, null)) {
                     player.sendMessage(new LiteralText("You reach the border limit !").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
                     return ActionResult.FAIL;
                 }

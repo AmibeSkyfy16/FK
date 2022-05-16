@@ -1,6 +1,6 @@
 package ch.skyfy.fk.commands.featured;
 
-import ch.skyfy.fk.constants.MsgBase;
+import ch.skyfy.fk.msg.MsgBase;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;

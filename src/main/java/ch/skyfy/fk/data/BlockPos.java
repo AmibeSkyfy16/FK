@@ -1,9 +1,13 @@
-package ch.skyfy.fk.features.data;
+package ch.skyfy.fk.data;
 
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.util.math.Box;
 
+/**
+ * Represent a block position.
+ * Serialize and deserialize through Gson
+ */
 public class BlockPos {
 
     @Getter

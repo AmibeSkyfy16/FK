@@ -2,7 +2,7 @@ package ch.skyfy.fk.config.actions;
 
 import ch.skyfy.fk.constants.Where;
 import ch.skyfy.fk.json.Defaultable;
-import ch.skyfy.fk.json.JsonDataClass;
+import ch.skyfy.fk.json.JsonData;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Items;
@@ -15,22 +15,22 @@ import static ch.skyfy.fk.constants.Where.*;
 
 public class PlayerActionsConfigs {
 
-    public static final JsonDataClass<PlacingBlocksConfig, PlacingBlocksConfigDefault> PLACING_BLOCKS_CONFIG;
-    public static final JsonDataClass<BreakingBlocksConfig, BreakingBlocksConfigDefault> BREAKING_BLOCKS_CONFIG;
-    public static final JsonDataClass<FillingBucketConfig, FillingBucketConfigDefault> FILLING_BUCKET_CONFIG;
-    public static final JsonDataClass<EmptyingBucketConfig, EmptyingBucketConfigDefault> EMPTYING_BUCKET_CONFIG;
-    public static final JsonDataClass<KillingEntitiesConfig, KillingEntitiesConfigDefault> KILLING_ENTITIES_CONFIG;
-    public static final JsonDataClass<UseItemsConfig, UseItemsConfigDefault> USE_ITEMS_CONFIG;
-    public static final JsonDataClass<UseBlocksConfig, UseBlocksConfigDefault> USE_BLOCKS_CONFIG;
+    public static final JsonData<PlacingBlocksConfig, PlacingBlocksConfigDefault> PLACING_BLOCKS_CONFIG;
+    public static final JsonData<BreakingBlocksConfig, BreakingBlocksConfigDefault> BREAKING_BLOCKS_CONFIG;
+    public static final JsonData<FillingBucketConfig, FillingBucketConfigDefault> FILLING_BUCKET_CONFIG;
+    public static final JsonData<EmptyingBucketConfig, EmptyingBucketConfigDefault> EMPTYING_BUCKET_CONFIG;
+    public static final JsonData<KillingEntitiesConfig, KillingEntitiesConfigDefault> KILLING_ENTITIES_CONFIG;
+    public static final JsonData<UseItemsConfig, UseItemsConfigDefault> USE_ITEMS_CONFIG;
+    public static final JsonData<UseBlocksConfig, UseBlocksConfigDefault> USE_BLOCKS_CONFIG;
 
     static {
-        PLACING_BLOCKS_CONFIG = new JsonDataClass<>("actions\\placeBlocks.json5", PlacingBlocksConfig.class, PlacingBlocksConfigDefault.class);
-        BREAKING_BLOCKS_CONFIG = new JsonDataClass<>("actions\\breakBlocks.json5", BreakingBlocksConfig.class, BreakingBlocksConfigDefault.class);
-        FILLING_BUCKET_CONFIG = new JsonDataClass<>("actions\\fillBucket.json5", FillingBucketConfig.class, FillingBucketConfigDefault.class);
-        EMPTYING_BUCKET_CONFIG = new JsonDataClass<>("actions\\emptyBucket.json5", EmptyingBucketConfig.class, EmptyingBucketConfigDefault.class);
-        KILLING_ENTITIES_CONFIG = new JsonDataClass<>("actions\\killEntities.json5", KillingEntitiesConfig.class, KillingEntitiesConfigDefault.class);
-        USE_ITEMS_CONFIG = new JsonDataClass<>("actions\\useItems.json5", UseItemsConfig.class, UseItemsConfigDefault.class);
-        USE_BLOCKS_CONFIG = new JsonDataClass<>("actions\\useBlocks.json5", UseBlocksConfig.class, UseBlocksConfigDefault.class);
+        PLACING_BLOCKS_CONFIG = new JsonData<>("actions\\placeBlocks.json5", PlacingBlocksConfig.class, PlacingBlocksConfigDefault.class);
+        BREAKING_BLOCKS_CONFIG = new JsonData<>("actions\\breakBlocks.json5", BreakingBlocksConfig.class, BreakingBlocksConfigDefault.class);
+        FILLING_BUCKET_CONFIG = new JsonData<>("actions\\fillBucket.json5", FillingBucketConfig.class, FillingBucketConfigDefault.class);
+        EMPTYING_BUCKET_CONFIG = new JsonData<>("actions\\emptyBucket.json5", EmptyingBucketConfig.class, EmptyingBucketConfigDefault.class);
+        KILLING_ENTITIES_CONFIG = new JsonData<>("actions\\killEntities.json5", KillingEntitiesConfig.class, KillingEntitiesConfigDefault.class);
+        USE_ITEMS_CONFIG = new JsonData<>("actions\\useItems.json5", UseItemsConfig.class, UseItemsConfigDefault.class);
+        USE_BLOCKS_CONFIG = new JsonData<>("actions\\useBlocks.json5", UseBlocksConfig.class, UseBlocksConfigDefault.class);
     }
 
     public static class PlacingBlocksConfigDefault implements Defaultable<PlacingBlocksConfig> {

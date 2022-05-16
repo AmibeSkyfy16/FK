@@ -1,4 +1,4 @@
-package ch.skyfy.fk.config.data;
+package ch.skyfy.fk.data;
 
 import lombok.Getter;
 

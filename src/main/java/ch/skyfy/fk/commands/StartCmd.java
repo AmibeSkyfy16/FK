@@ -2,7 +2,7 @@ package ch.skyfy.fk.commands;
 
 import ch.skyfy.fk.FKMod;
 import ch.skyfy.fk.logic.FKGame;
-import ch.skyfy.fk.logic.data.FKGameAllData;
+import ch.skyfy.fk.logic.persistant.PersistantFKGame;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
@@ -40,7 +40,7 @@ public class StartCmd implements Command<ServerCommandSource> {
 //            return 0;
 //        }
 
-        switch (FKGameAllData.FK_GAME_DATA.data.getGameState()) {
+        switch (PersistantFKGame.FK_GAME_DATA.data.getGameState()) {
             case PAUSED ->
                     player.sendMessage(new LiteralText("The game cannot be started because it is paused !").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
             case RUNNING ->
@@ -51,7 +51,7 @@ public class StartCmd implements Command<ServerCommandSource> {
 //                    GameUtils.sendMissingPlayersMessage(player, source.getServer().getPlayerManager().getPlayerList());
 //                    return 0;
 //                }
-                FKGameAllData.FK_GAME_DATA.data.setGameState(FKMod.GameState.RUNNING);
+                PersistantFKGame.FK_GAME_DATA.data.setGameState(FKMod.GameState.RUNNING);
                 optFKGameRef.get().ifPresent(FKGame::start);
             }
         }

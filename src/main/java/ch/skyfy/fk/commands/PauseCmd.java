@@ -1,24 +1,19 @@
 package ch.skyfy.fk.commands;
 
-import ch.skyfy.fk.FKMod;
 import ch.skyfy.fk.logic.FKGame;
-import ch.skyfy.fk.logic.data.FKGameAllData;
+import ch.skyfy.fk.logic.persistant.PersistantFKGame;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.network.MessageType;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Style;
-import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static net.minecraft.util.Util.NIL_UUID;
 
 @SuppressWarnings({"ClassCanBeRecord", "CommentedOutCode"})
 public class PauseCmd implements Command<ServerCommandSource> {
@@ -46,7 +41,7 @@ public class PauseCmd implements Command<ServerCommandSource> {
 
         optFKGameRef.get().ifPresent(FKGame::pause);
 
-        switch (FKGameAllData.FK_GAME_DATA.data.getGameState()) {
+        switch (PersistantFKGame.FK_GAME_DATA.data.getGameState()) {
             case NOT_STARTED ->
                     player.sendMessage(new LiteralText("The game cannot be paused because it is not started !").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
             case PAUSED ->

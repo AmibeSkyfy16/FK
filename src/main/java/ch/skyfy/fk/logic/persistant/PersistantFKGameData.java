@@ -1,4 +1,4 @@
-package ch.skyfy.fk.logic.data;
+package ch.skyfy.fk.logic.persistant;
 
 import ch.skyfy.fk.FKMod;
 import ch.skyfy.fk.json.Validatable;
@@ -8,16 +8,20 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FKGameData implements Validatable {
+/**
+ * This class contains data saved and loaded through a file called FKGameData.json
+ * @see PersistantFKGame
+ */
+public class PersistantFKGameData implements Validatable {
 
     @Getter
     @Setter
     private FKMod.GameState gameState;
 
     @Getter
-    private final ch.skyfy.fk.logic.data.TimelineData timelineData;
+    private final ch.skyfy.fk.logic.persistant.TimelineData timelineData;
 
-    public FKGameData(FKMod.GameState gameState, TimelineData timelineData) {
+    public PersistantFKGameData(FKMod.GameState gameState, TimelineData timelineData) {
         this.gameState = gameState;
         this.timelineData = timelineData;
     }

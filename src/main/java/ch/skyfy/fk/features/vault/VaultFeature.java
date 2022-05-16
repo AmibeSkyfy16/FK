@@ -1,20 +1,20 @@
-package ch.skyfy.fk.features;
+package ch.skyfy.fk.features.vault;
 
 import ch.skyfy.fk.FKMod;
 import ch.skyfy.fk.config.Configs;
-import ch.skyfy.fk.config.data.FKTeam;
-import ch.skyfy.fk.config.features.VaultFeatureConfig;
-import ch.skyfy.fk.constants.MsgBase;
+import ch.skyfy.fk.config.featured.VaultFeatureConfig;
 import ch.skyfy.fk.constants.Where;
+import ch.skyfy.fk.data.BlockPos;
+import ch.skyfy.fk.data.FKTeam;
 import ch.skyfy.fk.events.PlayerMoveCallback;
-import ch.skyfy.fk.features.data.BlockPos;
-import ch.skyfy.fk.features.data.PersistantVault;
-import ch.skyfy.fk.features.data.PersistantVaultData;
-import ch.skyfy.fk.features.data.Vault;
+import ch.skyfy.fk.features.vault.persistant.PersistantVault;
+import ch.skyfy.fk.features.vault.persistant.PersistantVaultData;
+import ch.skyfy.fk.features.vault.persistant.Vault;
 import ch.skyfy.fk.logic.FKGame;
 import ch.skyfy.fk.logic.GameUtils;
-import ch.skyfy.fk.logic.Utils;
-import ch.skyfy.fk.logic.data.FKGameAllData;
+import ch.skyfy.fk.logic.persistant.PersistantFKGame;
+import ch.skyfy.fk.msg.MsgBase;
+import ch.skyfy.fk.utils.MathUtils;
 import ch.skyfy.fk.utils.ReflectionUtils;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
@@ -244,7 +244,7 @@ public class VaultFeature {
 
         var valid = false;
 
-        if (Utils.isAPosInsideCube(base.getCube(), new Vec3d(pos1.getX(), pos1.getY(), pos1.getZ())) && Utils.isAPosInsideCube(base.getCube(), new Vec3d(pos2.getX(), pos2.getY(), pos2.getZ()))) {
+        if (MathUtils.isAPosInsideCube(base.getCube(), new Vec3d(pos1.getX(), pos1.getY(), pos1.getZ())) && MathUtils.isAPosInsideCube(base.getCube(), new Vec3d(pos2.getX(), pos2.getY(), pos2.getZ()))) {
             if (minY < minYRules) {
                 Msg.VAULT_IS_TOO_DEEP.formatted(config.getMaximumNumberOfBlocksDown(), base.getCube().getX(), base.getCube().getY(), base.getCube().getZ()).send(player);
             } else {
@@ -328,7 +328,7 @@ public class VaultFeature {
             if (Configs.VAULT_FEATURE_CONFIG.data.getMode() == Mode.NORMAL) {
                 server.getPlayerManager().broadcast(Msg.GAME_IS_OVER.text(), MessageType.CHAT, NIL_UUID);
                 server.getPlayerManager().broadcast(Msg.WINNER.formatted(fkTeamAttacker.getName(), fkTeamVictim.getName()).text(), MessageType.CHAT, NIL_UUID);
-                FKGameAllData.FK_GAME_DATA.data.setGameState(FKMod.GameState.FINISHED);
+                PersistantFKGame.FK_GAME_DATA.data.setGameState(FKMod.GameState.FINISHED);
                 GameUtils.getAllConnectedFKPlayers(server.getPlayerManager().getPlayerList()).forEach(fkGame::updateSidebar);
             } else if (Configs.VAULT_FEATURE_CONFIG.data.getMode() == Mode.BATTLE_ROYAL) {
                 Msg.NEW_TEAM_ELIMINATE.formatted(fkTeamVictim.getName(), fkTeamAttacker.getName()).broadcast(server.getPlayerManager());

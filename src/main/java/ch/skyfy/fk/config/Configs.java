@@ -1,11 +1,11 @@
 package ch.skyfy.fk.config;
 
 import ch.skyfy.fk.FKMod;
-import ch.skyfy.fk.config.data.*;
-import ch.skyfy.fk.config.features.VaultFeatureConfig;
-import ch.skyfy.fk.features.VaultFeature;
+import ch.skyfy.fk.config.featured.VaultFeatureConfig;
+import ch.skyfy.fk.data.*;
+import ch.skyfy.fk.features.vault.VaultFeature;
 import ch.skyfy.fk.json.Defaultable;
-import ch.skyfy.fk.json.JsonDataClass;
+import ch.skyfy.fk.json.JsonData;
 import net.minecraft.util.Formatting;
 
 import java.util.HashMap;
@@ -17,17 +17,17 @@ import java.util.List;
  */
 public class Configs {
 
-    public static final JsonDataClass<WorldBorderConfig, WorldBorderConfigDefault> WORLD_BORDER_CONFIG;
-    public static final JsonDataClass<FKConfig, FKConfigDefault> FK_CONFIG;
-    public static final JsonDataClass<FKTeamsConfig, FKTeamsConfigDefault> FK_TEAMS_CONFIG;
+    public static final JsonData<WorldBorderConfig, WorldBorderConfigDefault> WORLD_BORDER_CONFIG;
+    public static final JsonData<FKConfig, FKConfigDefault> FK_CONFIG;
+    public static final JsonData<FKTeamsConfig, FKTeamsConfigDefault> FK_TEAMS_CONFIG;
 
-    public static final JsonDataClass<VaultFeatureConfig, VaultFeatureConfigDefault> VAULT_FEATURE_CONFIG;
+    public static final JsonData<VaultFeatureConfig, VaultFeatureConfigDefault> VAULT_FEATURE_CONFIG;
 
     static {
-        WORLD_BORDER_CONFIG = new JsonDataClass<>("worldBorderConfig.json5", WorldBorderConfig.class, WorldBorderConfigDefault.class);
-        FK_CONFIG = new JsonDataClass<>("fkconfig.json5", FKConfig.class, FKConfigDefault.class);
-        FK_TEAMS_CONFIG = new JsonDataClass<>("teams.json5", FKTeamsConfig.class, FKTeamsConfigDefault.class);
-        VAULT_FEATURE_CONFIG = new JsonDataClass<>("features\\vault.json5", VaultFeatureConfig.class, VaultFeatureConfigDefault.class);
+        WORLD_BORDER_CONFIG = new JsonData<>("worldBorderConfig.json5", WorldBorderConfig.class, WorldBorderConfigDefault.class);
+        FK_CONFIG = new JsonData<>("fkconfig.json5", FKConfig.class, FKConfigDefault.class);
+        FK_TEAMS_CONFIG = new JsonData<>("teams.json5", FKTeamsConfig.class, FKTeamsConfigDefault.class);
+        VAULT_FEATURE_CONFIG = new JsonData<>("features\\vault.json5", VaultFeatureConfig.class, VaultFeatureConfigDefault.class);
 
         WORLD_BORDER_CONFIG.data.validate();
         FK_CONFIG.data.validate();
@@ -46,7 +46,7 @@ public class Configs {
             map.put("minecraft:overworld", new Cube((short) 210, 64, 319, 0, 0, 0));
             map.put("minecraft:the_nether", new Cube((short) 300, 64, 319, 0, 0, 0));
             map.put("minecraft:the_end", new Cube((short) 1000, 64, 319, 0, 0, 0));
-            return new WorldBorderConfig(new WorldBorderData(map));
+            return new WorldBorderConfig(new WorldBorder(map));
         }
     }
 

@@ -1,7 +1,7 @@
 package ch.skyfy.fk.config;
 
 
-import ch.skyfy.fk.config.data.WorldBorderData;
+import ch.skyfy.fk.data.WorldBorder;
 import ch.skyfy.fk.json.Validatable;
 import ch.skyfy.fk.utils.ValidateUtils;
 import lombok.Getter;
@@ -14,10 +14,10 @@ import java.util.List;
 public class WorldBorderConfig implements Validatable {
 
     @Getter
-    private final WorldBorderData worldBorderData;
+    private final WorldBorder worldBorder;
 
-    public WorldBorderConfig(WorldBorderData worldBorderData) {
-        this.worldBorderData = worldBorderData;
+    public WorldBorderConfig(WorldBorder worldBorder) {
+        this.worldBorder = worldBorder;
     }
 
     @Override
@@ -27,7 +27,7 @@ public class WorldBorderConfig implements Validatable {
         validateNonNull(errors);
         validatePrimitivesType(errors);
 
-        worldBorderData.getSpawns().forEach((s, cube) -> {
+        worldBorder.getSpawns().forEach((s, cube) -> {
             if(!Identifier.isValid(s))
                 errors.add("dimensionName " + s + " is not a valid dimension name");
         });
@@ -38,6 +38,6 @@ public class WorldBorderConfig implements Validatable {
 
     @Override
     public void validatePrimitivesType(List<String> errors) {
-        worldBorderData.getSpawns().forEach((s, cube) -> ValidateUtils.checkForNegativeValueInCubeClass(cube, errors));
+        worldBorder.getSpawns().forEach((s, cube) -> ValidateUtils.checkForNegativeValueInCubeClass(cube, errors));
     }
 }

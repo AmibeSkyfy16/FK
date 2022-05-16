@@ -1,8 +1,7 @@
 package ch.skyfy.fk.config;
 
-import ch.skyfy.fk.config.data.WaitingRoom;
+import ch.skyfy.fk.data.WaitingRoom;
 import ch.skyfy.fk.json.Validatable;
-import ch.skyfy.fk.utils.MathUtils;
 import ch.skyfy.fk.utils.ValidateUtils;
 import lombok.Getter;
 import net.minecraft.util.Identifier;

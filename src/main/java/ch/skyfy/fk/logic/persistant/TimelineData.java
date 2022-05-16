@@ -1,11 +1,14 @@
-package ch.skyfy.fk.logic.data;
-
+package ch.skyfy.fk.logic.persistant;
 
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
+/**
+ * Represents the time of a fk game
+ *
+ * @see PersistantFKGameData
+ * @see PersistantFKGame
+ */
 public class TimelineData {
 
     @Getter @Setter

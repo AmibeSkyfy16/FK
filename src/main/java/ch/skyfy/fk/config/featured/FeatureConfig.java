@@ -1,4 +1,4 @@
-package ch.skyfy.fk.config.features;
+package ch.skyfy.fk.config.featured;
 
 import lombok.Getter;
 

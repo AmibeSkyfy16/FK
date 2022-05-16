@@ -1,4 +1,4 @@
-package ch.skyfy.fk.constants;
+package ch.skyfy.fk.msg;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.MessageType;
@@ -27,6 +27,11 @@ public abstract class MsgBase {
 
     public void send(PlayerEntity player) {
         player.sendMessage(text(), false);
+    }
+
+    public <T> T send(PlayerEntity player, T defaultReturnValue){
+        send(player);
+        return defaultReturnValue;
     }
 
     public void broadcast(PlayerManager playerManager){

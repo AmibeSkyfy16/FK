@@ -1,6 +1,6 @@
 package ch.skyfy.fk.config;
 
-import ch.skyfy.fk.config.data.FKTeam;
+import ch.skyfy.fk.data.FKTeam;
 import ch.skyfy.fk.json.Validatable;
 import ch.skyfy.fk.utils.MathUtils;
 import ch.skyfy.fk.utils.ValidateUtils;
@@ -117,7 +117,7 @@ public class FKTeamsConfig implements Validatable {
         // Check if the base is inside the world border
         for (var team : teams){
             var base = team.getBase();
-            Configs.WORLD_BORDER_CONFIG.data.getWorldBorderData().getSpawns().entrySet()
+            Configs.WORLD_BORDER_CONFIG.data.getWorldBorder().getSpawns().entrySet()
                     .stream()
                     .filter(entry -> entry.getKey().equals(base.getSpawnLocation().getDimensionName()))
                     .findFirst()

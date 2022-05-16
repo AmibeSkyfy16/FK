@@ -1,6 +1,6 @@
 package ch.skyfy16.fk;
 
-import ch.skyfy.fk.config.data.Cube;
+import ch.skyfy.fk.data.Cube;
 import ch.skyfy.fk.utils.MathUtils;
 import org.junit.jupiter.api.Test;
 

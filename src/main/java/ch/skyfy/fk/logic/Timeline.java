@@ -3,8 +3,8 @@ package ch.skyfy.fk.logic;
 import ch.skyfy.fk.FKMod;
 import ch.skyfy.fk.ScoreboardManager;
 import ch.skyfy.fk.config.Configs;
-import ch.skyfy.fk.logic.data.FKGameAllData;
-import ch.skyfy.fk.logic.data.TimelineData;
+import ch.skyfy.fk.logic.persistant.PersistantFKGame;
+import ch.skyfy.fk.logic.persistant.TimelineData;
 import lombok.Getter;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.server.MinecraftServer;
@@ -21,7 +21,7 @@ public class Timeline {
     private final TimelineData timelineData;
 
     {
-        timelineData = FKGameAllData.FK_GAME_DATA.data.getTimelineData();
+        timelineData = PersistantFKGame.FK_GAME_DATA.data.getTimelineData();
     }
 
     public Timeline() {
@@ -57,7 +57,7 @@ public class Timeline {
 
     private void saveData() {
         try {
-            FKGameAllData.FK_GAME_DATA.jsonManager.save(FKGameAllData.FK_GAME_DATA.data);
+            PersistantFKGame.FK_GAME_DATA.jsonManager.save(PersistantFKGame.FK_GAME_DATA.data);
         } catch (IOException e) {
             FKMod.LOGGER.warn("An error occurred while trying to save game data");
             e.printStackTrace();

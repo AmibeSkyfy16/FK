@@ -1,7 +1,7 @@
 package ch.skyfy.fk;
 
 import ch.skyfy.fk.logic.GameUtils;
-import ch.skyfy.fk.logic.data.FKGameAllData;
+import ch.skyfy.fk.logic.persistant.PersistantFKGame;
 import ch.skyfy.fk.sidebar.api.Sidebar;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
@@ -43,7 +43,7 @@ public class ScoreboardManager {
         var list = new ArrayList<Text>();
 
         list.add(new LiteralText("").setStyle(Style.EMPTY));
-        list.add(new LiteralText("Game Status: " + FKGameAllData.FK_GAME_DATA.data.getGameState().name()).setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
+        list.add(new LiteralText("Game Status: " + PersistantFKGame.FK_GAME_DATA.data.getGameState().name()).setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
         list.add(new LiteralText("").setStyle(Style.EMPTY));
 
         var fkTeam = GameUtils.getFKTeamOfPlayerByName(player.getName().asString());

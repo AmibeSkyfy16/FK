@@ -1,6 +1,6 @@
 package ch.skyfy.fk.utils;
 
-import ch.skyfy.fk.config.data.Cube;
+import ch.skyfy.fk.data.Cube;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

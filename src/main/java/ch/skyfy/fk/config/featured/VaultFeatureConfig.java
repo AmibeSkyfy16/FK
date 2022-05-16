@@ -1,6 +1,6 @@
-package ch.skyfy.fk.config.features;
+package ch.skyfy.fk.config.featured;
 
-import ch.skyfy.fk.features.VaultFeature;
+import ch.skyfy.fk.features.vault.VaultFeature;
 import ch.skyfy.fk.json.Validatable;
 import lombok.Getter;
 

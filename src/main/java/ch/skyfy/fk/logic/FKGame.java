@@ -320,9 +320,7 @@ public class FKGame {
 
             if (GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
 
-            // It's not a block
-            if (!Registry.BLOCK.containsId(Registry.ITEM.getId(itemInHand.getItem())) || itemInHand.isOf(Items.AIR))
-                return ActionResult.PASS;
+            if(itemInHand.isOf(Items.AIR))return ActionResult.PASS;
 
             var placeBlock = (GameUtils.WhereIsThePlayer<ActionResult>) (where) -> switch (where.getRoot()) {
                 case INSIDE_HIS_OWN_BASE ->
@@ -441,7 +439,8 @@ public class FKGame {
                 if (itemInHand.isOf(Items.FLINT_AND_STEEL)) {
                     var block = world.getBlockState(hitResult.getBlockPos()).getBlock();
                     if (!(block instanceof TntBlock)) return ActionResult.PASS;
-                }
+                }else
+                    return ActionResult.PASS;
 
                 return switch (where.getRoot()) {
                     case INSIDE_HIS_OWN_BASE -> ActionResult.PASS;

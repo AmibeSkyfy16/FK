@@ -1,11 +1,14 @@
-package ch.skyfy.fk.logic;
+package ch.skyfy.fk.logic.time;
 
 import ch.skyfy.fk.FKMod;
 import ch.skyfy.fk.ScoreboardManager;
 import ch.skyfy.fk.config.Configs;
+import ch.skyfy.fk.logic.GameUtils;
 import ch.skyfy.fk.logic.persistant.PersistantFKGame;
 import ch.skyfy.fk.logic.persistant.TimelineData;
 import lombok.Getter;
+import net.fabricmc.fabric.api.event.Event;
+import net.fabricmc.fabric.api.event.EventFactory;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.server.MinecraftServer;
 
@@ -13,6 +16,16 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Timeline {
+
+    @FunctionalInterface
+    public interface TimeUpdatedCallback {
+        Event<TimeUpdatedCallback> EVENT = EventFactory.createArrayBacked(TimeUpdatedCallback.class,
+                (listeners) -> (oldValue, newValue) -> {
+                    for (var listener : listeners)
+                        listener.updated(oldValue, newValue);
+                });
+        void updated(TimelineData oldValue, TimelineData newValue);
+    }
 
     @Getter
     private final AtomicBoolean isTimerStartedRef = new AtomicBoolean(false);
@@ -35,6 +48,8 @@ public class Timeline {
     private void updateTimeTest(MinecraftServer server) {
         if (!GameUtils.isGameState_RUNNING() || !isTimerStartedRef.get()) return;
 
+        var clonedTimelineData = timelineData.clone();
+
         if (timelineData.getTimeOfDay() >= Configs.FK_CONFIG.data.getDayDuration() * 1200) {
             timelineData.setTimeOfDay(0);
             timelineData.setDay(timelineData.getDay() + 1);
@@ -53,6 +68,8 @@ public class Timeline {
             ScoreboardManager.getInstance().updateSidebar(fkPlayer, timelineData.getDay(), timelineData.getMinutes(), timelineData.getSeconds());
 
         timelineData.setTimeOfDay(timelineData.getTimeOfDay() + 1);
+
+        TimeUpdatedCallback.EVENT.invoker().updated(clonedTimelineData, timelineData);
     }
 
     private void saveData() {

@@ -36,7 +36,8 @@ public class PlayerActionsConfigs {
     public static class PlacingBlocksConfigDefault implements Defaultable<PlacingBlocksConfig> {
         @Override
         public PlacingBlocksConfig getDefault() {
-            var allowedBlocks1 = List.of("block.minecraft.tnt",
+            var allowedBlocks1 = List.of(
+                    "block.minecraft.tnt",
                     "block.minecraft.lever",
                     "block.minecraft.redstone_torch",
                     "block.minecraft.torch",
@@ -54,11 +55,11 @@ public class PlayerActionsConfigs {
             allowedMap.put("minecraft:the_end", new HashMap<>(nestedAllowedMap)); // When it is null, it means that all is allowed
 
             var nestedDeniedMap = new HashMap<Where, List<String>>();
-            nestedDeniedMap.put(INSIDE_HIS_OWN_BASE, null); // Here, when it is null, it's just skipped by the program, so nothing is denied !
-            nestedDeniedMap.put(CLOSE_TO_HIS_OWN_BASE, new ArrayList<>()); // Here, the list is empty, so nothing is denied
+            nestedDeniedMap.put(INSIDE_HIS_OWN_BASE, new ArrayList<>());
+            nestedDeniedMap.put(CLOSE_TO_HIS_OWN_BASE, new ArrayList<>());
             nestedDeniedMap.put(INSIDE_AN_ENEMY_BASE, new ArrayList<>());
             nestedDeniedMap.put(CLOSE_TO_AN_ENEMY_BASE, new ArrayList<>());
-            nestedDeniedMap.put(IN_THE_WILD, List.of(Blocks.CHEST.getTranslationKey()));
+            nestedDeniedMap.put(IN_THE_WILD, new ArrayList<>());
             var deniedMap = new HashMap<String, Map<Where, List<String>>>();
             deniedMap.put("minecraft:overworld", nestedDeniedMap);
             deniedMap.put("minecraft:the_nether", new HashMap<>(nestedDeniedMap));
@@ -70,7 +71,8 @@ public class PlayerActionsConfigs {
     public static class BreakingBlocksConfigDefault implements Defaultable<BreakingBlocksConfig> {
         @Override
         public BreakingBlocksConfig getDefault() {
-            var allowedBlocks1 = List.of("block.minecraft.tnt",
+            var allowedBlocks1 = List.of(
+                    "block.minecraft.tnt",
                     "block.minecraft.lever",
                     "block.minecraft.redstone_torch",
                     "block.minecraft.torch",
@@ -106,9 +108,9 @@ public class PlayerActionsConfigs {
         public KillingEntitiesConfig getDefault() {
             var nestedAllowedMap = new HashMap<Where, List<String>>();
             nestedAllowedMap.put(INSIDE_HIS_OWN_BASE, null);
-            nestedAllowedMap.put(CLOSE_TO_HIS_OWN_BASE, new ArrayList<>());
-            nestedAllowedMap.put(INSIDE_AN_ENEMY_BASE, new ArrayList<>());
-            nestedAllowedMap.put(CLOSE_TO_AN_ENEMY_BASE, new ArrayList<>());
+            nestedAllowedMap.put(CLOSE_TO_HIS_OWN_BASE, null);
+            nestedAllowedMap.put(INSIDE_AN_ENEMY_BASE, null);
+            nestedAllowedMap.put(CLOSE_TO_AN_ENEMY_BASE, null);
             nestedAllowedMap.put(IN_THE_WILD, null);
             var allowedMap = new HashMap<String, Map<Where, List<String>>>();
             allowedMap.put("minecraft:overworld", nestedAllowedMap);
@@ -132,7 +134,7 @@ public class PlayerActionsConfigs {
             nestedDeniedMap.put(INSIDE_HIS_OWN_BASE, new ArrayList<>());
             nestedDeniedMap.put(CLOSE_TO_HIS_OWN_BASE, new ArrayList<>());
             nestedDeniedMap.put(INSIDE_AN_ENEMY_BASE, deniedList);
-            nestedDeniedMap.put(CLOSE_TO_AN_ENEMY_BASE, deniedList);
+            nestedDeniedMap.put(CLOSE_TO_AN_ENEMY_BASE, new ArrayList<>());
             nestedDeniedMap.put(IN_THE_WILD, new ArrayList<>());
             var deniedMap = new HashMap<String, Map<Where, List<String>>>();
             deniedMap.put("minecraft:overworld", nestedDeniedMap);

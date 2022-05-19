@@ -9,7 +9,7 @@ import lombok.Setter;
  * @see PersistantFKGameData
  * @see PersistantFKGame
  */
-public class TimelineData {
+public class TimelineData implements Cloneable{
 
     @Getter @Setter
     private int day, minutes, seconds;
@@ -22,5 +22,24 @@ public class TimelineData {
         this.minutes = minutes;
         this.seconds = seconds;
         this.timeOfDay = timeOfDay;
+    }
+
+    @Override
+    public TimelineData clone() {
+        TimelineData timelineData  = null;
+        try {
+            timelineData = (TimelineData)super.clone();
+        } catch(CloneNotSupportedException ignored) {}
+        return timelineData;
+    }
+
+    @Override
+    public String toString() {
+        return "TimelineData{" +
+                "day=" + day +
+                ", minutes=" + minutes +
+                ", seconds=" + seconds +
+                ", timeOfDay=" + timeOfDay +
+                '}';
     }
 }

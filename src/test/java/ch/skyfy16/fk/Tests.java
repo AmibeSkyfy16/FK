@@ -1,14 +1,12 @@
 package ch.skyfy16.fk;
 
 import ch.skyfy.fk.data.Cube;
-import ch.skyfy.fk.features.vault.VaultFeature;
+import ch.skyfy.fk.logic.persistant.TimelineData;
 import ch.skyfy.fk.utils.MathUtils;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static net.minecraft.util.Formatting.RED;
 
 public class Tests {
 
@@ -86,9 +84,15 @@ public class Tests {
     }
 
     @Test
-    public void mapTest() {
-//        var s = new String("Here are the coordinates of your base : X:%d Y:%d Z:%d").formatted(20.0d, 43.0d, 43.0d);
-//        System.out.println(s);
+    public void cloneTest() throws CloneNotSupportedException {
+        var t1 = new TimelineData(0,0,0,0);
+        var t1C = t1.clone();
+
+        t1.setDay(1);
+
+        System.out.println("t1: "  + t1);
+        System.out.println("t1C: " + t1C);
+
 
     }
 

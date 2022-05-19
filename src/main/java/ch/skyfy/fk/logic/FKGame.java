@@ -6,10 +6,12 @@ import ch.skyfy.fk.config.Configs;
 import ch.skyfy.fk.config.actions.AbstractPlayerActionConfig;
 import ch.skyfy.fk.config.actions.PlayerActionsConfigs;
 import ch.skyfy.fk.logic.persistant.PersistantFKGame;
+import ch.skyfy.fk.logic.time.Timeline;
 import ch.skyfy.fk.msg.MsgBase;
 import ch.skyfy.fk.constants.Where;
 import ch.skyfy.fk.events.*;
 import ch.skyfy.fk.features.vault.VaultFeature;
+import ch.skyfy.fk.msg.MsgManager;
 import ch.skyfy.fk.utils.MathUtils;
 import ch.skyfy.fk.utils.ReflectionUtils;
 import lombok.Getter;
@@ -80,6 +82,8 @@ public class FKGame {
     @Getter
     private final Timeline timeline;
 
+    private final MsgManager msgManager;
+
     private final PauseEvents pauseEvents;
 
     private final FKGameEvents fkGameEvents;
@@ -91,7 +95,8 @@ public class FKGame {
 
     public FKGame(MinecraftServer server) {
         this.server = server;
-        this.timeline = new Timeline();
+        timeline = new Timeline();
+        msgManager = new MsgManager(server);
         pauseEvents = new PauseEvents();
         fkGameEvents = new FKGameEvents();
         vaultFeature = new VaultFeature(server, this);
@@ -188,7 +193,6 @@ public class FKGame {
     }
 
     private void registerEvents() {
-        System.out.println(PlayerActionsConfigs.USE_BLOCKS_CONFIG.data.getDenied().toString());
         // Event use when the game state is "running"
         PlayerBlockBreakEvents.BEFORE.register(fkGameEvents::cancelPlayerFromBreakingBlocks);
         UseBlockCallback.EVENT.register(FKGameEvents.SECOND, fkGameEvents::onUseBlockEvent);

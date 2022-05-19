@@ -2,7 +2,9 @@ package ch.skyfy.fk;
 
 import ch.skyfy.fk.logic.GameUtils;
 import ch.skyfy.fk.logic.persistant.PersistantFKGame;
+import ch.skyfy.fk.logic.persistant.TimelineData;
 import ch.skyfy.fk.sidebar.api.Sidebar;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Style;
@@ -10,8 +12,9 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
-@SuppressWarnings("ConstantConditions")
 public class ScoreboardManager {
 
     private static class LazyHolder {
@@ -22,23 +25,55 @@ public class ScoreboardManager {
         return LazyHolder.INSTANCE;
     }
 
-    private final Sidebar generalSidebar;
+    private final Map<String, Sidebar> sidebarMap;
 
     private ScoreboardManager() {
-        generalSidebar = new Sidebar(Sidebar.Priority.MEDIUM);
-        generalSidebar.setTitle(new LiteralText(">> Fallen Kingdoms <<").setStyle(Style.EMPTY.withColor(Formatting.GOLD).withBold(true)));
+        sidebarMap = new HashMap<>();
+    }
+
+    public void initialize(TimelineData timelineData) {
+
+        ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+            sidebarMap.remove(handler.getPlayer().getUuidAsString());
+        });
+
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+            var player = handler.getPlayer();
+            if (!sidebarMap.containsKey(player.getUuidAsString())) {
+                var sb = new Sidebar(Sidebar.Priority.HIGH);
+                sb.setTitle(new LiteralText(">> Fallen Kingdoms <<").setStyle(Style.EMPTY.withColor(Formatting.GOLD).withBold(true)));
+                sb.addPlayer(player);
+                sb.setUpdateRate(20);
+                sidebarMap.put(player.getUuidAsString(), sb);
+            }
+
+            updateSidebarImpl(player, timelineData.getDay(), timelineData.getMinutes(), timelineData.getSeconds());
+
+            sidebarMap.get(player.getUuidAsString()).show();
+        });
     }
 
     public void updateSidebar(ServerPlayerEntity player, int day, int minutes, int seconds) {
+
+//        if(!sidebarMap.containsKey(player.getUuidAsString())){
+//            var sb = new Sidebar(Sidebar.Priority.HIGH);
+//            sb.setTitle(new LiteralText(">> Fallen Kingdoms <<").setStyle(Style.EMPTY.withColor(Formatting.GOLD).withBold(true)));
+//            sb.addPlayer(player);
+//            sb.setUpdateRate(20);
+//            sidebarMap.put(player.getUuidAsString(), sb);
+//        }
+//
         updateSidebarImpl(player, day, minutes, seconds);
+//
+//        sidebarMap.get(player.getUuidAsString()).show();
 
-        if (generalSidebar.getPlayerHandlerSet().stream().noneMatch(serverPlayNetworkHandler -> serverPlayNetworkHandler.player.equals(player)))
-            generalSidebar.addPlayer(player);
 
-        generalSidebar.show();
     }
 
     private void updateSidebarImpl(ServerPlayerEntity player, int day, int minutes, int seconds) {
+
+        var sb = sidebarMap.get(player.getUuidAsString());
+        if (sb == null) return;
 
         var list = new ArrayList<Text>();
 
@@ -47,9 +82,14 @@ public class ScoreboardManager {
         list.add(new LiteralText("").setStyle(Style.EMPTY));
 
         var fkTeam = GameUtils.getFKTeamOfPlayerByName(player.getName().asString());
+        var isFKPlayer = GameUtils.isFKPlayer(player.getName().asString());
 
-        if(fkTeam != null){
-            list.add(new LiteralText("Team name: " + GameUtils.getFKTeamOfPlayerByName(player.getName().asString()).getName()).setStyle(Style.EMPTY.withColor(Formatting.valueOf(fkTeam.getColor()))));
+        if (fkTeam != null) {
+            if (isFKPlayer)
+                list.add(new LiteralText("Team name: " + fkTeam.getName()).setStyle(Style.EMPTY.withColor(Formatting.valueOf(fkTeam.getColor()))));
+            else
+                list.add(new LiteralText("You have no team").setStyle(Style.EMPTY.withColor(Formatting.GOLD)));
+
             list.add(new LiteralText("").setStyle(Style.EMPTY));
         }
 
@@ -63,10 +103,10 @@ public class ScoreboardManager {
         list.add(new LiteralText("End: " + getSentence(GameUtils.isEndEnabled(day))).setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)));
 
         for (int i = list.size() - 1; i >= 0; i--)
-            generalSidebar.setLine(i, list.get(list.size() - 1 -i));
+            sb.setLine(i, list.get(list.size() - 1 - i));
     }
 
-    private String getSentence(boolean bool){
+    private String getSentence(boolean bool) {
         return bool ? "Enabled" : "Disabled";
     }
 

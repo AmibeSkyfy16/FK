@@ -5,12 +5,12 @@ import ch.skyfy.fk.ScoreboardManager;
 import ch.skyfy.fk.config.Configs;
 import ch.skyfy.fk.config.actions.AbstractPlayerActionConfig;
 import ch.skyfy.fk.config.actions.PlayerActionsConfigs;
-import ch.skyfy.fk.logic.persistant.PersistantFKGame;
-import ch.skyfy.fk.logic.time.Timeline;
-import ch.skyfy.fk.msg.MsgBase;
 import ch.skyfy.fk.constants.Where;
 import ch.skyfy.fk.events.*;
 import ch.skyfy.fk.features.vault.VaultFeature;
+import ch.skyfy.fk.logic.persistant.PersistantFKGame;
+import ch.skyfy.fk.logic.time.Timeline;
+import ch.skyfy.fk.msg.MsgBase;
 import ch.skyfy.fk.msg.MsgManager;
 import ch.skyfy.fk.utils.MathUtils;
 import ch.skyfy.fk.utils.ReflectionUtils;
@@ -104,6 +104,7 @@ public class FKGame {
 
         initialize();
         registerEvents();
+        ScoreboardManager.getInstance().initialize(timeline.getTimelineData());
     }
 
     private void initialize() {
@@ -152,9 +153,7 @@ public class FKGame {
     }
 
     private void update(ServerPlayerEntity player) {
-        if (GameUtils.isFKPlayer(player.getName().asString()))
-            updateTeam(player);
-        updateSidebar(player);
+        updateTeam(player);
     }
 
     private void updateTeam(ServerPlayerEntity player) {
@@ -162,22 +161,31 @@ public class FKGame {
 
         var serverScoreboard = server.getScoreboard();
 
+        var oldPlayerTeam = serverScoreboard.getPlayerTeam(playerName);
+
         var fkTeam = GameUtils.getFKTeamOfPlayerByName(playerName);
-        if (fkTeam == null) return;
 
-        var team = serverScoreboard.getTeam(GameUtils.getFKTeamIdentifierByName(fkTeam.getName()));
-        if (team == null) {
-            team = serverScoreboard.addTeam(GameUtils.getFKTeamIdentifierByName(fkTeam.getName())); // minecraft internal team name can't have space or special char
-            team.setDisplayName(new LiteralText(fkTeam.getName()).setStyle(Style.EMPTY.withColor(Formatting.byName(fkTeam.getColor()))));
-            team.setColor(Formatting.byName(fkTeam.getColor()));
+        // If the player has no team now, but before maybe yes, we delete the old team
+        if (fkTeam == null) {
+            if (oldPlayerTeam != null)
+                serverScoreboard.removePlayerFromTeam(playerName, oldPlayerTeam);
+        } else {
+            var newTeam = serverScoreboard.getTeam(GameUtils.getFKTeamIdentifierByName(fkTeam.getName()));
+            if (newTeam == null)
+                newTeam = serverScoreboard.addTeam(GameUtils.getFKTeamIdentifierByName(fkTeam.getName()));
+
+            newTeam.setDisplayName(new LiteralText(fkTeam.getName()).setStyle(Style.EMPTY.withColor(Formatting.byName(fkTeam.getColor()))));
+            newTeam.setColor(Formatting.byName(fkTeam.getColor()));
+
+            // if player was in another team before
+            if (oldPlayerTeam != null && !oldPlayerTeam.getName().equals(newTeam.getName()))
+                serverScoreboard.removePlayerFromTeam(playerName, oldPlayerTeam);
+
+            serverScoreboard.addPlayerToTeam(playerName, newTeam);
+
+            serverScoreboard.updateScoreboardTeamAndPlayers(newTeam);
+            serverScoreboard.updateScoreboardTeam(newTeam);
         }
-
-        var playerTeam = serverScoreboard.getPlayerTeam(playerName);
-        if (playerTeam == null)
-            serverScoreboard.addPlayerToTeam(playerName, team);
-
-        serverScoreboard.updateScoreboardTeamAndPlayers(team);
-        serverScoreboard.updateScoreboardTeam(team);
     }
 
     public void updateSidebar(ServerPlayerEntity player) {
@@ -284,7 +292,7 @@ public class FKGame {
         private boolean cancelPlayerFromBreakingBlocks(World world, PlayerEntity player, BlockPos pos, BlockState state, /* Nullable */ BlockEntity blockEntity) {
             if (player.hasPermissionLevel(4)) return true;
 
-            if(GameUtils.isGameState_FINISHED()) return true;
+            if (GameUtils.isGameState_FINISHED()) return true;
 
             if (!GameUtils.isGameState_RUNNING()) return false;
 
@@ -298,7 +306,7 @@ public class FKGame {
 
         private ActionResult cancelPlayerFromKillingEntities(PlayerEntity player, World world, Hand hand, Entity entity, @Nullable EntityHitResult hitResult) {
             if (player.hasPermissionLevel(4)) return ActionResult.PASS;
-            if(GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
+            if (GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
             if (!GameUtils.isGameState_RUNNING()) return ActionResult.FAIL;
 
             var where = GameUtils.whereIsThePlayer(player, entity.getPos(), w -> w);
@@ -308,9 +316,9 @@ public class FKGame {
 
         private ActionResult cancelPlayerFromPlacingBlocks(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
             var currentDimId = player.getWorld().getDimension().getEffects().toString();
-            var itemInHand = player.getStackInHand(player.getActiveHand());
+            var itemInHand = player.getStackInHand(hand);
 
-            if(GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
+            if (GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
 
             // It's not a block
             if (!Registry.BLOCK.containsId(Registry.ITEM.getId(itemInHand.getItem())) || itemInHand.isOf(Items.AIR))
@@ -337,7 +345,7 @@ public class FKGame {
 
         private TypedActionResult<ItemStack> cancelPlayerFromFillingABucket(World world, PlayerEntity player, Hand hand, Fluid fillFluid, Block targetBlock, BucketItem bucketItem, BlockHitResult blockHitResult) {
             if (player.hasPermissionLevel(4)) return TypedActionResult.pass(player.getStackInHand(hand));
-            if(GameUtils.isGameState_FINISHED()) return TypedActionResult.pass(player.getStackInHand(hand));
+            if (GameUtils.isGameState_FINISHED()) return TypedActionResult.pass(player.getStackInHand(hand));
             if (!GameUtils.isGameState_RUNNING()) return TypedActionResult.fail(player.getStackInHand(hand));
 
             var fillBucketImpl = (GameUtils.WhereIsThePlayer<TypedActionResult<ItemStack>>) (where) -> {
@@ -352,7 +360,7 @@ public class FKGame {
 
         private TypedActionResult<ItemStack> cancelPlayerFromEmptyingABucket(World world, PlayerEntity player, Hand hand, Fluid emptyFluid, Item item, Vec3d pos) {
             if (player.hasPermissionLevel(4)) return TypedActionResult.pass(player.getStackInHand(hand));
-            if(GameUtils.isGameState_FINISHED()) return TypedActionResult.pass(player.getStackInHand(hand));
+            if (GameUtils.isGameState_FINISHED()) return TypedActionResult.pass(player.getStackInHand(hand));
             if (!GameUtils.isGameState_RUNNING()) return TypedActionResult.fail(player.getStackInHand(hand));
 
             var emptyBucketImpl = (GameUtils.WhereIsThePlayer<TypedActionResult<ItemStack>>) (where) -> {
@@ -366,7 +374,7 @@ public class FKGame {
 
         private TypedActionResult<ItemStack> cancelPlayerFromUsingAItem(PlayerEntity player, World world, Hand hand) {
             if (player.hasPermissionLevel(4)) return TypedActionResult.pass(player.getStackInHand(hand));
-            if(GameUtils.isGameState_FINISHED()) return TypedActionResult.pass(player.getStackInHand(hand));
+            if (GameUtils.isGameState_FINISHED()) return TypedActionResult.pass(player.getStackInHand(hand));
             if (!GameUtils.isGameState_RUNNING()) return TypedActionResult.fail(player.getStackInHand(hand));
 
             var item = player.getStackInHand(hand);
@@ -388,7 +396,7 @@ public class FKGame {
 
         private ActionResult cancelPlayerFromAssaultWithEnderPearl(ServerPlayerEntity player, Vec3d pos) {
             if (player.hasPermissionLevel(4)) return ActionResult.PASS;
-            if(GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
+            if (GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
             if (!GameUtils.isGameState_RUNNING()) return ActionResult.FAIL;
 
             if (Configs.FK_CONFIG.data.isAllowEnderPearlAssault()) return ActionResult.PASS;
@@ -405,7 +413,7 @@ public class FKGame {
         private ActionResult onUseBlockEvent(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
             if (player.hasPermissionLevel(4)) return ActionResult.PASS; // Admin can bypass this
 
-            if(GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
+            if (GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
 
             // If the game is NOT_STARTED OR PAUSED, players can't destroy block, block entity (painting, item frame, ...) or firing tnt
             if (!GameUtils.isGameState_RUNNING()) return ActionResult.FAIL;
@@ -426,7 +434,7 @@ public class FKGame {
         private ActionResult cancelPlayerFromFiringATNT(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
             var itemInHand = player.getStackInHand(hand);
 
-            if(GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
+            if (GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
 
             var emptyBucketImpl = (GameUtils.WhereIsThePlayer<ActionResult>) (where) -> {
 
@@ -460,7 +468,7 @@ public class FKGame {
         private ActionResult cancelPlayerFromUsingABlock(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
             var targetBlock = world.getBlockState(hitResult.getBlockPos()).getBlock();
 
-            if(GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
+            if (GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
 
             if (!interactiveBlocks.contains(targetBlock.getTranslationKey())) return ActionResult.PASS;
 
@@ -476,7 +484,7 @@ public class FKGame {
 
         private ActionResult cancelPlayerPvP(PlayerEntity player, World world, Hand hand, Entity entity, @Nullable EntityHitResult hitResult) {
             if (player.hasPermissionLevel(4)) return ActionResult.PASS;
-            if(GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
+            if (GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
             if (!GameUtils.isGameState_RUNNING()) return ActionResult.FAIL;
 
             if (entity instanceof PlayerEntity)
@@ -489,7 +497,7 @@ public class FKGame {
 
         private ActionResult cancelPlayerFromEnteringInPortal(ServerPlayerEntity player, Identifier dimensionId) {
             if (player.hasPermissionLevel(4)) return ActionResult.PASS;
-            if(GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
+            if (GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
             if (!GameUtils.isGameState_RUNNING()) return ActionResult.FAIL;
 
             if (dimensionId == DimensionType.THE_NETHER_ID) {
@@ -505,7 +513,7 @@ public class FKGame {
 
         private ActionResult onPlayerMove(PlayerMoveCallback.MoveData moveData, ServerPlayerEntity player) {
             if (player.hasPermissionLevel(4)) return ActionResult.PASS; // OP Player can move anymore
-            if(GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
+            if (GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
             if (GameUtils.isGameState_NOT_STARTED()) {
                 var waitingRoom = Configs.FK_CONFIG.data.getWaitingRoom();
                 // if player is not in a waiting room

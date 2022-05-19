@@ -44,7 +44,7 @@ public class MsgManager {
 //        );
 
         timedMsgList.add(new TimedMsg(
-                "[RAPPEL] -> Votre des coffres doit avoir été construite avant le jour " + Configs.FK_CONFIG.data.getDayOfAuthorizationOfTheAssaults(),
+                "[RAPPEL] -> Votre salle des coffres doit avoir été construite avant le jour " + Configs.FK_CONFIG.data.getDayOfAuthorizationOfTheAssaults(),
                 new HashMap<>() {{
                     put(TimeUnit.MINUTE, 10);
                 }},

@@ -233,6 +233,27 @@ public class FKGame {
                     Blocks.CHIPPED_ANVIL.getTranslationKey(),
                     Blocks.DAMAGED_ANVIL.getTranslationKey(),
 
+                    Blocks.DISPENSER.getTranslationKey(),
+                    Blocks.HOPPER.getTranslationKey(),
+
+                    Blocks.LOOM.getTranslationKey(),
+                    Blocks.CARTOGRAPHY_TABLE.getTranslationKey(),
+                    Blocks.SMOKER.getTranslationKey(),
+                    Blocks.SMITHING_TABLE.getTranslationKey(),
+                    Blocks.ENCHANTING_TABLE.getTranslationKey(),
+                    Blocks.STONECUTTER.getTranslationKey(),
+                    Blocks.GRINDSTONE.getTranslationKey(),
+
+                    Blocks.BLAST_FURNACE.getTranslationKey(),
+                    Blocks.FURNACE.getTranslationKey(),
+
+                    Blocks.BREWING_STAND.getTranslationKey(),
+
+                    Blocks.CHEST.getTranslationKey(),
+                    Blocks.ENDER_CHEST.getTranslationKey(),
+
+                    Blocks.CRAFTING_TABLE.getTranslationKey(),
+
                     Blocks.RESPAWN_ANCHOR.getTranslationKey(),
 
                     Blocks.WHITE_BED.getTranslationKey(),
@@ -253,21 +274,9 @@ public class FKGame {
                     Blocks.BLACK_BED.getTranslationKey(),
 
                     Blocks.BELL.getTranslationKey(),
-                    Blocks.BLAST_FURNACE.getTranslationKey(),
-                    Blocks.FURNACE.getTranslationKey(),
-                    Blocks.CRAFTING_TABLE.getTranslationKey(),
-                    Blocks.BREWING_STAND.getTranslationKey(),
+
                     Blocks.LEVER.getTranslationKey(),
-                    Blocks.LOOM.getTranslationKey(),
                     Blocks.NOTE_BLOCK.getTranslationKey(),
-                    Blocks.CARTOGRAPHY_TABLE.getTranslationKey(),
-                    Blocks.CHEST.getTranslationKey(),
-                    Blocks.SMITHING_TABLE.getTranslationKey(),
-                    Blocks.SMOKER.getTranslationKey(),
-                    Blocks.ENCHANTING_TABLE.getTranslationKey(),
-                    Blocks.ENDER_CHEST.getTranslationKey(),
-                    Blocks.STONECUTTER.getTranslationKey(),
-                    Blocks.GRINDSTONE.getTranslationKey(),
 
                     Blocks.BIRCH_BUTTON.getTranslationKey(),
                     Blocks.ACACIA_BUTTON.getTranslationKey(),
@@ -320,7 +329,16 @@ public class FKGame {
 
             if (GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
 
-            if(itemInHand.isOf(Items.AIR))return ActionResult.PASS;
+            System.out.println("player can place on");
+            var p = player.canPlaceOn(hitResult.getBlockPos(), hitResult.getSide(), itemInHand);
+            System.out.println("P: " + p);
+
+
+            if (!Registry.BLOCK.containsId(Registry.ITEM.getId(itemInHand.getItem()))) {
+                if (!Registry.ENTITY_TYPE.containsId(Registry.ITEM.getId(itemInHand.getItem()))) {
+                    return ActionResult.PASS;
+                }
+            }
 
             var placeBlock = (GameUtils.WhereIsThePlayer<ActionResult>) (where) -> switch (where.getRoot()) {
                 case INSIDE_HIS_OWN_BASE ->
@@ -416,17 +434,24 @@ public class FKGame {
             // If the game is NOT_STARTED OR PAUSED, players can't destroy block, block entity (painting, item frame, ...) or firing tnt
             if (!GameUtils.isGameState_RUNNING()) return ActionResult.FAIL;
 
-            // check if a player is trying to use an interactive bloc like crafting table, respawn anchor, etc.
-            var result2 = cancelPlayerFromUsingABlock(player, world, hand, hitResult);
-            if (result2 == ActionResult.FAIL) return result2;
+            var targetBlock = world.getBlockState(hitResult.getBlockPos()).getBlock();
+            var itemInHand = player.getStackInHand(hand);
 
-            // Check if player has a block in his hand and if we need to cancel
-            var result = cancelPlayerFromPlacingBlocks(player, world, hand, hitResult);
-            if (result == ActionResult.FAIL) return result;
+            var result3 = cancelPlayerFromFiringATNT(player, world, hand, hitResult);
+            if (result3 == ActionResult.FAIL)
+                return result3;
 
-            // Check if player has a flint and steel in his hand and if the target block is a tnt
-            // if true -> we fail. Otherwise -> pass
-            return cancelPlayerFromFiringATNT(player, world, hand, hitResult);
+
+            // if player try to interact with an interactive block like a bed, crafting table, ...
+            var isInteraction = false;
+            if (interactiveBlocks.contains(targetBlock.getTranslationKey()))
+                if ((player.isSneaking() && itemInHand.isOf(Items.AIR)) || !player.isSneaking())
+                    isInteraction = true;
+
+            if (isInteraction)
+                return cancelPlayerFromUsingABlock(player, world, hand, hitResult);
+            else
+                return cancelPlayerFromPlacingBlocks(player, world, hand, hitResult);
         }
 
         private ActionResult cancelPlayerFromFiringATNT(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
@@ -436,11 +461,10 @@ public class FKGame {
 
             var emptyBucketImpl = (GameUtils.WhereIsThePlayer<ActionResult>) (where) -> {
 
-                if (itemInHand.isOf(Items.FLINT_AND_STEEL)) {
-                    var block = world.getBlockState(hitResult.getBlockPos()).getBlock();
-                    if (!(block instanceof TntBlock)) return ActionResult.PASS;
-                }else
-                    return ActionResult.PASS;
+                var block = world.getBlockState(hitResult.getBlockPos()).getBlock();
+
+                if (!itemInHand.isOf(Items.FLINT_AND_STEEL)) return ActionResult.PASS;
+                if (!(block instanceof TntBlock)) return ActionResult.PASS;
 
                 return switch (where.getRoot()) {
                     case INSIDE_HIS_OWN_BASE -> ActionResult.PASS;
@@ -466,19 +490,13 @@ public class FKGame {
 
         private ActionResult cancelPlayerFromUsingABlock(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
             var targetBlock = world.getBlockState(hitResult.getBlockPos()).getBlock();
+            var itemInHand = player.getStackInHand(hand);
 
             if (GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
 
-            if (!interactiveBlocks.contains(targetBlock.getTranslationKey())) return ActionResult.PASS;
-
-            // if player try to use an interactive bloc like anvil, crafting table, ...
-            if (!player.isSneaking() || (player.isSneaking() && player.getStackInHand(hand) == ItemStack.EMPTY)) {
-                var currentDimId = player.getWorld().getDimension().getEffects().toString();
-                var where = GameUtils.whereIsThePlayer(player, hitResult.getPos(), w -> w);
-                return playerActionImpl(targetBlock.getTranslationKey(), currentDimId, where, ActionResult.PASS, ActionResult.FAIL, PlayerActionsConfigs.USE_BLOCKS_CONFIG.data);
-            }
-
-            return ActionResult.PASS;
+            var currentDimId = player.getWorld().getDimension().getEffects().toString();
+            var where = GameUtils.whereIsThePlayer(player, hitResult.getPos(), w -> w);
+            return playerActionImpl(targetBlock.getTranslationKey(), currentDimId, where, ActionResult.PASS, ActionResult.FAIL, PlayerActionsConfigs.USE_BLOCKS_CONFIG.data);
         }
 
         private ActionResult cancelPlayerPvP(PlayerEntity player, World world, Hand hand, Entity entity, @Nullable EntityHitResult hitResult) {

@@ -1,8 +1,0 @@
-{
-  "minWidth": 4,
-  "minLength": 4,
-  "minHeight": 2,
-  "maximumNumberOfBlocksDown": 20,
-  "mode": "NORMAL",
-  "enabled": true
-}

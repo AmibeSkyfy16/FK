@@ -87,22 +87,6 @@ tasks {
         }
     }
 
-    create<Exec>("restartServer") {
-        doFirst {
-            println("Starting FK TEST")
-            workingDir = file(".\\servers")
-            commandLine = listOf("cmd", "/C", "start", "restartServer.bat")
-        }
-    }
-
-    create<Exec>("stopServer") {
-        doFirst {
-            println("Starting server1")
-            workingDir = file(".\\servers")
-            commandLine = listOf("cmd", "/C", "start", "stopServer.bat")
-        }
-    }
-
 }
 
 fun copyFile(path: String) {

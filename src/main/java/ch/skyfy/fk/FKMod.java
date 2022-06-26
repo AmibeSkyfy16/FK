@@ -11,7 +11,7 @@ import ch.skyfy.fk.logic.FKGame;
 import ch.skyfy.fk.utils.ModUtils;
 import ch.skyfy.fk.utils.ReflectionUtils;
 import net.fabricmc.api.DedicatedServerModInitializer;
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import org.apache.logging.log4j.LogManager;
@@ -74,7 +74,7 @@ public class FKMod implements DedicatedServerModInitializer {
     }
 
     public void registerCommands() {
-        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
+        CommandRegistrationCallback.EVENT.register((dispatcher, commandRegistryAccess, registrationEnvironment) -> {
             startCmd.register(dispatcher);
             pauseCmd.register(dispatcher);
             resumeCmd.register(dispatcher);

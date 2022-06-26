@@ -20,10 +20,9 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.MessageType;
+import net.minecraft.network.message.MessageType;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -46,7 +45,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static ch.skyfy.fk.constants.Where.INSIDE_AN_ENEMY_BASE;
 import static ch.skyfy.fk.constants.Where.INSIDE_THE_VAULT_OF_AN_ENEMY_BASE;
 import static net.minecraft.util.Formatting.*;
-import static net.minecraft.util.Util.NIL_UUID;
 
 @SuppressWarnings({"unused", "FieldCanBeLocal"})
 public class VaultFeature {
@@ -112,7 +110,7 @@ public class VaultFeature {
             var player = handler.getPlayer();
             if (whereIsThePlayer(player) != INSIDE_THE_VAULT_OF_AN_ENEMY_BASE) return;
             captureMap.forEach((fkteam, capture) -> {
-                if (fkteam.getPlayers().stream().anyMatch(name -> player.getName().asString().equals(name))) {
+                if (fkteam.getPlayers().stream().anyMatch(name -> player.getName().getString().equals(name))) {
                     capture.leave(player);
                 }
             });
@@ -160,7 +158,7 @@ public class VaultFeature {
                 } else {
                     if (!capture.playerAttackers.contains(playerAttacker)) {
                         capture.playerAttackers.add(playerAttacker);
-                        playerAttacker.sendMessage(new LiteralText("You're now " + capture.playerAttackers.size() + " players capturing this vault").setStyle(Style.EMPTY.withColor(GREEN)), false);
+                        playerAttacker.sendMessage(Text.literal("You're now " + capture.playerAttackers.size() + " players capturing this vault").setStyle(Style.EMPTY.withColor(GREEN)), false);
                     } else {
                         Msg.YOU_ARE_ALREADY_CAPTURING_THIS_VAULT.send(playerAttacker);
                     }
@@ -171,7 +169,7 @@ public class VaultFeature {
 
         // Here we start a new capture
         if (shouldCapture) {
-            playerAttacker.sendMessage(new LiteralText("The capture of the vault has started").setStyle(Style.EMPTY.withColor(GREEN)), false);
+            playerAttacker.sendMessage(Text.literal("The capture of the vault has started").setStyle(Style.EMPTY.withColor(GREEN)), false);
             captureMap.putIfAbsent(fkTeamAttacker, new Capture(vault, fkTeamVictim, playerAttacker));
         }
     }
@@ -187,15 +185,15 @@ public class VaultFeature {
     private ActionResult updatePlayerVaultDimension(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
         var itemInHand = player.getStackInHand(hand);
 
-        if (!GameUtils.isFKPlayer(player.getName().asString())) {
-            player.sendMessage(new LiteralText("You cannot use this feature, because you're not a FKPlayer").setStyle(Style.EMPTY.withColor(GOLD)), false);
+        if (!GameUtils.isFKPlayer(player.getName().getString())) {
+            player.sendMessage(Text.literal("You cannot use this feature, because you're not a FKPlayer").setStyle(Style.EMPTY.withColor(GOLD)), false);
             return ActionResult.PASS;
         }
 
         if (itemInHand.hasCustomName()) {
-            if (itemInHand.getName().asString().equals("marker")) {
+            if (itemInHand.getName().getString().equals("marker")) {
                 var valid = false;
-                var fkTeam = GameUtils.getFKTeamOfPlayerByName(player.getName().asString());
+                var fkTeam = GameUtils.getFKTeamOfPlayerByName(player.getName().getString());
                 var fkTeamId = GameUtils.getFKTeamIdentifierByName(fkTeam.getName());
 
                 var optVault = persistantVaultData.getVaults().stream().filter(vault -> vault.getTeamId().equals(fkTeamId)).findFirst();
@@ -237,7 +235,7 @@ public class VaultFeature {
         var box = new Box(pos1.getX(), pos1.getY(), pos1.getZ(), pos2.getX(), pos2.getY(), pos2.getZ());
 
         var minY = Math.min(pos1.getY(), pos2.getY());
-        var fkTeam = GameUtils.getFKTeamOfPlayerByName(player.getName().asString());
+        var fkTeam = GameUtils.getFKTeamOfPlayerByName(player.getName().getString());
         var base = fkTeam.getBase();
 
         var minYRules = base.getCube().getY() - config.getMaximumNumberOfBlocksDown();
@@ -287,7 +285,7 @@ public class VaultFeature {
             this.fkTeamVictim = fkTeamVictim;
 
             playerAttackers = new ArrayList<>(List.of(playerAttacker));
-            fkTeamAttacker = GameUtils.getFKTeamOfPlayerByName(playerAttacker.getName().asString());
+            fkTeamAttacker = GameUtils.getFKTeamOfPlayerByName(playerAttacker.getName().getString());
 
             startCapture(playerAttacker);
         }
@@ -296,16 +294,16 @@ public class VaultFeature {
             started.set(true);
 
             // Send a message to all victims to tell them that their base is being captured
-            GameUtils.getPlayersFromNames(server.getPlayerManager(), fkTeamVictim.getPlayers()).forEach(player -> Msg.CAPTURE1.formatted(playerAttacker.getName().asString(), fkTeamAttacker.getName()).send(player));
+            GameUtils.getPlayersFromNames(server.getPlayerManager(), fkTeamVictim.getPlayers()).forEach(player -> Msg.CAPTURE1.formatted(playerAttacker.getName().getString(), fkTeamAttacker.getName()).send(player));
             // Send a message to all allies of the attacker to tell them that the attacker is capturing a vault
-            GameUtils.getPlayersFromNames(server.getPlayerManager(), fkTeamAttacker.getPlayers()).forEach(player -> Msg.CAPTURE2.formatted(playerAttacker.getName().asString(), fkTeamVictim.getName()));
+            GameUtils.getPlayersFromNames(server.getPlayerManager(), fkTeamAttacker.getPlayers()).forEach(player -> Msg.CAPTURE2.formatted(playerAttacker.getName().getString(), fkTeamVictim.getName()));
 
             ServerTickEvents.END_SERVER_TICK.register(server -> {
                 if (cancelled.get() || win.get()) return;
                 if (captureTime.get() >= 1200) win(server);
 
                 var second = captureTime.get() / 20;
-                playerAttackers.forEach(player -> player.sendMessage(new LiteralText("%d seconds left before you finish the capture".formatted(second)).setStyle(Style.EMPTY.withColor(GOLD)), true));
+                playerAttackers.forEach(player -> player.sendMessage(Text.literal("%d seconds left before you finish the capture".formatted(second)).setStyle(Style.EMPTY.withColor(GOLD)), true));
 
                 captureTime.getAndIncrement();
             });
@@ -326,8 +324,8 @@ public class VaultFeature {
             win.set(true);
 
             if (Configs.VAULT_FEATURE_CONFIG.data.getMode() == Mode.NORMAL) {
-                server.getPlayerManager().broadcast(Msg.GAME_IS_OVER.text(), MessageType.CHAT, NIL_UUID);
-                server.getPlayerManager().broadcast(Msg.WINNER.formatted(fkTeamAttacker.getName(), fkTeamVictim.getName()).text(), MessageType.CHAT, NIL_UUID);
+                server.getPlayerManager().broadcast(Msg.GAME_IS_OVER.text(), MessageType.CHAT);
+                server.getPlayerManager().broadcast(Msg.WINNER.formatted(fkTeamAttacker.getName(), fkTeamVictim.getName()).text(), MessageType.CHAT);
                 PersistantFKGame.FK_GAME_DATA.data.setGameState(FKMod.GameState.FINISHED);
                 GameUtils.getAllConnectedFKPlayers(server.getPlayerManager().getPlayerList()).forEach(fkGame::updateSidebar);
             } else if (Configs.VAULT_FEATURE_CONFIG.data.getMode() == Mode.BATTLE_ROYAL) {

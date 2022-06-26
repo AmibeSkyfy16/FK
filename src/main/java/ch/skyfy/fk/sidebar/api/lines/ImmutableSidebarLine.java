@@ -30,8 +30,7 @@ public record ImmutableSidebarLine(int value, Text text) implements SidebarLine 
 
     public boolean equals(Object o, ServerPlayNetworkHandler handler) {
         if (this == o) return true;
-        if (o == null || !(o instanceof SidebarLine)) return false;
-        SidebarLine that = (SidebarLine) o;
+        if (!(o instanceof SidebarLine that)) return false;
         return this.value == that.getValue() && that.getText(handler).equals(this.text);
     }
 }

@@ -13,6 +13,7 @@ import java.util.function.Function;
 /**
  * Simple builder for making creation of Sidebars faster
  */
+@SuppressWarnings("unused")
 public class LineBuilder {
     protected List<SidebarLine> lines = new ArrayList<>();
 

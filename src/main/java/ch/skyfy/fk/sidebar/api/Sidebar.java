@@ -7,16 +7,15 @@ import ch.skyfy.fk.sidebar.api.lines.SimpleSidebarLine;
 import ch.skyfy.fk.sidebar.interfaces.SidebarHolder;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 
 import java.util.*;
 import java.util.function.Consumer;
 
 /**
- * Basic sidebar with all of basic functionality
+ * Basic sidebar with all basic functionality
  */
-@SuppressWarnings({ "unused" })
+@SuppressWarnings({"unused"})
 public class Sidebar {
     protected List<SidebarLine> elements = new ArrayList<>();
     protected Set<ServerPlayNetworkHandler> players = new HashSet<>();
@@ -29,7 +28,7 @@ public class Sidebar {
 
     public Sidebar(Priority priority) {
         this.priority = priority;
-        this.title = new LiteralText("");
+        this.title = Text.literal("");
     }
 
     public Sidebar(Text title, Priority priority) {

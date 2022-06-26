@@ -8,6 +8,7 @@ import net.minecraft.text.Text;
 
 import java.util.List;
 
+@SuppressWarnings("unused")
 public class ScrollableSidebar extends Sidebar {
     protected Object2LongMap<ServerPlayNetworkHandler> position = new Object2LongArrayMap<>();
     protected int scrollTickNumber;

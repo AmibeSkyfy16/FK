@@ -52,8 +52,8 @@ public class ReflectionUtils {
                     }
 
                 } catch (IllegalAccessException | NoSuchMethodException | ClassCastException |
-                         InvocationTargetException ignored) {
-                    ignored.printStackTrace();
+                         InvocationTargetException e) {
+                    e.printStackTrace();
                 }
             }
         }

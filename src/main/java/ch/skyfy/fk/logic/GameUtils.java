@@ -2,8 +2,8 @@ package ch.skyfy.fk.logic;
 
 import ch.skyfy.fk.FKMod;
 import ch.skyfy.fk.config.Configs;
-import ch.skyfy.fk.data.FKTeam;
 import ch.skyfy.fk.constants.Where;
+import ch.skyfy.fk.data.FKTeam;
 import ch.skyfy.fk.features.vault.persistant.PersistantVault;
 import ch.skyfy.fk.features.vault.persistant.Vault;
 import ch.skyfy.fk.logic.persistant.PersistantFKGame;
@@ -42,7 +42,7 @@ public class GameUtils {
         var missingPlayers = new ArrayList<String>();
         for (var fkTeam : FK_TEAMS_CONFIG.data.getTeams()) {
             for (var fkPlayerName : fkTeam.getPlayers()) {
-                if (onlinePlayers.stream().noneMatch(serverPlayerEntity -> serverPlayerEntity.getName().asString().equals(fkPlayerName)))
+                if (onlinePlayers.stream().noneMatch(serverPlayerEntity -> serverPlayerEntity.getName().getString().equals(fkPlayerName)))
                     missingPlayers.add(fkPlayerName);
             }
         }
@@ -64,14 +64,14 @@ public class GameUtils {
     public static List<ServerPlayerEntity> getAllConnectedFKPlayers(List<ServerPlayerEntity> onlinePlayers) {
         return FK_TEAMS_CONFIG.data.getTeams().stream()
                 .flatMap(fkTeam -> onlinePlayers.stream()
-                        .filter(player -> fkTeam.getPlayers().contains(player.getName().asString())))
+                        .filter(player -> fkTeam.getPlayers().contains(player.getName().getString())))
                 .toList();
     }
 
     public static List<ServerPlayerEntity> getPlayersFromNames(PlayerManager playerManager, List<String> names) {
         var list = new ArrayList<ServerPlayerEntity>();
         for (ServerPlayerEntity serverPlayerEntity : playerManager.getPlayerList())
-            if (names.contains(serverPlayerEntity.getName().asString())) list.add(serverPlayerEntity);
+            if (names.contains(serverPlayerEntity.getName().getString())) list.add(serverPlayerEntity);
         return list;
     }
 
@@ -96,7 +96,7 @@ public class GameUtils {
 
     public static Optional<ServerWorld> getServerWorldByIdentifier(MinecraftServer server, String id) {
         return StreamSupport.stream(server.getWorlds().spliterator(), false)
-                .filter(serverWorld -> serverWorld.getDimension().getEffects().toString().equals(id))
+                .filter(serverWorld -> serverWorld.getDimension().effects().toString().equals(id))
                 .findFirst();
     }
 
@@ -130,7 +130,7 @@ public class GameUtils {
             var baseCube = team.getBase().getCube();
 
             // Is this base the base of the player who break the block ?
-            var isBaseOfPlayer = team.getPlayers().stream().anyMatch(fkPlayerName -> player.getName().asString().equals(fkPlayerName));
+            var isBaseOfPlayer = team.getPlayers().stream().anyMatch(fkPlayerName -> player.getName().getString().equals(fkPlayerName));
 
             // If player is inside a base
             if (MathUtils.isAPosInsideCube(baseCube, pos)) {
@@ -176,7 +176,7 @@ public class GameUtils {
     public static List<ServerPlayerEntity> getAllFKPlayerOfFKTeam(PlayerManager playerManager, FKTeam fkTeam) {
         var list = new ArrayList<ServerPlayerEntity>();
         for (var serverPlayerEntity : playerManager.getPlayerList())
-            if (fkTeam.getPlayers().contains(serverPlayerEntity.getName().asString()))
+            if (fkTeam.getPlayers().contains(serverPlayerEntity.getName().getString()))
                 list.add(serverPlayerEntity);
         return list;
     }
@@ -197,7 +197,7 @@ public class GameUtils {
         return PersistantVault.DATA.data.getEliminatedTeams().values().stream().anyMatch(id -> id.equals(fkTeamId));
     }
 
-    public static boolean isFKTeamEliminate(FKTeam fkTeam){
+    public static boolean isFKTeamEliminate(FKTeam fkTeam) {
         var fkTeamId = getFKTeamIdentifierByName(fkTeam.getName());
         return PersistantVault.DATA.data.getEliminatedTeams().values().stream().anyMatch(id -> id.equals(fkTeamId));
     }

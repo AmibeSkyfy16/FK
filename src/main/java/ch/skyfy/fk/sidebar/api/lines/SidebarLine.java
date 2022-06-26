@@ -3,7 +3,6 @@ package ch.skyfy.fk.sidebar.api.lines;
 import ch.skyfy.fk.sidebar.api.Sidebar;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,12 +10,12 @@ import java.util.function.Function;
 
 /**
  * Minimalistic interface for creating own SidebarLines
- *
  */
+@SuppressWarnings("unused")
 public interface SidebarLine {
     /**
      * Returns score of this line (used for ordering)
-     * Highest number is always on top
+     * The Highest number is always on top
      */
     int getValue();
 
@@ -37,7 +36,7 @@ public interface SidebarLine {
      * Creates a static, immutable copy of this SidebarLine, that's used for comparing
      */
     default ImmutableSidebarLine immutableCopy(ServerPlayNetworkHandler handler) {
-        return new ImmutableSidebarLine(this.getValue(), this.getText(handler).shallowCopy());
+        return new ImmutableSidebarLine(this.getValue(), this.getText(handler).copy());
     }
 
     /**
@@ -48,9 +47,9 @@ public interface SidebarLine {
     /**
      * Quick way to create SidebarLine instance with more advanced text building
      *
-     * @param value Scoreboard value
+     * @param value       Scoreboard value
      * @param textBuilder Function creating text
-     * @return SidebarLine 
+     * @return SidebarLine
      */
     static SidebarLine create(int value, Function<@Nullable ServerPlayerEntity, Text> textBuilder) {
         return new SuppliedSidebarLine(value, textBuilder);
@@ -60,7 +59,7 @@ public interface SidebarLine {
      * Quick way to create SidebarLine instance with more advanced text building
      *
      * @param value Scoreboard value
-     * @param text Text
+     * @param text  Text
      * @return SidebarLine
      */
     static SidebarLine create(int value, Text text) {
@@ -77,7 +76,7 @@ public interface SidebarLine {
         return new AbstractSidebarLine() {
             @Override
             public Text getText() {
-                return LiteralText.EMPTY;
+                return Text.empty();
             }
         };
     }

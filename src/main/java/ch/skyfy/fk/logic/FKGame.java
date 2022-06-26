@@ -33,13 +33,12 @@ import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.item.*;
-import net.minecraft.network.MessageType;
 import net.minecraft.network.message.MessageType;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Style;
+import net.minecraft.text.Text;
 import net.minecraft.util.*;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
@@ -48,15 +47,13 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.World;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.dimension.DimensionTypes;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static net.minecraft.util.Util.NIL_UUID;
 
 @SuppressWarnings({"FieldCanBeLocal", "unused"})
 public class FKGame {
@@ -175,7 +172,7 @@ public class FKGame {
             if (newTeam == null)
                 newTeam = serverScoreboard.addTeam(GameUtils.getFKTeamIdentifierByName(fkTeam.getName()));
 
-            newTeam.setDisplayName(new LiteralText(fkTeam.getName()).setStyle(Style.EMPTY.withColor(Formatting.byName(fkTeam.getColor()))));
+            newTeam.setDisplayName(Text.literal(fkTeam.getName()).setStyle(Style.EMPTY.withColor(Formatting.byName(fkTeam.getColor()))));
             newTeam.setColor(Formatting.byName(fkTeam.getColor()));
 
             // if player was in another team before
@@ -307,7 +304,7 @@ public class FKGame {
             if (!GameUtils.isGameState_RUNNING()) return false;
 
             var breakPlace = (GameUtils.WhereIsThePlayer<Boolean>) (where) -> {
-                var currentDimId = player.getWorld().getDimension().getEffects().toString();
+                var currentDimId = player.getWorld().getDimension().effects().toString();
                 var block = world.getBlockState(pos).getBlock();
                 return playerActionImpl(block.getTranslationKey(), currentDimId, where, true, false, PlayerActionsConfigs.BREAKING_BLOCKS_CONFIG.data);
             };
@@ -320,12 +317,12 @@ public class FKGame {
             if (!GameUtils.isGameState_RUNNING()) return ActionResult.FAIL;
 
             var where = GameUtils.whereIsThePlayer(player, entity.getPos(), w -> w);
-            var currentDimId = player.getWorld().getDimension().getEffects().toString();
+            var currentDimId = player.getWorld().getDimension().effects().toString();
             return playerActionImpl(entity.getType().getTranslationKey(), currentDimId, where, ActionResult.PASS, ActionResult.FAIL, PlayerActionsConfigs.KILLING_ENTITIES_CONFIG.data);
         }
 
         private ActionResult cancelPlayerFromPlacingBlocks(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
-            var currentDimId = player.getWorld().getDimension().getEffects().toString();
+            var currentDimId = player.getWorld().getDimension().effects().toString();
             var itemInHand = player.getStackInHand(hand);
 
             if (GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
@@ -366,7 +363,7 @@ public class FKGame {
             if (!GameUtils.isGameState_RUNNING()) return TypedActionResult.fail(player.getStackInHand(hand));
 
             var fillBucketImpl = (GameUtils.WhereIsThePlayer<TypedActionResult<ItemStack>>) (where) -> {
-                var currentDimId = player.getWorld().getDimension().getEffects().toString();
+                var currentDimId = player.getWorld().getDimension().effects().toString();
                 var placedItemStack = player.getStackInHand(player.getActiveHand());
                 return playerActionImpl(targetBlock.getTranslationKey(), currentDimId, where, TypedActionResult.pass(placedItemStack), TypedActionResult.fail(placedItemStack), PlayerActionsConfigs.FILLING_BUCKET_CONFIG.data);
             };
@@ -381,7 +378,7 @@ public class FKGame {
             if (!GameUtils.isGameState_RUNNING()) return TypedActionResult.fail(player.getStackInHand(hand));
 
             var emptyBucketImpl = (GameUtils.WhereIsThePlayer<TypedActionResult<ItemStack>>) (where) -> {
-                var currentDimId = player.getWorld().getDimension().getEffects().toString();
+                var currentDimId = player.getWorld().getDimension().effects().toString();
                 var placedItemStack = player.getStackInHand(player.getActiveHand());
                 return playerActionImpl(item.getTranslationKey(), currentDimId, where, TypedActionResult.pass(placedItemStack), TypedActionResult.fail(placedItemStack), PlayerActionsConfigs.EMPTYING_BUCKET_CONFIG.data);
             };
@@ -402,7 +399,7 @@ public class FKGame {
                 onUsedEnderPearlMap.compute(player.getUuidAsString(), (s, vec3d) -> player.getPos());
 
             String translationKey;
-            var currentDimId = player.getWorld().getDimension().getEffects().toString();
+            var currentDimId = player.getWorld().getDimension().effects().toString();
             if (item.getItem() instanceof PotionItem)
                 translationKey = Registry.POTION.getId(PotionUtil.getPotion(item)).toString();
             else
@@ -495,7 +492,7 @@ public class FKGame {
 
             if (GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
 
-            var currentDimId = player.getWorld().getDimension().getEffects().toString();
+            var currentDimId = player.getWorld().getDimension().effects().toString();
             var where = GameUtils.whereIsThePlayer(player, hitResult.getPos(), w -> w);
             return playerActionImpl(targetBlock.getTranslationKey(), currentDimId, where, ActionResult.PASS, ActionResult.FAIL, PlayerActionsConfigs.USE_BLOCKS_CONFIG.data);
         }
@@ -518,10 +515,10 @@ public class FKGame {
             if (GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
             if (!GameUtils.isGameState_RUNNING()) return ActionResult.FAIL;
 
-            if (dimensionId == DimensionType.THE_NETHER_ID) {
+            if (dimensionId == DimensionTypes.THE_NETHER_ID) {
                 if (!GameUtils.isNetherEnabled(timeline.getTimelineData().getDay()))
                     return ActionResult.FAIL;
-            } else if (dimensionId == DimensionType.THE_END_ID) {
+            } else if (dimensionId == DimensionTypes.THE_END_ID) {
                 if (!GameUtils.isEndEnabled(timeline.getTimelineData().getDay()))
                     return ActionResult.FAIL;
             }
@@ -535,7 +532,7 @@ public class FKGame {
             if (GameUtils.isGameState_NOT_STARTED()) {
                 var waitingRoom = Configs.FK_CONFIG.data.getWaitingRoom();
                 // if player is not in a waiting room
-                if (!player.getWorld().getDimension().getEffects().toString().equals(waitingRoom.getSpawnLocation().getDimensionName()))
+                if (!player.getWorld().getDimension().effects().toString().equals(waitingRoom.getSpawnLocation().getDimensionName()))
                     return ActionResult.PASS;
                 if (MathUtils.cancelPlayerFromLeavingAnArea(waitingRoom.getCube(), player, waitingRoom.getSpawnLocation()))
                     return ActionResult.FAIL;
@@ -550,11 +547,11 @@ public class FKGame {
             var opt = Configs.WORLD_BORDER_CONFIG.data.getWorldBorder().getSpawns()
                     .entrySet()
                     .stream()
-                    .filter(entry -> entry.getKey().equals(player.getWorld().getDimension().getEffects().toString()))
+                    .filter(entry -> entry.getKey().equals(player.getWorld().getDimension().effects().toString()))
                     .findFirst();
             if (opt.isPresent()) {
                 if (MathUtils.cancelPlayerFromLeavingAnArea(opt.get().getValue(), player, null)) {
-                    player.sendMessage(new LiteralText("You reach the border limit !").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
+                    player.sendMessage(Text.literal("You reach the border limit !").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
                     return ActionResult.FAIL;
                 }
             }

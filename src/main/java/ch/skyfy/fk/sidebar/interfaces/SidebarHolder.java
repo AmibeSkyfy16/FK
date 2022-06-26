@@ -6,6 +6,7 @@ import ch.skyfy.fk.sidebar.api.Sidebar;
 
 import java.util.Set;
 
+@SuppressWarnings("unused")
 public interface SidebarHolder {
     void addSidebar(Sidebar sidebar);
     void removeSidebar(Sidebar sidebar);

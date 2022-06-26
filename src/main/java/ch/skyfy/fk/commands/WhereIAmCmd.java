@@ -1,12 +1,11 @@
 package ch.skyfy.fk.commands;
 
 import ch.skyfy.fk.constants.Where;
-import ch.skyfy.fk.msg.WhereMsg;
 import ch.skyfy.fk.logic.GameUtils;
+import ch.skyfy.fk.msg.WhereMsg;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.math.Vec3d;
@@ -18,8 +17,9 @@ public class WhereIAmCmd implements Command<ServerCommandSource> {
     }
 
     @Override
-    public int run(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+    public int run(CommandContext<ServerCommandSource> context) {
         var player = context.getSource().getPlayer();
+        if (player == null) return 0;
 
         var whereIsThePlayer = (GameUtils.WhereIsThePlayer<Void>) (where) -> {
             switch (where.getRoot()) {

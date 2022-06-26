@@ -1,14 +1,11 @@
 package ch.skyfy.fk.msg;
 
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.MessageType;
+import net.minecraft.network.message.MessageType;
 import net.minecraft.server.PlayerManager;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-
-import static net.minecraft.util.Util.NIL_UUID;
 
 public abstract class MsgBase {
 
@@ -29,16 +26,16 @@ public abstract class MsgBase {
         player.sendMessage(text(), false);
     }
 
-    public <T> T send(PlayerEntity player, T defaultReturnValue){
+    public <T> T send(PlayerEntity player, T defaultReturnValue) {
         send(player);
         return defaultReturnValue;
     }
 
-    public void broadcast(PlayerManager playerManager){
-        playerManager.broadcast(text(),  MessageType.CHAT, NIL_UUID);
+    public void broadcast(PlayerManager playerManager) {
+        playerManager.broadcast(text(), MessageType.CHAT);
     }
 
     public Text text() {
-        return new LiteralText(s).setStyle(Style.EMPTY.withColor(formatting));
+        return Text.literal(s).setStyle(Style.EMPTY.withColor(formatting));
     }
 }

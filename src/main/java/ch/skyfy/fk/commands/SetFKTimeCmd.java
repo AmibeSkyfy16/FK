@@ -7,8 +7,8 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Style;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.util.Optional;
@@ -16,7 +16,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 
-@SuppressWarnings("ClassCanBeRecord")
 public class SetFKTimeCmd implements Command<ServerCommandSource> {
 
     public void register(CommandDispatcher<ServerCommandSource> dispatcher) {
@@ -39,7 +38,7 @@ public class SetFKTimeCmd implements Command<ServerCommandSource> {
         var time = getInteger(context, "timeOfDay");
         optFKGameRef.get().ifPresent(fkGame -> {
             fkGame.getTimeline().getTimelineData().setTimeOfDay(time);
-            context.getSource().sendFeedback(new LiteralText("time has been set to " + time).setStyle(Style.EMPTY.withColor(Formatting.GREEN)), true);
+            context.getSource().sendFeedback(Text.literal("time has been set to " + time).setStyle(Style.EMPTY.withColor(Formatting.GREEN)), true);
         });
         return SINGLE_SUCCESS;
     }

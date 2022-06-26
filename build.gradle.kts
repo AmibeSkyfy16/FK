@@ -1,7 +1,7 @@
 @file:Suppress("GradlePackageVersionRange")
 
 plugins {
-    id("fabric-loom") version "0.11-SNAPSHOT"
+    id("fabric-loom") version "0.12-SNAPSHOT"
     id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 

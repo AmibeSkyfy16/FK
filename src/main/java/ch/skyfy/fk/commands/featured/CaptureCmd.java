@@ -1,14 +1,13 @@
 package ch.skyfy.fk.commands.featured;
 
 import ch.skyfy.fk.config.Configs;
-import ch.skyfy.fk.msg.MsgBase;
 import ch.skyfy.fk.constants.Where;
 import ch.skyfy.fk.logic.FKGame;
 import ch.skyfy.fk.logic.GameUtils;
+import ch.skyfy.fk.msg.MsgBase;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.Formatting;
@@ -17,7 +16,6 @@ import net.minecraft.util.math.Vec3d;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
-@SuppressWarnings("ClassCanBeRecord")
 public class CaptureCmd implements Command<ServerCommandSource> {
 
     private static class Msg extends MsgBase {
@@ -48,19 +46,20 @@ public class CaptureCmd implements Command<ServerCommandSource> {
     }
 
     @Override
-    public int run(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+    public int run(CommandContext<ServerCommandSource> context) {
         if (optFKGameRef.get().isEmpty()) return 0;
 
         if (!GameUtils.isGameState_RUNNING()) return 0;
 
         var playerAttacker = context.getSource().getPlayer();
+        if (playerAttacker == null) return 0;
 
         // The « capture » command only works if the « Vault » feature is enabled
         if (!Configs.VAULT_FEATURE_CONFIG.data.isEnabled())
             return Msg.VAULT_FEATURE_NOT_ENABLED.send(playerAttacker, 0);
 
         // A player who is part of a team that is eliminated can no longer use the command
-        if (GameUtils.isFKPlayerEliminate(playerAttacker.getName().asString()))
+        if (GameUtils.isFKPlayerEliminate(playerAttacker.getName().getString()))
             return Msg.YOU_ARE_ELIMINATED.send(playerAttacker, 0);
 
         var fkGame = optFKGameRef.get().get();
@@ -69,7 +68,7 @@ public class CaptureCmd implements Command<ServerCommandSource> {
         if (!GameUtils.areAssaultEnabled(fkGame.getTimeline().getTimelineData().getDay()))
             return Msg.ASSAULT_NOT_ENABLED.send(playerAttacker, 0);
 
-        var playerName = playerAttacker.getName().asString();
+        var playerName = playerAttacker.getName().getString();
 
         // Only a player in the game can use the command
         if (!GameUtils.isFKPlayer(playerName))
@@ -102,7 +101,7 @@ public class CaptureCmd implements Command<ServerCommandSource> {
             if (GameUtils.isFKTeamEliminate(fkTeamVictim))
                 return Msg.TEAM_ALREADY_ELIMINATED.send(playerAttacker, 0);
 
-            chestRoomFeature.addCapture(vault, fkTeamVictim, GameUtils.getFKTeamOfPlayerByName(playerAttacker.getName().asString()), playerAttacker);
+            chestRoomFeature.addCapture(vault, fkTeamVictim, GameUtils.getFKTeamOfPlayerByName(playerAttacker.getName().getString()), playerAttacker);
         } else {
             return Msg.NOT_INSIDE_AN_ENEMY_VAULT.send(playerAttacker, 0);
         }

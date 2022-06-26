@@ -34,6 +34,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.item.*;
 import net.minecraft.network.MessageType;
+import net.minecraft.network.message.MessageType;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -119,10 +120,10 @@ public class FKGame {
         server.getOverworld().setTimeOfDay(0);
         timeline.startTimer();
 
-        server.getPlayerManager().broadcast(Msg.GAME_BEGINS.text(), MessageType.CHAT, NIL_UUID);
+        server.getPlayerManager().broadcast(Msg.GAME_BEGINS.text(), MessageType.CHAT);
 
         for (var fkPlayer : GameUtils.getAllConnectedFKPlayers(server.getPlayerManager().getPlayerList())) {
-            var fkTeam = GameUtils.getFKTeamOfPlayerByName(fkPlayer.getName().asString());
+            var fkTeam = GameUtils.getFKTeamOfPlayerByName(fkPlayer.getName().getString());
             var base = fkTeam.getBase();
             fkPlayer.getInventory().clear();
             if (Configs.FK_CONFIG.data.isShouldTeleportPlayersToTheirOwnBaseWhenGameIsStarted()) {
@@ -137,13 +138,13 @@ public class FKGame {
 
     public void pause() {
         PersistantFKGame.FK_GAME_DATA.data.setGameState(FKMod.GameState.PAUSED);
-        server.getPlayerManager().broadcast(Msg.GAME_HAS_BEEN_PAUSED.text(), MessageType.CHAT, NIL_UUID);
+        server.getPlayerManager().broadcast(Msg.GAME_HAS_BEEN_PAUSED.text(), MessageType.CHAT);
         GameUtils.getAllConnectedFKPlayers(server.getPlayerManager().getPlayerList()).forEach(this::updateSidebar);
     }
 
     public void resume() {
         PersistantFKGame.FK_GAME_DATA.data.setGameState(FKMod.GameState.RUNNING);
-        server.getPlayerManager().broadcast(Msg.GAME_HAS_BEEN_RESUMED.text(), MessageType.CHAT, NIL_UUID);
+        server.getPlayerManager().broadcast(Msg.GAME_HAS_BEEN_RESUMED.text(), MessageType.CHAT);
 
         // If the timeline wasn't started (in the case of a server restart with gamestate at PAUSE OR RUNNING)
         if (!timeline.getIsTimerStartedRef().get())
@@ -157,7 +158,7 @@ public class FKGame {
     }
 
     private void updateTeam(ServerPlayerEntity player) {
-        var playerName = player.getName().asString();
+        var playerName = player.getName().getString();
 
         var serverScoreboard = server.getScoreboard();
 

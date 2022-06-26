@@ -28,13 +28,16 @@ public class FKConfig implements Validatable {
     @Getter
     private final WaitingRoom waitingRoom;
 
+    @Getter
+    private final List<String> administrators;
+
     public FKConfig(int dayOfAuthorizationOfTheAssaults,
                     int dayOfAuthorizationOfTheEntryInTheNether,
                     int dayOfAuthorizationOfTheEntryInTheEnd,
                     int dayOfAuthorizationOfThePvP,
                     int dayDuration,
                     boolean allowEnderPearlAssault,
-                    boolean shouldTeleportPlayersToTheirOwnBaseWhenGameIsStarted, WaitingRoom waitingRoom) {
+                    boolean shouldTeleportPlayersToTheirOwnBaseWhenGameIsStarted, WaitingRoom waitingRoom, List<String> administrators) {
 
         this.dayOfAuthorizationOfTheAssaults = dayOfAuthorizationOfTheAssaults;
         this.dayOfAuthorizationOfTheEntryInTheNether = dayOfAuthorizationOfTheEntryInTheNether;
@@ -44,6 +47,7 @@ public class FKConfig implements Validatable {
         this.allowEnderPearlAssault = allowEnderPearlAssault;
         this.shouldTeleportPlayersToTheirOwnBaseWhenGameIsStarted = shouldTeleportPlayersToTheirOwnBaseWhenGameIsStarted;
         this.waitingRoom = waitingRoom;
+        this.administrators = administrators;
     }
 
     @SuppressWarnings("CommentedOutCode")

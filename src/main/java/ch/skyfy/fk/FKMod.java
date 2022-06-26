@@ -45,6 +45,7 @@ public class FKMod implements DedicatedServerModInitializer {
     private final WhereIAmCmd whereIAmCmd;
     private final SetFKTimeCmd setFKTimeCmd;
     private final GetMarkerCmd getMarkerCmd;
+    private final DebugCmd debugCmd;
     private final CaptureCmd captureCmd;
 
     public FKMod() throws Exception {
@@ -64,6 +65,7 @@ public class FKMod implements DedicatedServerModInitializer {
         whereIAmCmd = new WhereIAmCmd();
         setFKTimeCmd = new SetFKTimeCmd(optFKGameRef);
         getMarkerCmd = new GetMarkerCmd();
+        debugCmd = new DebugCmd();
         captureCmd = new CaptureCmd(optFKGameRef);
     }
 
@@ -80,6 +82,7 @@ public class FKMod implements DedicatedServerModInitializer {
             resumeCmd.register(dispatcher);
             setFKTimeCmd.register(dispatcher);
             getMarkerCmd.register(dispatcher);
+            debugCmd.register(dispatcher);
             captureCmd.register(dispatcher);
             whereIAmCmd.register(dispatcher);
         });

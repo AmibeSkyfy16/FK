@@ -90,8 +90,8 @@ public class Configs {
                     new WaitingRoom(
                             new Cube((short) 22, 250, 255, 0, 101, 4),
                             new SpawnLocation("minecraft:overworld", 0, 101, 16, 180, 2.8f)
-                    )
-            );
+                    ),
+                    List.of("Skyfy16"));
         }
     }
 

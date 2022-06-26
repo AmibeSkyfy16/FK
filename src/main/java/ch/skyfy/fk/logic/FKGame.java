@@ -55,6 +55,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static net.minecraft.world.GameRules.DO_DAYLIGHT_CYCLE;
+
 @SuppressWarnings({"FieldCanBeLocal", "unused"})
 public class FKGame {
 
@@ -103,6 +105,8 @@ public class FKGame {
         initialize();
         registerEvents();
         ScoreboardManager.getInstance().initialize(timeline.getTimelineData());
+
+        System.out.println("GameState: " + PersistantFKGame.FK_GAME_DATA.data.getGameState());
     }
 
     private void initialize() {
@@ -114,7 +118,10 @@ public class FKGame {
 
     @SuppressWarnings("ConstantConditions")
     public void start() {
-        server.getOverworld().setTimeOfDay(0);
+
+        if (server.getGameRules().getBoolean(DO_DAYLIGHT_CYCLE))
+            server.getOverworld().setTimeOfDay(0);
+
         timeline.startTimer();
 
         server.getPlayerManager().broadcast(Msg.GAME_BEGINS.text(), MessageType.CHAT);
@@ -298,7 +305,9 @@ public class FKGame {
         }
 
         private boolean cancelPlayerFromBreakingBlocks(World world, PlayerEntity player, BlockPos pos, BlockState state, /* Nullable */ BlockEntity blockEntity) {
-            if (player.hasPermissionLevel(4)) return true;
+
+            if (GameUtils.isAdminByName(player.getName().getString()) && PersistantFKGame.FK_GAME_DATA.data.isDebug())
+                return true;
 
             if (GameUtils.isGameState_FINISHED()) return true;
 
@@ -313,7 +322,8 @@ public class FKGame {
         }
 
         private ActionResult cancelPlayerFromKillingEntities(PlayerEntity player, World world, Hand hand, Entity entity, @Nullable EntityHitResult hitResult) {
-            if (player.hasPermissionLevel(4)) return ActionResult.PASS;
+            if (GameUtils.isAdminByName(player.getName().getString()) && PersistantFKGame.FK_GAME_DATA.data.isDebug())
+                return ActionResult.PASS;
             if (GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
             if (!GameUtils.isGameState_RUNNING()) return ActionResult.FAIL;
 
@@ -322,39 +332,9 @@ public class FKGame {
             return playerActionImpl(entity.getType().getTranslationKey(), currentDimId, where, ActionResult.PASS, ActionResult.FAIL, PlayerActionsConfigs.KILLING_ENTITIES_CONFIG.data);
         }
 
-        private ActionResult cancelPlayerFromPlacingBlocks(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
-            var currentDimId = player.getWorld().getDimension().effects().toString();
-            var itemInHand = player.getStackInHand(hand);
-
-            if (GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
-
-            if (!Registry.BLOCK.containsId(Registry.ITEM.getId(itemInHand.getItem()))) {
-                if (!Registry.ENTITY_TYPE.containsId(Registry.ITEM.getId(itemInHand.getItem()))) {
-                    return ActionResult.PASS;
-                }
-            }
-
-            var placeBlock = (GameUtils.WhereIsThePlayer<ActionResult>) (where) -> switch (where.getRoot()) {
-                case INSIDE_HIS_OWN_BASE ->
-                        playerActionImpl(itemInHand.getTranslationKey(), currentDimId, where, ActionResult.PASS, ActionResult.FAIL, PlayerActionsConfigs.PLACING_BLOCKS_CONFIG.data);
-                case CLOSE_TO_HIS_OWN_BASE ->
-                        playerActionImpl(itemInHand.getTranslationKey(), currentDimId, where, ActionResult.PASS, ActionResult.FAIL, PlayerActionsConfigs.PLACING_BLOCKS_CONFIG.data);
-                case INSIDE_AN_ENEMY_BASE, CLOSE_TO_AN_ENEMY_BASE -> {
-                    if (!GameUtils.areAssaultEnabled(timeline.getTimelineData().getDay()))
-                        yield ActionResult.FAIL;
-                    yield playerActionImpl(itemInHand.getTranslationKey(), currentDimId, where, ActionResult.PASS, ActionResult.FAIL, PlayerActionsConfigs.PLACING_BLOCKS_CONFIG.data);
-                }
-                case IN_THE_WILD ->
-                        playerActionImpl(itemInHand.getTranslationKey(), currentDimId, where, ActionResult.PASS, ActionResult.FAIL, PlayerActionsConfigs.PLACING_BLOCKS_CONFIG.data);
-                default -> ActionResult.PASS;
-            };
-
-            var blockPos = hitResult.getBlockPos();
-            return GameUtils.whereIsThePlayer(player, new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()), placeBlock);
-        }
-
         private TypedActionResult<ItemStack> cancelPlayerFromFillingABucket(World world, PlayerEntity player, Hand hand, Fluid fillFluid, Block targetBlock, BucketItem bucketItem, BlockHitResult blockHitResult) {
-            if (player.hasPermissionLevel(4)) return TypedActionResult.pass(player.getStackInHand(hand));
+            if (GameUtils.isAdminByName(player.getName().getString()) && PersistantFKGame.FK_GAME_DATA.data.isDebug())
+                return TypedActionResult.pass(player.getStackInHand(hand));
             if (GameUtils.isGameState_FINISHED()) return TypedActionResult.pass(player.getStackInHand(hand));
             if (!GameUtils.isGameState_RUNNING()) return TypedActionResult.fail(player.getStackInHand(hand));
 
@@ -369,7 +349,8 @@ public class FKGame {
         }
 
         private TypedActionResult<ItemStack> cancelPlayerFromEmptyingABucket(World world, PlayerEntity player, Hand hand, Fluid emptyFluid, Item item, Vec3d pos) {
-            if (player.hasPermissionLevel(4)) return TypedActionResult.pass(player.getStackInHand(hand));
+            if (GameUtils.isAdminByName(player.getName().getString()) && PersistantFKGame.FK_GAME_DATA.data.isDebug())
+                return TypedActionResult.pass(player.getStackInHand(hand));
             if (GameUtils.isGameState_FINISHED()) return TypedActionResult.pass(player.getStackInHand(hand));
             if (!GameUtils.isGameState_RUNNING()) return TypedActionResult.fail(player.getStackInHand(hand));
 
@@ -383,7 +364,8 @@ public class FKGame {
         }
 
         private TypedActionResult<ItemStack> cancelPlayerFromUsingAItem(PlayerEntity player, World world, Hand hand) {
-            if (player.hasPermissionLevel(4)) return TypedActionResult.pass(player.getStackInHand(hand));
+            if (GameUtils.isAdminByName(player.getName().getString()) && PersistantFKGame.FK_GAME_DATA.data.isDebug())
+                return TypedActionResult.pass(player.getStackInHand(hand));
             if (GameUtils.isGameState_FINISHED()) return TypedActionResult.pass(player.getStackInHand(hand));
             if (!GameUtils.isGameState_RUNNING()) return TypedActionResult.fail(player.getStackInHand(hand));
 
@@ -405,7 +387,8 @@ public class FKGame {
         }
 
         private ActionResult cancelPlayerFromAssaultWithEnderPearl(ServerPlayerEntity player, Vec3d pos) {
-            if (player.hasPermissionLevel(4)) return ActionResult.PASS;
+            if (GameUtils.isAdminByName(player.getName().getString()) && PersistantFKGame.FK_GAME_DATA.data.isDebug())
+                return ActionResult.PASS;
             if (GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
             if (!GameUtils.isGameState_RUNNING()) return ActionResult.FAIL;
 
@@ -421,7 +404,8 @@ public class FKGame {
         }
 
         private ActionResult onUseBlockEvent(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
-            if (player.hasPermissionLevel(4)) return ActionResult.PASS; // Admin can bypass this
+            if (GameUtils.isAdminByName(player.getName().getString()) && PersistantFKGame.FK_GAME_DATA.data.isDebug())
+                return ActionResult.PASS; // Admin can bypass this
 
             if (GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
 
@@ -484,15 +468,43 @@ public class FKGame {
             var targetBlock = world.getBlockState(hitResult.getBlockPos()).getBlock();
             var itemInHand = player.getStackInHand(hand);
 
-            if (GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
-
             var currentDimId = player.getWorld().getDimension().effects().toString();
             var where = GameUtils.whereIsThePlayer(player, hitResult.getPos(), w -> w);
             return playerActionImpl(targetBlock.getTranslationKey(), currentDimId, where, ActionResult.PASS, ActionResult.FAIL, PlayerActionsConfigs.USE_BLOCKS_CONFIG.data);
         }
 
+        private ActionResult cancelPlayerFromPlacingBlocks(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
+            var currentDimId = player.getWorld().getDimension().effects().toString();
+            var itemInHand = player.getStackInHand(hand);
+
+            if (!Registry.BLOCK.containsId(Registry.ITEM.getId(itemInHand.getItem()))) {
+                if (!Registry.ENTITY_TYPE.containsId(Registry.ITEM.getId(itemInHand.getItem()))) {
+                    return ActionResult.PASS;
+                }
+            }
+
+            var placeBlock = (GameUtils.WhereIsThePlayer<ActionResult>) (where) -> switch (where.getRoot()) {
+                case INSIDE_HIS_OWN_BASE ->
+                        playerActionImpl(itemInHand.getTranslationKey(), currentDimId, where, ActionResult.PASS, ActionResult.FAIL, PlayerActionsConfigs.PLACING_BLOCKS_CONFIG.data);
+                case CLOSE_TO_HIS_OWN_BASE ->
+                        playerActionImpl(itemInHand.getTranslationKey(), currentDimId, where, ActionResult.PASS, ActionResult.FAIL, PlayerActionsConfigs.PLACING_BLOCKS_CONFIG.data);
+                case INSIDE_AN_ENEMY_BASE, CLOSE_TO_AN_ENEMY_BASE -> {
+                    if (!GameUtils.areAssaultEnabled(timeline.getTimelineData().getDay()))
+                        yield ActionResult.FAIL;
+                    yield playerActionImpl(itemInHand.getTranslationKey(), currentDimId, where, ActionResult.PASS, ActionResult.FAIL, PlayerActionsConfigs.PLACING_BLOCKS_CONFIG.data);
+                }
+                case IN_THE_WILD ->
+                        playerActionImpl(itemInHand.getTranslationKey(), currentDimId, where, ActionResult.PASS, ActionResult.FAIL, PlayerActionsConfigs.PLACING_BLOCKS_CONFIG.data);
+                default -> ActionResult.PASS;
+            };
+
+            var blockPos = hitResult.getBlockPos();
+            return GameUtils.whereIsThePlayer(player, new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()), placeBlock);
+        }
+
         private ActionResult cancelPlayerPvP(PlayerEntity player, World world, Hand hand, Entity entity, @Nullable EntityHitResult hitResult) {
-            if (player.hasPermissionLevel(4)) return ActionResult.PASS;
+            if (GameUtils.isAdminByName(player.getName().getString()) && PersistantFKGame.FK_GAME_DATA.data.isDebug())
+                return ActionResult.PASS;
             if (GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
             if (!GameUtils.isGameState_RUNNING()) return ActionResult.FAIL;
 
@@ -505,7 +517,8 @@ public class FKGame {
         }
 
         private ActionResult cancelPlayerFromEnteringInPortal(ServerPlayerEntity player, Identifier dimensionId) {
-            if (player.hasPermissionLevel(4)) return ActionResult.PASS;
+            if (GameUtils.isAdminByName(player.getName().getString()) && PersistantFKGame.FK_GAME_DATA.data.isDebug())
+                return ActionResult.PASS;
             if (GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
             if (!GameUtils.isGameState_RUNNING()) return ActionResult.FAIL;
 
@@ -521,7 +534,8 @@ public class FKGame {
         }
 
         private ActionResult onPlayerMove(PlayerMoveCallback.MoveData moveData, ServerPlayerEntity player) {
-            if (player.hasPermissionLevel(4)) return ActionResult.PASS; // OP Player can move anymore
+            if (GameUtils.isAdminByName(player.getName().getString()) && PersistantFKGame.FK_GAME_DATA.data.isDebug())
+                return ActionResult.PASS; // OP Player can move anymore
             if (GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
             if (GameUtils.isGameState_NOT_STARTED()) {
                 var waitingRoom = Configs.FK_CONFIG.data.getWaitingRoom();
@@ -561,12 +575,18 @@ public class FKGame {
         }
 
         private ActionResult onPlayerDamage(ServerPlayerEntity player, DamageSource source, float amount) {
+            if (GameUtils.isAdminByName(player.getName().getString()) && PersistantFKGame.FK_GAME_DATA.data.isDebug())
+                return ActionResult.PASS;
+
             if (GameUtils.isGameState_PAUSED() || GameUtils.isGameState_NOT_STARTED())
                 return ActionResult.FAIL;
             return ActionResult.PASS;
         }
 
         private ActionResult onPlayerHungerUpdate(PlayerEntity player) {
+            if (GameUtils.isAdminByName(player.getName().getString()) && PersistantFKGame.FK_GAME_DATA.data.isDebug())
+                return ActionResult.PASS;
+
             if (GameUtils.isGameState_NOT_STARTED() || GameUtils.isGameState_PAUSED())
                 return ActionResult.FAIL;
             return ActionResult.PASS;
@@ -584,8 +604,10 @@ public class FKGame {
         }
 
         private void onPlayerJoin(ServerPlayerEntity player, MinecraftServer server) {
-            if (!player.hasPermissionLevel(4))
-                player.changeGameMode(GameMode.SURVIVAL);
+            if (GameUtils.isAdminByName(player.getName().getString()) && PersistantFKGame.FK_GAME_DATA.data.isDebug())
+                return;
+
+            player.changeGameMode(GameMode.SURVIVAL);
 
             teleportPlayerToWaitingRoom(player);
             update(player);

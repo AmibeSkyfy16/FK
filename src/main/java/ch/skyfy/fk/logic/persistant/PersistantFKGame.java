@@ -23,6 +23,7 @@ public class PersistantFKGame {
         public PersistantFKGameData getDefault() {
             return new PersistantFKGameData(
                     FKMod.GameState.NOT_STARTED,
+                    false,
                     new ch.skyfy.fk.logic.persistant.TimelineData(1, 0, 0, 0)
             );
         }

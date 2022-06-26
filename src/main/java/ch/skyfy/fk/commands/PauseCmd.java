@@ -1,6 +1,7 @@
 package ch.skyfy.fk.commands;
 
 import ch.skyfy.fk.logic.FKGame;
+import ch.skyfy.fk.logic.GameUtils;
 import ch.skyfy.fk.logic.persistant.PersistantFKGame;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
@@ -14,7 +15,6 @@ import net.minecraft.util.Formatting;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
-@SuppressWarnings({"CommentedOutCode"})
 public class PauseCmd implements Command<ServerCommandSource> {
 
     private final AtomicReference<Optional<FKGame>> optFKGameRef;
@@ -29,17 +29,13 @@ public class PauseCmd implements Command<ServerCommandSource> {
 
     @Override
     public int run(CommandContext<ServerCommandSource> context) {
-        var source = context.getSource();
-        var player = source.getPlayer();
+        var player = context.getSource().getPlayer();
         if (player == null) return 0;
 
-        // TODO UNCOMMENT THIS
-//        if (!player.hasPermissionLevel(4)) {
-//            player.sendMessage(Text.of("You don't have required privileges to use this command"), false);
-//            return 0;
-//        }
-
-        optFKGameRef.get().ifPresent(FKGame::pause);
+        if (!GameUtils.isAdminByName(player.getName().getString())) {
+            player.sendMessage(Text.literal("Only admin can run this command").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
+            return 0;
+        }
 
         switch (PersistantFKGame.FK_GAME_DATA.data.getGameState()) {
             case NOT_STARTED ->

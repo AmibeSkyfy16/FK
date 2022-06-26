@@ -189,6 +189,10 @@ public class GameUtils {
         return FK_TEAMS_CONFIG.data.getTeams().stream().filter(fkTeam -> getFKTeamIdentifierByName(fkTeam.getName()).equals(teamId)).findFirst();
     }
 
+    public static boolean isAdminByName(String name){
+        return Configs.FK_CONFIG.data.getAdministrators().contains(name);
+    }
+
     public static boolean isFKPlayerEliminate(String playerName) {
         if (!Configs.VAULT_FEATURE_CONFIG.data.isEnabled()) return false;
         var fkTeam = getFKTeamOfPlayerByName(playerName);

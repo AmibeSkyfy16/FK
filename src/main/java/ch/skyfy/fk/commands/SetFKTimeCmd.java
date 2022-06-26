@@ -1,6 +1,7 @@
 package ch.skyfy.fk.commands;
 
 import ch.skyfy.fk.logic.FKGame;
+import ch.skyfy.fk.logic.GameUtils;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -35,6 +36,15 @@ public class SetFKTimeCmd implements Command<ServerCommandSource> {
 
     @Override
     public int run(CommandContext<ServerCommandSource> context) {
+        var player = context.getSource().getPlayer();
+        if (player == null) return 0;
+
+
+        if (!GameUtils.isAdminByName(player.getName().getString())) {
+            player.sendMessage(Text.literal("Only admin can run this command").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
+            return 0;
+        }
+
         var time = getInteger(context, "timeOfDay");
         optFKGameRef.get().ifPresent(fkGame -> {
             fkGame.getTimeline().getTimelineData().setTimeOfDay(time);

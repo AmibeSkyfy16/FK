@@ -10,6 +10,7 @@ import java.util.List;
 
 /**
  * This class contains data saved and loaded through a file called FKGameData.json
+ *
  * @see PersistantFKGame
  */
 public class PersistantFKGameData implements Validatable {
@@ -19,10 +20,15 @@ public class PersistantFKGameData implements Validatable {
     private FKMod.GameState gameState;
 
     @Getter
+    @Setter
+    private boolean debug;
+
+    @Getter
     private final ch.skyfy.fk.logic.persistant.TimelineData timelineData;
 
-    public PersistantFKGameData(FKMod.GameState gameState, TimelineData timelineData) {
+    public PersistantFKGameData(FKMod.GameState gameState, boolean debug, TimelineData timelineData) {
         this.gameState = gameState;
+        this.debug = debug;
         this.timelineData = timelineData;
     }
 

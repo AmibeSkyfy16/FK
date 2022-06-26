@@ -1,0 +1,140 @@
+{
+  "teams": [
+    {
+      "name": "Yellow team",
+      "color": "YELLOW",
+      "players": [
+        "Alex"
+      ],
+      "base": {
+        "name": "Yellow base",
+        "cube": {
+          "size": 15,
+          "numberOfBlocksDown": 64,
+          "numberOfBlocksUp": 319,
+          "x": 50.0,
+          "y": -23.0,
+          "z": 50.0
+        },
+        "proximityCube": {
+          "size": 35,
+          "numberOfBlocksDown": 64,
+          "numberOfBlocksUp": 319,
+          "x": 50.0,
+          "y": -23.0,
+          "z": 50.0
+        },
+        "spawnLocation": {
+          "dimensionName": "minecraft:overworld",
+          "x": 50.0,
+          "y": -22.0,
+          "z": 50,
+          "yaw": 0.0,
+          "pitch": 16.5
+        }
+      }
+    },
+    {
+      "name": "Purple team",
+      "color": "DARK_PURPLE",
+      "players": [
+        "Skyfy16"
+      ],
+      "base": {
+        "name": "Purple base",
+        "cube": {
+          "size": 15,
+          "numberOfBlocksDown": 64,
+          "numberOfBlocksUp": 319,
+          "x": -50.0,
+          "y": -23.0,
+          "z": -50.0
+        },
+        "proximityCube": {
+          "size": 35,
+          "numberOfBlocksDown": 64,
+          "numberOfBlocksUp": 319,
+          "x": -50.0,
+          "y": -23.0,
+          "z": -50.0
+        },
+        "spawnLocation": {
+          "dimensionName": "minecraft:overworld",
+          "x": -50.0,
+          "y": -22.0,
+          "z": -50,
+          "yaw": 0.0,
+          "pitch": 16.5
+        }
+      }
+    },
+    {
+      "name": "Blue team",
+      "color": "BLUE",
+      "players": [
+        "Steve"
+      ],
+      "base": {
+        "name": "Blue base",
+        "cube": {
+          "size": 15,
+          "numberOfBlocksDown": 64,
+          "numberOfBlocksUp": 319,
+          "x": -50.0,
+          "y": -23.0,
+          "z": 50.0
+        },
+        "proximityCube": {
+          "size": 35,
+          "numberOfBlocksDown": 64,
+          "numberOfBlocksUp": 319,
+          "x": -50.0,
+          "y": -23.0,
+          "z": 50.0
+        },
+        "spawnLocation": {
+          "dimensionName": "minecraft:overworld",
+          "x": -50.0,
+          "y": -22.0,
+          "z": 50,
+          "yaw": 0.0,
+          "pitch": 16.5
+        }
+      }
+    },
+    {
+      "name": "Red team",
+      "color": "RED",
+      "players": [
+        "TesioX69"
+      ],
+      "base": {
+        "name": "Red base",
+        "cube": {
+          "size": 15,
+          "numberOfBlocksDown": 64,
+          "numberOfBlocksUp": 319,
+          "x": 50.0,
+          "y": -23.0,
+          "z": -50.0
+        },
+        "proximityCube": {
+          "size": 35,
+          "numberOfBlocksDown": 64,
+          "numberOfBlocksUp": 319,
+          "x": 50.0,
+          "y": -23.0,
+          "z": -50.0
+        },
+        "spawnLocation": {
+          "dimensionName": "minecraft:overworld",
+          "x": 50.0,
+          "y": -22.0,
+          "z": -50,
+          "yaw": 0.0,
+          "pitch": 16.5
+        }
+      }
+    }
+  ]
+}

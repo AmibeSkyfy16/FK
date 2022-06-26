@@ -232,6 +232,7 @@ public class FKGame {
                     Blocks.DAMAGED_ANVIL.getTranslationKey(),
 
                     Blocks.DISPENSER.getTranslationKey(),
+                    Blocks.DROPPER.getTranslationKey(),
                     Blocks.HOPPER.getTranslationKey(),
 
                     Blocks.LOOM.getTranslationKey(),
@@ -326,11 +327,6 @@ public class FKGame {
             var itemInHand = player.getStackInHand(hand);
 
             if (GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
-
-            System.out.println("player can place on");
-            var p = player.canPlaceOn(hitResult.getBlockPos(), hitResult.getSide(), itemInHand);
-            System.out.println("P: " + p);
-
 
             if (!Registry.BLOCK.containsId(Registry.ITEM.getId(itemInHand.getItem()))) {
                 if (!Registry.ENTITY_TYPE.containsId(Registry.ITEM.getId(itemInHand.getItem()))) {
@@ -447,7 +443,7 @@ public class FKGame {
                     isInteraction = true;
 
             if (isInteraction)
-                return cancelPlayerFromUsingABlock(player, world, hand, hitResult);
+                return cancelPlayerFromInteractingWithABlock(player, world, hand, hitResult);
             else
                 return cancelPlayerFromPlacingBlocks(player, world, hand, hitResult);
         }
@@ -455,9 +451,7 @@ public class FKGame {
         private ActionResult cancelPlayerFromFiringATNT(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
             var itemInHand = player.getStackInHand(hand);
 
-            if (GameUtils.isGameState_FINISHED()) return ActionResult.PASS;
-
-            var emptyBucketImpl = (GameUtils.WhereIsThePlayer<ActionResult>) (where) -> {
+            var whereIsThePlayer = (GameUtils.WhereIsThePlayer<ActionResult>) (where) -> {
 
                 var block = world.getBlockState(hitResult.getBlockPos()).getBlock();
 
@@ -483,10 +477,10 @@ public class FKGame {
             };
 
             var blockPos = hitResult.getBlockPos();
-            return GameUtils.whereIsThePlayer(player, new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()), emptyBucketImpl);
+            return GameUtils.whereIsThePlayer(player, new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()), whereIsThePlayer);
         }
 
-        private ActionResult cancelPlayerFromUsingABlock(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
+        private ActionResult cancelPlayerFromInteractingWithABlock(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
             var targetBlock = world.getBlockState(hitResult.getBlockPos()).getBlock();
             var itemInHand = player.getStackInHand(hand);
 

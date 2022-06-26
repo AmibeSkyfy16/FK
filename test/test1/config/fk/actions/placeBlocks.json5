@@ -1,0 +1,84 @@
+{
+  "allowed": {
+    "minecraft:overworld": {
+      "INSIDE_HIS_OWN_BASE": null,
+      "INSIDE_AN_ENEMY_BASE": [
+        "block.minecraft.tnt",
+        "block.minecraft.lever",
+        "block.minecraft.redstone_torch",
+        "block.minecraft.torch",
+        "block.minecraft.soul_torch"
+      ],
+      "IN_THE_WILD": null,
+      "CLOSE_TO_HIS_OWN_BASE": [],
+      "CLOSE_TO_AN_ENEMY_BASE": [
+        "block.minecraft.tnt",
+        "block.minecraft.lever",
+        "block.minecraft.redstone_torch",
+        "block.minecraft.torch",
+        "block.minecraft.soul_torch"
+      ]
+    },
+    "minecraft:the_nether": {
+      "INSIDE_HIS_OWN_BASE": null,
+      "CLOSE_TO_HIS_OWN_BASE": [],
+      "INSIDE_AN_ENEMY_BASE": [
+        "block.minecraft.tnt",
+        "block.minecraft.lever",
+        "block.minecraft.redstone_torch",
+        "block.minecraft.torch",
+        "block.minecraft.soul_torch"
+      ],
+      "IN_THE_WILD": null,
+      "CLOSE_TO_AN_ENEMY_BASE": [
+        "block.minecraft.tnt",
+        "block.minecraft.lever",
+        "block.minecraft.redstone_torch",
+        "block.minecraft.torch",
+        "block.minecraft.soul_torch"
+      ]
+    },
+    "minecraft:the_end": {
+      "INSIDE_HIS_OWN_BASE": null,
+      "CLOSE_TO_HIS_OWN_BASE": [],
+      "INSIDE_AN_ENEMY_BASE": [
+        "block.minecraft.tnt",
+        "block.minecraft.lever",
+        "block.minecraft.redstone_torch",
+        "block.minecraft.torch",
+        "block.minecraft.soul_torch"
+      ],
+      "IN_THE_WILD": null,
+      "CLOSE_TO_AN_ENEMY_BASE": [
+        "block.minecraft.tnt",
+        "block.minecraft.lever",
+        "block.minecraft.redstone_torch",
+        "block.minecraft.torch",
+        "block.minecraft.soul_torch"
+      ]
+    }
+  },
+  "denied": {
+    "minecraft:overworld": {
+      "INSIDE_HIS_OWN_BASE": [],
+      "INSIDE_AN_ENEMY_BASE": [],
+      "IN_THE_WILD": [],
+      "CLOSE_TO_HIS_OWN_BASE": [],
+      "CLOSE_TO_AN_ENEMY_BASE": []
+    },
+    "minecraft:the_nether": {
+      "INSIDE_HIS_OWN_BASE": [],
+      "CLOSE_TO_HIS_OWN_BASE": [],
+      "INSIDE_AN_ENEMY_BASE": [],
+      "IN_THE_WILD": [],
+      "CLOSE_TO_AN_ENEMY_BASE": []
+    },
+    "minecraft:the_end": {
+      "INSIDE_HIS_OWN_BASE": [],
+      "CLOSE_TO_HIS_OWN_BASE": [],
+      "INSIDE_AN_ENEMY_BASE": [],
+      "IN_THE_WILD": [],
+      "CLOSE_TO_AN_ENEMY_BASE": []
+    }
+  }
+}

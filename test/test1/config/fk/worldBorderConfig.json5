@@ -1,0 +1,30 @@
+{
+  "worldBorder": {
+    "spawns": {
+      "minecraft:overworld": {
+        "size": 300,
+        "numberOfBlocksDown": 64,
+        "numberOfBlocksUp": 319,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "minecraft:the_nether": {
+        "size": 300,
+        "numberOfBlocksDown": 64,
+        "numberOfBlocksUp": 319,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "minecraft:the_end": {
+        "size": 1000,
+        "numberOfBlocksDown": 64,
+        "numberOfBlocksUp": 319,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      }
+    }
+  }
+}

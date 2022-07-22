@@ -38,6 +38,7 @@ public class ReflectionUtils {
         map.put(Item.class, "method_7876");
         map.put(Potion.class, "");
         map.put(EntityType.class, "method_5882");
+
         var yarnMethodName = map.get(typeClass);
         if (yarnMethodName == null) return list;
         for (var field : tClass.getDeclaredFields()) {

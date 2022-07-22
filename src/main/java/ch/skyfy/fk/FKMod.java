@@ -27,7 +27,6 @@ public class FKMod implements DedicatedServerModInitializer {
         NOT_STARTED,
         RUNNING,
         PAUSED,
-
         FINISHED
     }
 
